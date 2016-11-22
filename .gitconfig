@@ -1,0 +1,30 @@
+[user]
+	name = dragonkid
+	email = idragonkid@gmail.com
+[filter "hawser"]
+	clean = git hawser clean %f
+	smudge = git hawser smudge %f
+	required = true
+[push]
+	default = simple
+[alias]
+	co = checkout
+	b = branch
+	st = status
+	fe = fetch
+	re = rebase
+[core]
+	editor = /usr/bin/vim
+[color "status"]
+	added = green
+	changed = red
+	untracked = cyan
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+[diff]
+	tool = vimdiff
+[merge]
+	tool = vimdiff

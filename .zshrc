@@ -60,6 +60,8 @@ ZSH_THEME="af-magic"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git autojump colored-man-pages zsh-syntax-highlighting) 
 
+eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -95,6 +97,7 @@ export LC_ALL=en_US.UTF-8
 
 # execute
 alias -s tgz='tar -zxvf'
+alias -s gz='tar -zxvf'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 

@@ -21,7 +21,7 @@ ln -sf ${PWD}/.zshrc ~/.zshrc
 
 # install vimrc
 git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
-sh ~/.vim_runtime/install_basic_vimrc.sh
+sh ~/.vim_runtime/install_awesome_vimrc.sh
 
 # install tmuxrc
 git clone git@github.com:dragonkid/tmux-config.git ~/.tmux

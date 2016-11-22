@@ -13,6 +13,8 @@
 	st = status
 	fe = fetch
 	re = rebase
+	d = difftool
+	lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
 [core]
 	editor = /usr/bin/vim
 [color "status"]
@@ -28,3 +30,5 @@
 	tool = vimdiff
 [merge]
 	tool = vimdiff
+[difftool]
+	prompt = false

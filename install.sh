@@ -1,8 +1,11 @@
-sudo apt-get update && sudo apt-get install -y git cmake build-essential
+SCRIPT=$(readlink -f "$0")
+BASEDIR=$(dirname "${SCRIPT}")
+
+sudo apt-get update && sudo apt-get install -y git cmake build-essential keychain autojump
 
 # install zsh
 sudo apt-get install zsh
-if [ ! ~/.oh-my-zsh ]; then
+if [ ! -e ~/.oh-my-zsh ]; then
     wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
     chsh -s `which zsh`
 fi
@@ -17,7 +20,7 @@ fi
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
 
 # install zshrc
-ln -sf ${PWD}/.zshrc ~/.zshrc
+ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 
 # install vimrc
 git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
@@ -31,4 +34,4 @@ cd ~/.tmux && git submodule init && git submodule update
 cd ~/.tmux/vendor/tmux-mem-cpu-load && cmake . && make && sudo make install
 
 # install .gitconfig
-ln -sf ${PWD}/.gitconfig ~/.gitconfig
+ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig

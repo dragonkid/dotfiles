@@ -1,7 +1,10 @@
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "${SCRIPT}")
 
-sudo apt-get update && sudo apt-get install -y git cmake build-essential keychain autojump
+# sudo add-apt-repository ppa:pkg-vim/vim-daily -y
+sudo apt-get update
+# sudo apt-get install --reinstall vim
+sudo apt-get install -y git cmake build-essential keychain autojump python-dev python3-dev
 
 # install zsh
 sudo apt-get install zsh
@@ -28,6 +31,8 @@ sh ~/.vim_runtime/install_awesome_vimrc.sh
 ## install Vundle & plugins
 git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 vim +PluginInstall +qall
+## install YouCompleteMe
+cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
 ## add colors
 COLORS_DIR=~/.vim/colors/
 mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}

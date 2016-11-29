@@ -21,8 +21,7 @@ fi
 
 ## install zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
-
-# install zshrc
+## linking zshrc
 ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 
 # install vimrc

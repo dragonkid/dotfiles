@@ -100,9 +100,11 @@ alias -s tgz='tar -zxvf'
 alias -s gz='tar -zxvf'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
-
+# vim
+alias viminstall='vim +PluginInstall +qall'
+alias vimupdate='vim +PluginUpdate +qall'
+# more history
 export HISTSIZE=1000000
 export HISTFILESIZE=1000000
-
+# others
 alias h='history'
-alias proxychains='proxychains'

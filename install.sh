@@ -25,6 +25,12 @@ ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 # install vimrc
 git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
 sh ~/.vim_runtime/install_awesome_vimrc.sh
+## install Vundle & plugins
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+vim +PluginInstall +qall
+## add colors
+COLORS_DIR=~/.vim/colors/
+mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}
 
 # install tmuxrc
 git clone git@github.com:dragonkid/tmux-config.git ~/.tmux

@@ -22,6 +22,7 @@ sudo pip install virtualenvwrapper
 curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc
 ln -sf ${BASEDIR}/.zshrc ~/.zshrc
+source ~/.zshrc
 
 # config vim
 VIM_RUNTIME=~/.vim_runtime

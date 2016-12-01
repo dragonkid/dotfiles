@@ -39,10 +39,10 @@ ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
     git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
+    sh ~/.vim_runtime/install_awesome_vimrc.sh
 else
     cd ${VIM_RUNTIME} && git pull origin master
 fi
-sh ~/.vim_runtime/install_awesome_vimrc.sh
 ## add colors
 COLORS_DIR=~/.vim/colors/
 mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}

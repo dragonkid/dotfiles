@@ -15,22 +15,32 @@ if [ ! -e ~/.oh-my-zsh ]; then
     chsh -s `which zsh`
 fi
 
-if [ $1 == "powerlevel9k" ]; then
+if [ "$1" == "powerlevel9k" ]; then
     ## install powerlevel9k
     git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
+
+    ## install awesome-terminal-fonts
+    git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
+    bash /tmp/awesome-terminal-fonts/install.sh
 fi
 
-## install awesome-terminal-fonts
-git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
-bash /tmp/awesome-terminal-fonts/install.sh
-
 ## install zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
+ZSH_SYNTAX_HIGHLIGHTING=~/.oh-my-zsh/plugins/zsh-syntax-highlighting
+if [ ! -e ${ZSH_SYNTAX_HIGHLIGHTING} ]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_SYNTAX_HIGHLIGHTING}
+else
+    cd ${ZSH_SYNTAX_HIGHLIGHTING} && git pull origin master
+fi
 ## linking zshrc
 ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 
 # install vimrc
-git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
+VIM_RUNTIME=~/.vim_runtime
+if [ ! -e ${VIM_RUNTIME} ]; then
+    git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
+else
+    cd ${VIM_RUNTIME} && git pull origin master
+fi
 sh ~/.vim_runtime/install_awesome_vimrc.sh
 ## add colors
 COLORS_DIR=~/.vim/colors/

@@ -1,3 +1,4 @@
+#!/bin/bash
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "${SCRIPT}")
 
@@ -46,17 +47,28 @@ sh ~/.vim_runtime/install_awesome_vimrc.sh
 COLORS_DIR=~/.vim/colors/
 mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}
 ## install Vundle & plugins
-git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-vim +PluginInstall +qall
-## install YouCompleteMe
-cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
+VUNDLE=~/.vim/bundle/Vundle.vim
+if [ ! -e ${VUNDLE} ]; then
+    git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    vim +PluginInstall +qall
+    ## install YouCompleteMe
+    cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
+else
+    cd ${VUNDLE} && git pull origin master
+    vim +PluginUpdate +qall
+fi
 
 # install tmuxrc
-git clone git@github.com:dragonkid/tmux-config.git ~/.tmux
-ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
-## build tmux-mem-cpu-load
-cd ~/.tmux && git submodule init && git submodule update
-cd ~/.tmux/vendor/tmux-mem-cpu-load && cmake . && make && sudo make install
+TMUX=~/.tmux
+if [ ! -e ${TMUX} ]; then
+    git clone git@github.com:dragonkid/tmux-config.git ~/.tmux
+    ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
+    ## build tmux-mem-cpu-load
+    cd ~/.tmux && git submodule init && git submodule update
+    cd ~/.tmux/vendor/tmux-mem-cpu-load && cmake . && make && sudo make install
+else
+    cd ${TMUX} && git pull origin master
+fi
 
 # install .gitconfig
 ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig

@@ -64,10 +64,14 @@ ZSH_THEME="af-magic"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+antigen use oh-my-zsh
+
 antigen bundle dragonkid/zsh-autoswitch-virtualenv
 antigen bundle zsh-users/zsh-syntax-highlighting
 
-plugins=(git autojump colored-man-pages zsh-syntax-highlighting zsh-autoswitch-virtualenv)
+antigen apply
+
+plugins=(git autojump colored-man-pages)
 
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
@@ -80,7 +84,7 @@ export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8  
+export LC_ALL=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then

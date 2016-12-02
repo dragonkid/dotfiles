@@ -38,7 +38,7 @@ ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 # install vimrc
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
-    git clone git@github.com:dragonkid/vimrc.git ~/.vim_runtime
+    git clone https://github.com/dragonkid/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 else
     cd ${VIM_RUNTIME} && git pull origin master
@@ -61,7 +61,7 @@ fi
 # install tmuxrc
 TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
-    git clone git@github.com:dragonkid/tmux-config.git ~/.tmux
+    git clone https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## build tmux-mem-cpu-load
     cd ~/.tmux && git submodule init && git submodule update

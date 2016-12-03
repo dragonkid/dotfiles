@@ -1,6 +1,12 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+# Enable plugin manager
+source $ZSH/antigen.zsh
+
+# Enable virtualenvwrapper
+source /usr/local/bin/virtualenvwrapper.sh
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
@@ -58,7 +64,10 @@ ZSH_THEME="af-magic"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git autojump colored-man-pages zsh-syntax-highlighting) 
+antigen bundle dragonkid/zsh-autoswitch-virtualenv
+antigen bundle zsh-users/zsh-syntax-highlighting
+
+plugins=(git autojump colored-man-pages zsh-syntax-highlighting zsh-autoswitch-virtualenv)
 
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 

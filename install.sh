@@ -2,40 +2,28 @@
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "${SCRIPT}")
 
-# sudo add-apt-repository ppa:pkg-vim/vim-daily -y
-sudo apt-get update
-# sudo apt-get install --reinstall vim
-sudo apt-get install -y git cmake build-essential keychain autojump python-dev python3-dev
-# fix add-apt-repository command not found
-which add-apt-repository || sudo apt-get install -y python-software-properties software-properties-common
-
-# install zsh
-sudo apt-get install zsh
+# config zsh
+## install oh-my-zsh
 if [ ! -e ~/.oh-my-zsh ]; then
     wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
     chsh -s `which zsh`
 fi
-
+## install powerlevel9k theme
 if [ "$1" == "powerlevel9k" ]; then
-    ## install powerlevel9k
     git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
 
     ## install awesome-terminal-fonts
     git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
     bash /tmp/awesome-terminal-fonts/install.sh
 fi
-
-## install zsh-syntax-highlighting
-ZSH_SYNTAX_HIGHLIGHTING=~/.oh-my-zsh/plugins/zsh-syntax-highlighting
-if [ ! -e ${ZSH_SYNTAX_HIGHLIGHTING} ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_SYNTAX_HIGHLIGHTING}
-else
-    cd ${ZSH_SYNTAX_HIGHLIGHTING} && git pull origin master
-fi
+## install virtualenvwrapper
+sudo pip install virtualenvwrapper
+## install antigen
+curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc
 ln -sf ${BASEDIR}/.zshrc ~/.zshrc
 
-# install vimrc
+# config vim
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
     git clone https://github.com/dragonkid/vimrc.git ~/.vim_runtime
@@ -58,7 +46,7 @@ else
     vim +PluginUpdate +qall
 fi
 
-# install tmuxrc
+# config tmux
 TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
     git clone https://github.com/dragonkid/tmux-config.git ~/.tmux

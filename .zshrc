@@ -67,11 +67,12 @@ ZSH_THEME="af-magic"
 antigen use oh-my-zsh
 
 antigen bundle dragonkid/zsh-autoswitch-virtualenv
+export AUTOSWITCH_SILENT=true
 antigen bundle zsh-users/zsh-syntax-highlighting
 
 antigen apply
 
-plugins=(git autojump colored-man-pages)
+plugins=(git autojump colored-man-pages redis-cli)
 
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 

@@ -2,27 +2,6 @@
 SCRIPT=$(readlink -f "$0")
 BASEDIR=$(dirname "${SCRIPT}")
 
-# config zsh
-## install oh-my-zsh
-if [ ! -e ~/.oh-my-zsh ]; then
-    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
-    chsh -s `which zsh`
-fi
-## install powerlevel9k theme
-if [ "$1" == "powerlevel9k" ]; then
-    git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
-
-    ## install awesome-terminal-fonts
-    git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
-    bash /tmp/awesome-terminal-fonts/install.sh
-fi
-## install virtualenvwrapper
-sudo pip install virtualenvwrapper
-## install antigen
-curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
-## linking zshrc
-ln -sf ${BASEDIR}/.zshrc ~/.zshrc
-
 # config vim
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
@@ -44,6 +23,32 @@ if [ ! -e ${VUNDLE} ]; then
 else
     cd ${VUNDLE} && git pull origin master
     vim +PluginUpdate +qall
+fi
+
+# config zsh
+## install oh-my-zsh
+if [ ! -e ~/.oh-my-zsh ]; then
+    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
+    chsh -s `which zsh`
+fi
+## install powerlevel9k theme
+if [ "$1" == "powerlevel9k" ]; then
+    git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
+
+    ## install awesome-terminal-fonts
+    git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
+    bash /tmp/awesome-terminal-fonts/install.sh
+fi
+## install virtualenvwrapper
+sudo pip install virtualenvwrapper
+## install antigen
+curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
+## linking zshrc
+ZSHRC=~/.zshrc
+if [ -f ${ZSHRC} ]; then
+    echo -ne "\n\033[0;31m${ZSHRC} existed. 'force' to replace it by force, 'merge' to merge them with vimdiff(f/M):\033[0m"
+    read choice
+    [ "${choice}" == "f" ] && ln -sf ${BASEDIR}/.zshrc ${ZSHRC} || vimdiff ${BASEDIR}/.zshrc ${ZSHRC}
 fi
 
 # config tmux

@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT=$(readlink -f "$0")
+SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
 BASEDIR=$(dirname "${SCRIPT}")
 
 # config vim

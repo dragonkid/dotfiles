@@ -71,6 +71,7 @@ ZSH_THEME="af-magic"
 # Add wisely, as too many plugins slow down shell startup.
 antigen bundle dragonkid/zsh-autoswitch-virtualenv
 export AUTOSWITCH_SILENT=true
+export AUTOSWITCH_DEFAULTENV="default_venv"
 antigen bundle zsh-users/zsh-syntax-highlighting
 
 antigen apply

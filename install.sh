@@ -41,6 +41,7 @@ if [ "$1" == "powerlevel9k" ]; then
 fi
 ## install virtualenvwrapper
 sudo pip install virtualenvwrapper
+mkvirtualenv default_venv
 ## install antigen
 curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc

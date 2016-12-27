@@ -10,7 +10,7 @@ setopt nullglob
 source $ZSH/antigen.zsh
 
 # Enable virtualenvwrapper
-source /usr/local/bin/virtualenvwrapper.sh
+[ -e /usr/bin/virtualenvwrapper.sh ] && source /usr/bin/virtualenvwrapper.sh || source /usr/local/bin/virtualenvwrapper.sh
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -71,7 +71,6 @@ ZSH_THEME="af-magic"
 # Add wisely, as too many plugins slow down shell startup.
 antigen bundle dragonkid/zsh-autoswitch-virtualenv
 export AUTOSWITCH_SILENT=true
-export AUTOSWITCH_DEFAULTENV="default_venv"
 antigen bundle zsh-users/zsh-syntax-highlighting
 
 antigen apply

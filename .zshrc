@@ -112,6 +112,7 @@ export LC_ALL=en_US.UTF-8
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+export EDITOR='vim'
 # execute
 alias -s tgz='tar -zxvf'
 alias -s gz='tar -zxvf'

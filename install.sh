@@ -5,7 +5,7 @@ BASEDIR=$(dirname "${SCRIPT}")
 # config vim
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
-    git clone https://github.com/dragonkid/vimrc.git ~/.vim_runtime
+    git clone --depth 1 https://github.com/dragonkid/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 else
     cd ${VIM_RUNTIME} && git pull origin master
@@ -16,7 +16,7 @@ mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}
 ## install Vundle & plugins
 VUNDLE=~/.vim/bundle/Vundle.vim
 if [ ! -e ${VUNDLE} ]; then
-    git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    git clone --depth 1 https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
     ## install YouCompleteMe
     cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
@@ -33,10 +33,10 @@ if [ ! -e ~/.oh-my-zsh ]; then
 fi
 ## install powerlevel9k theme
 if [ "$1" == "powerlevel9k" ]; then
-    git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
+    git clone --depth 1 https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
 
     ## install awesome-terminal-fonts
-    git clone https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
+    git clone --depth 1 https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
     bash /tmp/awesome-terminal-fonts/install.sh
 fi
 ## install virtualenvwrapper
@@ -54,7 +54,7 @@ fi
 # config tmux
 TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
-    git clone https://github.com/dragonkid/tmux-config.git ~/.tmux
+    git clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## build tmux-mem-cpu-load
     cd ~/.tmux && git submodule init && git submodule update

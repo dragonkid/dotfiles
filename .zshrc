@@ -75,7 +75,8 @@ antigen bundle zsh-users/zsh-syntax-highlighting
 
 antigen apply
 
-plugins=(git autojump colored-man-pages redis-cli)
+# sudo Simply hitting ESC twice puts sudo in front of the current command, or the last one if your cli is empty
+plugins=(git autojump colored-man-pages redis-cli sudo vagrant)
 
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 

@@ -2,6 +2,8 @@
 SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
 BASEDIR=$(dirname "${SCRIPT}")
 
+apt-get update && apt-get install cmake build-essential -y
+
 # config vim
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
@@ -42,7 +44,7 @@ fi
 ## install virtualenvwrapper
 sudo pip install virtualenvwrapper
 ## install antigen
-curl https://cdn.rawgit.com/zsh-users/antigen/v1.2.4/bin/antigen.zsh > ~/.oh-my-zsh/antigen.zsh
+curl -L git.io/antigen > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc
 ZSHRC=~/.zshrc
 if [ -f ${ZSHRC} ]; then

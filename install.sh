@@ -2,7 +2,7 @@
 SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
 BASEDIR=$(dirname "${SCRIPT}")
 
-apt-get update && apt-get install cmake build-essential -y
+apt-get update && apt-get install cmake build-essential python2.7-dev -y
 
 # config vim
 VIM_RUNTIME=~/.vim_runtime

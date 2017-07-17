@@ -43,6 +43,8 @@ if [ "$1" == "powerlevel9k" ]; then
 fi
 ## install virtualenvwrapper
 sudo pip install virtualenvwrapper
+## add project path to PYTHONPATH automatically
+echo 'export PYTHONPATH=${PYTHONPATH}:`pwd`' >> ~/.virtualenvs/postactivate
 ## install antigen
 curl -L git.io/antigen > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc

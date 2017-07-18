@@ -116,7 +116,7 @@ export LC_ALL=en_US.UTF-8
 export EDITOR='vim'
 # execute
 alias -s tgz='tar -zxvf'
-alias -s gz='tar -zxvf'
+alias -s gz='gunzip'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 # vim

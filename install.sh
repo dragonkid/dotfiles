@@ -60,6 +60,8 @@ TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
     git clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
+    ## install tmux plugin manager
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     ## build tmux-mem-cpu-load
     cd ~/.tmux && git submodule init && git submodule update
     cd ~/.tmux/vendor/tmux-mem-cpu-load && cmake . && make && sudo make install

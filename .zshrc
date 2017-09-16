@@ -120,6 +120,7 @@ alias -s gz='gunzip'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 # vim
+alias vi='vim'
 alias viminstall='vim +PluginInstall +qall'
 alias vimupdate='vim +PluginUpdate +qall'
 # more history

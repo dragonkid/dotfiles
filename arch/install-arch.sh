@@ -2,7 +2,7 @@
 SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
 BASEDIR=$(dirname "${SCRIPT}")
 
-sudo pacman -Syu && sudo pacman -Sy base-devel zsh git tmux htop wget bmon keychain lsof terminator
+sudo pacman -Syu && sudo pacman -Sy base-devel zsh git tmux htop wget bmon keychain lsof terminator autojump
 
 # config vim
 VIM_RUNTIME=~/.vim_runtime

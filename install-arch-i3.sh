@@ -71,3 +71,13 @@ fi
 
 # install .gitconfig
 ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig
+
+# config Xmodmpa(swap ctrl & capslock and swap alt & super)
+ln -sf ${BASEDIR}/arch-i3/.Xmodmap .Xmodmap
+
+# config i3
+ln -sf ${BASEDIR}/arch-i3/i3-config ~/.i3/config
+
+# config terminator
+ln -sf ${BASEDIR}/arch-i3/terminator-config ~/.config/terminator/config
+

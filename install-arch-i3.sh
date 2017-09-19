@@ -81,3 +81,6 @@ ln -sf ${BASEDIR}/arch-i3/i3-config ~/.i3/config
 # config terminator
 ln -sf ${BASEDIR}/arch-i3/terminator-config ~/.config/terminator/config
 
+# config yaourt
+ln -sf ${BASEDIR}/arch-i3/yoaurtrc ~/.yaourtrc
+

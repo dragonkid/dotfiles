@@ -20,7 +20,7 @@ VUNDLE=~/.vim/bundle/Vundle.vim
 if [ ! -e ${VUNDLE} ]; then
     git clone --depth 1 https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
-    ## install YouCompleteMe
+    ## install YouCompleteMe(libtinfo5 may be needed)
     cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
 else
     cd ${VUNDLE} && git pull origin master

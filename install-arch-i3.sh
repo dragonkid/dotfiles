@@ -84,3 +84,5 @@ ln -sf ${BASEDIR}/arch-i3/terminator-config ~/.config/terminator/config
 # config yaourt
 ln -sf ${BASEDIR}/arch-i3/yoaurtrc ~/.yaourtrc
 
+# config xinitrc
+ln -sf ${BASEDIR}/arch-i3/xinitrc ~/.xinitrc

@@ -75,4 +75,4 @@ ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig
 # config jupyter notebook
 JUPYTER_CONFIG_PATH=~/.jupyter
 mkdir -p ${JUPYTER_CONFIG_PATH}
-ln -sf ${BASEDIR}/jupyter_notebook_config.py ${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py
+ln -sf ${BASEDIR}/jupyter_notebook_config.py ~/${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py

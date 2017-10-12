@@ -90,4 +90,4 @@ ln -sf ${BASEDIR}/arch-i3/xinitrc ~/.xinitrc
 # config jupyter notebook
 JUPYTER_CONFIG_PATH=~/.jupyter
 mkdir -p ${JUPYTER_CONFIG_PATH}
-ln -sf ${BASEDIR}/jupyter_notebook_config.py ${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py
+ln -sf ${BASEDIR}/jupyter_notebook_config.py ~/${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py

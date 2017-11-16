@@ -2,7 +2,7 @@
 SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
 BASEDIR=$(dirname "${SCRIPT}")
 
-sudo pacman -Syu && sudo pacman -Sy base-devel zsh git tmux htop wget bmon keychain lsof terminator autojump
+sudo pacman -Syu && sudo pacman -Sy base-devel zsh git tmux htop wget bmon keychain lsof terminator autojump blueman
 
 # config vim
 VIM_RUNTIME=~/.vim_runtime
@@ -76,7 +76,7 @@ ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig
 ln -sf ${BASEDIR}/arch-i3/.Xmodmap .Xmodmap
 
 # config i3
-ln -sf ${BASEDIR}/arch-i3/i3-config ~/.i3/config
+ln -sf ${BASEDIR}/arch-i3/.i3 ~/.i3
 
 # config terminator
 ln -sf ${BASEDIR}/arch-i3/terminator-config ~/.config/terminator/config

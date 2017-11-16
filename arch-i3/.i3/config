@@ -348,17 +348,16 @@ set $i3_color17         #0c0c0c
 
 # Start i3bar to display a workspace bar (plus the system information i3status if available)
 bar {
-	status_command i3status
+	status_command conky -c $HOME/.i3/conky/conkyrc
+    mode dock
 	position bottom
+	strip_workspace_numbers yes
 
 ## please set your primary output first. Example: 'xrandr --output eDP1 --primary'
 #	tray_output primary
 #	tray_output eDP1
 
-	bindsym button4 nop
-	bindsym button5 nop
 	font xft:Noto Sans 10.5
-	strip_workspace_numbers yes
 
 	colors {
 #       background $transparent

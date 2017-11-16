@@ -1,0 +1,17 @@
+###    lovelybacon.deviantart.com   ####
+### ${exec acpi -b | awk "{print $1}" | sed 's/\([^:]*\): \([^,]*\), \([0-9]*\)%.*/\3/'}% \ ###
+### ${exec acpi -b | awk "{print $1}" | sed 's/\([^:]*\): \([^,]*\), \([0-9]*\)%.*/\2/'} \ ###
+background no
+out_to_x no
+out_to_console yes
+update_interval 1
+total_run_times 0
+use_spacer none
+TEXT
+${if_mpd_playing}${mpd_artist}${mpd_title}${endif}  \
+  ${downspeedf wlp6s0}KB/s | ${upspeedf wlp6s0}KB/s  \
+  ${wireless_essid wlp6s0}  \
+  ${hwmon 2 temp 1}${hwmon 2 temp 3}C  \
+  ${exec amixer get Master -c 0 -M | grep -oE "[[:digit:]]*%"}  \
+  ${time %a %b %d,%Y}  \
+  ${time %H:%M:%S}

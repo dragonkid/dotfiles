@@ -7,7 +7,7 @@ export ZSH=$HOME/.oh-my-zsh
 setopt nullglob
 
 # Enable plugin manager
-source $ZSH/antigen.zsh
+source "${HOME}/.zgen/zgen.zsh"
 
 # Enable virtualenvwrapper
 [ -e /usr/bin/virtualenvwrapper.sh ] && source /usr/bin/virtualenvwrapper.sh || source /usr/local/bin/virtualenvwrapper.sh
@@ -69,11 +69,19 @@ ZSH_THEME="af-magic"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-antigen bundle dragonkid/zsh-autoswitch-virtualenv
-export AUTOSWITCH_SILENT=true
-antigen bundle zsh-users/zsh-syntax-highlighting
 
-antigen apply
+# if the init scipt doesn't exist
+if ! zgen saved; then
+
+  # specify plugins here
+  zgen oh-my-zsh
+  export AUTOSWITCH_SILENT=true
+  zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
+  zgen load zsh-users/zsh-syntax-highlighting
+
+  # generate the init script from plugins above
+  zgen save
+fi
 
 # sudo Simply hitting ESC twice puts sudo in front of the current command, or the last one if your cli is empty
 plugins=(git autojump colored-man-pages redis-cli sudo vagrant)

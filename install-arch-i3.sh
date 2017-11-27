@@ -27,26 +27,15 @@ else
     vim +PluginUpdate +qall
 fi
 
-# config zsh
-## install oh-my-zsh
-if [ ! -e ~/.oh-my-zsh ]; then
-    wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh
-    chsh -s `which zsh`
-fi
-## install powerlevel9k theme
-if [ "$1" == "powerlevel9k" ]; then
-    git clone --depth 1 https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
 
-    ## install awesome-terminal-fonts
-    git clone --depth 1 https://github.com/gabrielelana/awesome-terminal-fonts.git /tmp/awesome-terminal-fonts
-    bash /tmp/awesome-terminal-fonts/install.sh
-fi
+# config zsh
+chsh -s `which zsh`
+## install zgen
+git clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen"
 ## install virtualenvwrapper
 sudo pip install virtualenvwrapper
 ## add project path to PYTHONPATH automatically
 echo 'export PYTHONPATH=${PYTHONPATH}:`pwd`' >> ~/.virtualenvs/postactivate
-## install antigen
-curl -L git.io/antigen > ~/.oh-my-zsh/antigen.zsh
 ## linking zshrc
 ZSHRC=~/.zshrc
 if [ -f ${ZSHRC} ]; then

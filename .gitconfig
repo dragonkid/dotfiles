@@ -17,6 +17,7 @@
 	lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
 [core]
 	editor = /usr/bin/vim
+	excludesfile = ~/.gitignore
 [color "status"]
 	added = green
 	changed = red

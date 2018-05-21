@@ -1,3 +1,6 @@
+# work around bug of Pycharm PATH
+# https://youtrack.jetbrains.com/issue/IDEA-176888
+[[ "$PATH" =~ /usr/local/bin  ]] || export PATH=$PATH:/usr/local/bin
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -6,11 +9,11 @@ export ZSH=$HOME/.oh-my-zsh
 # Overrides NOMATCH
 setopt nullglob
 
-# Enable plugin manager
-source "${HOME}/.zgen/zgen.zsh"
-
 # Enable virtualenvwrapper
 [ -e /usr/bin/virtualenvwrapper.sh ] && source /usr/bin/virtualenvwrapper.sh || source /usr/local/bin/virtualenvwrapper.sh
+
+# Enable plugin manager
+source "${HOME}/.zgen/zgen.zsh"
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -78,13 +81,16 @@ if ! zgen saved; then
   export AUTOSWITCH_SILENT=true
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
   zgen load zsh-users/zsh-syntax-highlighting
+  zgen load zsh-users/zsh-autosuggestions
 
   # generate the init script from plugins above
   zgen save
 fi
 
+source =virtualenvwrapper.sh
+
 # sudo Simply hitting ESC twice puts sudo in front of the current command, or the last one if your cli is empty
-plugins=(git autojump colored-man-pages redis-cli sudo vagrant)
+plugins=(git autojump colored-man-pages sudo zsh-autosuggestions)
 
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
@@ -92,8 +98,13 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
-# export MANPATH="/usr/local/man:$MANPATH"
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/libexec"
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+export PATH="/Users/dragonkid/Coding/odps/odpscmd/bin:$PATH"
+# for java env
+export PATH="$HOME/.jenv/bin:$PATH"
+
+export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
@@ -121,7 +132,7 @@ export LC_ALL=en_US.UTF-8
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-export EDITOR='vim'
+export EDITOR='/usr/bin/vim'
 # execute
 alias -s tgz='tar -zxvf'
 alias -s gz='gunzip'
@@ -135,5 +146,12 @@ alias vimupdate='vim +PluginUpdate +qall'
 export HISTSIZE=1000000
 export HISTFILESIZE=1000000
 # others
+alias awk='gawk'
+alias sed='gsed'
 alias h='history'
-alias up='sudo pacman -Syu'
+alias up='brew update && brew upgrade && brew cleanup -s && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cask cleanup'
+alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_CTRL_T_COMMAND='ag -g ""'    # search file ignore files which ignored by .gitignore
+eval "$(jenv init -)"

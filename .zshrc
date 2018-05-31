@@ -30,10 +30,6 @@ source "${HOME}/.zgen/zgen.zsh"
 #POWERLEVEL9K_STATUS_VERBOSE=false
 #POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 
-# ZSH_THEME="amuse"
-
-ZSH_THEME="af-magic"
-
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -78,33 +74,32 @@ if ! zgen saved; then
 
   # specify plugins here
   zgen oh-my-zsh
-  export AUTOSWITCH_SILENT=true
-  zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
+  zgen oh-my-zsh themes/af-magic
+  # zgen oh-my-zsh themes/amuse
+  zgen oh-my-zsh plugins/git
+  zgen oh-my-zsh plugins/autojump
+  zgen oh-my-zsh plugins/colored-man-pages
+  # sudo Simply hitting ESC twice puts sudo in front of the current command,
+  # or the last one if your cli is empty
+  zgen oh-my-zsh plugins/sudo
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
+  # slient virtualenv autoswitch
+  export AUTOSWITCH_SILENT=true
+  zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
 
   # generate the init script from plugins above
   zgen save
 fi
 
-source =virtualenvwrapper.sh
-
-# sudo Simply hitting ESC twice puts sudo in front of the current command, or the last one if your cli is empty
-plugins=(git autojump colored-man-pages sudo zsh-autosuggestions)
-
-eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
-
-source $ZSH/oh-my-zsh.sh
-
 # User configuration
+eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/libexec"
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 export PATH="/Users/dragonkid/Coding/odps/odpscmd/bin:$PATH"
 # for java env
 export PATH="$HOME/.jenv/bin:$PATH"
-
-export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8

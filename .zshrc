@@ -15,21 +15,6 @@ setopt nullglob
 # Enable plugin manager
 source "${HOME}/.zgen/zgen.zsh"
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-
-## powerlevel9k/powerlevel9k
-#ZSH_THEME="powerlevel9k/powerlevel9k"
-#POWERLEVEL9K_MODE='awesome-fontconfig'
-#POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs)
-#POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status virtualenv time)
-#POWERLEVEL9K_VIRTUALENV_BACKGROUND="yellow"
-#POWERLEVEL9K_TIME_FORMAT="%D{\uf017 %H:%M:%S \uf073 %Y.%m.%d}"
-#POWERLEVEL9K_STATUS_VERBOSE=false
-#POWERLEVEL9K_PROMPT_ON_NEWLINE=true
-
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -78,7 +63,7 @@ if ! zgen saved; then
   # zgen oh-my-zsh themes/amuse
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/autojump
-  zgen oh-my-zsh plugins/colored-man-pages
+  zgen oh-my-zsh plugins/colorize
   # sudo Simply hitting ESC twice puts sudo in front of the current command,
   # or the last one if your cli is empty
   zgen oh-my-zsh plugins/sudo
@@ -106,11 +91,7 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+export EDITOR='/usr/bin/vim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -118,17 +99,7 @@ export LC_ALL=en_US.UTF-8
 # ssh
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
 export LESS=-SRXF
-export EDITOR='/usr/bin/vim'
 # execute
 alias -s tgz='tar -zxvf'
 alias -s gz='gunzip'
@@ -141,10 +112,14 @@ alias vimupdate='vim +PluginUpdate +qall'
 # more history
 export HISTSIZE=1000000
 export HISTFILESIZE=1000000
+# colorize code on cat
+alias cat='pygmentize -g'
 # others
+alias zshconfig="vi ~/.zshrc"
 alias awk='gawk'
 alias sed='gsed'
 alias h='history'
+alias f='fzf'
 alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && brew update && brew upgrade && brew cleanup -s && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cask cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 

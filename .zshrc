@@ -145,7 +145,7 @@ export HISTFILESIZE=1000000
 alias awk='gawk'
 alias sed='gsed'
 alias h='history'
-alias up='brew update && brew upgrade && brew cleanup -s && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cask cleanup'
+alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && brew update && brew upgrade && brew cleanup -s && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cask cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

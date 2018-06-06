@@ -1,0 +1,13 @@
+# Mr. Developer
+.idea/
+
+# Mr. Python
+*.py[co]
+
+# Virtualenv
+.venv
+.env/
+
+# Others
+.DS_Store
+*.bak

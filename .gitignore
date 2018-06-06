@@ -8,6 +8,9 @@
 .venv
 .env/
 
+# Suspend
+*.suspend
+
 # Others
 .DS_Store
 *.bak

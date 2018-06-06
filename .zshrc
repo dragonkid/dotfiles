@@ -105,6 +105,14 @@ alias -s tgz='tar -zxvf'
 alias -s gz='gunzip'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
+# deal with it laterly on git
+suspend() {
+    mv "$1"{,.suspend}
+}
+restore() {
+    mv "$1" "${1:0:-8}"
+}
+alias lssuspend='find . -name "*.suspend"'
 # vim
 alias vi='vim'
 alias viminstall='vim +PluginInstall +qall'

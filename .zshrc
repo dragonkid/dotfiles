@@ -1,6 +1,7 @@
 # work around bug of Pycharm PATH
 # https://youtrack.jetbrains.com/issue/IDEA-176888
-[[ "$PATH" =~ /usr/local/bin  ]] || export PATH=$PATH:/usr/local/bin
+[[ "$PATH" =~ /usr/local/bin  ]] || export PATH=/usr/local/bin:$PATH
+export PATH="/usr/local/sbin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -80,7 +81,6 @@ fi
 # User configuration
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/libexec"
 export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 export PATH="/Users/dragonkid/Coding/odps/odpscmd/bin:$PATH"
 # for java env

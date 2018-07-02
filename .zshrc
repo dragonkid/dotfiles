@@ -81,7 +81,6 @@ fi
 # User configuration
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 export PATH="/Users/dragonkid/Coding/odps/odpscmd/bin:$PATH"
 # for java env
 export PATH="$HOME/.jenv/bin:$PATH"

@@ -65,6 +65,7 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
+  zgen oh-my-zsh plugins/colored-man-pages
   # sudo Simply hitting ESC twice puts sudo in front of the current command,
   # or the last one if your cli is empty
   zgen oh-my-zsh plugins/sudo

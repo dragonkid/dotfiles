@@ -16,7 +16,7 @@
 	d = difftool
 	lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
 [core]
-	editor = /usr/bin/vim
+	editor = vim
 	excludesfile = ~/.gitignore
 [color "status"]
 	added = green

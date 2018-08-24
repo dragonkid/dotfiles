@@ -63,6 +63,7 @@ if ! zgen saved; then
   zgen oh-my-zsh themes/af-magic
   # zgen oh-my-zsh themes/amuse
   zgen oh-my-zsh plugins/git
+  zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
@@ -128,7 +129,7 @@ alias awk='gawk'
 alias sed='gsed'
 alias h='history'
 alias f='fzf'
-alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && brew update && brew upgrade && brew cleanup -s && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cask cleanup'
+alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && brew update && brew upgrade && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

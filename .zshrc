@@ -1,6 +1,6 @@
 # work around bug of Pycharm PATH
 # https://youtrack.jetbrains.com/issue/IDEA-176888
-[[ "$PATH" =~ /usr/local/bin  ]] || export PATH=/usr/local/bin:$PATH
+[[ "$PATH" =~ /usr/local/bin ]] || export PATH=/usr/local/bin:$PATH
 export PATH="/usr/local/sbin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
@@ -137,5 +137,5 @@ export FZF_CTRL_T_COMMAND='ag -g ""'    # search file ignore files which ignored
 eval "$(jenv init -)"
 
 # load private configurations
-source ~/.dotfiles/private.sh
+[ -e ~/.zshrc_private ] && source ~/.zshrc_private || echo '# add private configurations to ~/.zshrc_private' | tee ~/.zshrc_private
 

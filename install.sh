@@ -58,7 +58,8 @@ else
 fi
 
 # config git
-ln -sf ${BASEDIR}/.gitconfig ~/.gitconfig
+ln -sf ${BASEDIR}/gitconfig ~/.gitconfig
+ln -sf ${BASEDIR}/gitignore ~/.gitignore
 
 # config jupyter notebook
 JUPYTER_CONFIG_PATH=~/.jupyter

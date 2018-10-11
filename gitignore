@@ -1,0 +1,24 @@
+# Mr. Developer
+.idea/
+
+# Mr. Python
+*.py[co]
+
+# Virtualenv
+.venv
+.env/
+
+# Data
+*.xlsx
+
+# Suspend
+*.suspend
+
+# npm
+node_modules/
+
+# Others
+.DS_Store
+*.bak
+*.tar.gz
+

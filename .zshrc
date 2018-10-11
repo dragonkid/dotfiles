@@ -135,3 +135,7 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_CTRL_T_COMMAND='ag -g ""'    # search file ignore files which ignored by .gitignore
 eval "$(jenv init -)"
+
+# load private configurations
+source ~/.dotfiles/private.sh
+

@@ -2,6 +2,12 @@
 # https://youtrack.jetbrains.com/issue/IDEA-176888
 [[ "$PATH" =~ /usr/local/bin ]] || export PATH=/usr/local/bin:$PATH
 export PATH="/usr/local/sbin:$PATH"
+# for coreutils
+export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+# for java env
+export PATH="$HOME/.jenv/bin:$PATH"
+
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -83,10 +89,6 @@ fi
 # User configuration
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
-export PATH="/Users/dragonkid/Coding/odps/odpscmd/bin:$PATH"
-# for java env
-export PATH="$HOME/.jenv/bin:$PATH"
-
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
@@ -96,9 +98,6 @@ export EDITOR='/usr/bin/vim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 export LESS=-SRXF
 # execute

@@ -14,11 +14,16 @@
 # Suspend
 *.suspend
 
-# npm
+# NPM
 node_modules/
+
+# Python
+*.egg-info/
+
+# Backup files
+*.bak
+*.tar.gz
 
 # Others
 .DS_Store
-*.bak
-*.tar.gz
 

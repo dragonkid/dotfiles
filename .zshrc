@@ -102,7 +102,6 @@ export EDITOR='/usr/bin/vim'
 export LESS=-SRXF
 # execute
 alias -s tgz='tar -zxvf'
-alias -s gz='gunzip'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 # deal with it laterly on git

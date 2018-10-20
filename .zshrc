@@ -8,9 +8,6 @@ export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 # for java env
 export PATH="$HOME/.jenv/bin:$PATH"
 
-# Path to your oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
-
 # If a pattern for filename generation has no matches, delete  the
 # pattern  from  the  argument list instead of reporting an error.
 # Overrides NOMATCH
@@ -19,9 +16,6 @@ setopt nullglob
 # Enable virtualenvwrapper
 [ -e /usr/bin/virtualenvwrapper.sh ] && source /usr/bin/virtualenvwrapper.sh || source /usr/local/bin/virtualenvwrapper.sh
 
-# Enable plugin manager
-source "${HOME}/.zgen/zgen.zsh"
-
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -29,7 +23,7 @@ source "${HOME}/.zgen/zgen.zsh"
 # DISABLE_AUTO_UPDATE="true"
 
 # Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+export UPDATE_ZSH_DAYS=7
 
 # Uncomment the following line to disable colors in ls.
 # DISABLE_LS_COLORS="true"
@@ -54,12 +48,15 @@ source "${HOME}/.zgen/zgen.zsh"
 # HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
+ZSH_CUSTOM=~/.zshrc_private
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+
+# Enable plugin manager
+source "${HOME}/.zgen/zgen.zsh"
 
 # if the init scipt doesn't exist
 if ! zgen saved; then
@@ -78,9 +75,10 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/sudo
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
+  #zgen load unixorn/autoupdate-zgen
   # slient virtualenv autoswitch
-  export AUTOSWITCH_SILENT=true
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
+  export AUTOSWITCH_SILENT=true
 
   # generate the init script from plugins above
   zgen save
@@ -123,6 +121,8 @@ export HISTFILESIZE=1000000
 alias cat='pygmentize -g'
 # others
 alias zshconfig="vi ~/.zshrc"
+# https://github.com/robbyrussell/oh-my-zsh/issues/5349#issuecomment-387210275
+alias ls="gls --color=always"
 alias awk='gawk'
 alias sed='gsed'
 alias h='history'
@@ -133,7 +133,3 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_CTRL_T_COMMAND='ag -g ""'    # search file ignore files which ignored by .gitignore
 eval "$(jenv init -)"
-
-# load private configurations
-[ -e ~/.zshrc_private ] && source ~/.zshrc_private || echo '# add private configurations to ~/.zshrc_private' | tee ~/.zshrc_private
-

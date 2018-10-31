@@ -1,35 +1,38 @@
 [user]
-	name = dragonkid
-	email = idragonkid@gmail.com
+    name = dragonkid
+    email = idragonkid@gmail.com
 [filter "hawser"]
-	clean = git hawser clean %f
-	smudge = git hawser smudge %f
-	required = true
+    clean = git hawser clean %f
+    smudge = git hawser smudge %f
+    required = true
 [push]
-	default = simple
+    default = simple
 [alias]
-	co = checkout
-	b = branch
-	st = status
-	fe = fetch
-	re = rebase
-	d = difftool
-	lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
+    co = checkout
+    b = branch
+    st = status
+    fe = fetch
+    re = rebase
+    d = difftool
+    lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
 [core]
-	editor = vim
-	excludesfile = ~/.gitignore
+    editor = vim
+    excludesfile = ~/.gitignore
 [color "status"]
-	added = green
-	changed = red
-	untracked = cyan
+    added = green
+    changed = red
+    untracked = cyan
 [color "diff"]
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
-	new = green bold
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
 [diff]
-	tool = vimdiff
+    tool = vimdiff
 [merge]
-	tool = vimdiff
+    tool = vimdiff
 [difftool]
-	prompt = false
+    prompt = false
+[pager]
+    diff = diff-so-fancy | less --tabs=1,5 -RFX
+    show = diff-so-fancy | less --tabs=1,5 -RFX

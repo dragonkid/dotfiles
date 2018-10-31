@@ -100,6 +100,8 @@ export EDITOR='/usr/bin/vim'
 export LESS=-SRXF
 # execute
 alias -s tgz='tar -zxvf'
+alias -s gz='gunzip'
+alias -s tar='tar -xvf'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 # deal with it laterly on git
@@ -117,19 +119,21 @@ alias vimupdate='vim +PluginUpdate +qall'
 # more history
 export HISTSIZE=1000000
 export HISTFILESIZE=1000000
-# colorize code on cat
-alias cat='pygmentize -g'
+alias cat='bat'
 # others
 alias zshconfig="vi ~/.zshrc"
+alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
+alias help='tldr'
 # https://github.com/robbyrussell/oh-my-zsh/issues/5349#issuecomment-387210275
 alias ls="gls --color=always"
 alias awk='gawk'
 alias sed='gsed'
 alias h='history'
-alias f='fzf'
 alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && brew update && brew upgrade && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 
+# search file ignore files which ignored by .gitignore
+export FZF_CTRL_T_COMMAND="ag -g \"\""
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --color \"always\" {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-export FZF_CTRL_T_COMMAND='ag -g ""'    # search file ignore files which ignored by .gitignore
 eval "$(jenv init -)"

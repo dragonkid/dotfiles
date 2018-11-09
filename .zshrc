@@ -7,6 +7,9 @@ export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 # for java env
 export PATH="$HOME/.jenv/bin:$PATH"
+# for ssh libs
+export LDFLAGS="-L/usr/local/opt/openssl/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl/include"
 
 # If a pattern for filename generation has no matches, delete  the
 # pattern  from  the  argument list instead of reporting an error.

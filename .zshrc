@@ -137,6 +137,6 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 
 # search file ignore files which ignored by .gitignore
 export FZF_CTRL_T_COMMAND="ag -g \"\""
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --preview 'bat --color \"always\" {}'"
+export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(jenv init -)"

@@ -65,3 +65,7 @@ ln -sf ${BASEDIR}/gitignore ~/.gitignore
 JUPYTER_CONFIG_PATH=~/.jupyter
 mkdir -p ${JUPYTER_CONFIG_PATH}
 ln -sf ${BASEDIR}/jupyter_notebook_config.py ~/${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py
+
+# config ideavim
+ln -sf ${BASEDIR}/ideavimrc ~/.ideavimrc
+

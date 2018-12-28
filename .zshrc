@@ -81,11 +81,13 @@ if ! zgen saved; then
   #zgen load unixorn/autoupdate-zgen
   # slient virtualenv autoswitch
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
-  export AUTOSWITCH_SILENT=true
 
   # generate the init script from plugins above
   zgen save
 fi
+
+export AUTOSWITCH_SILENT=true
+export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
 eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)

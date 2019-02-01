@@ -35,6 +35,7 @@ chsh -s `which zsh`
 sudo pip install virtualenvwrapper
 ## add project path to PYTHONPATH automatically
 echo 'export PYTHONPATH=${PYTHONPATH}:`pwd`' >> ~/.virtualenvs/postactivate
+## install ipdb alfter virtualenv is created. `-i` parameter can also be used.
 echo '[[ $VIRTUAL_ENV ]] && pip install ipdb' >> ~/.virtualenvs/postmkvirtualenv
 ## linking zshrc
 ZSHRC=~/.zshrc

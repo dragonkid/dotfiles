@@ -16,9 +16,6 @@ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 # Overrides NOMATCH
 setopt nullglob
 
-# Enable virtualenvwrapper
-source /usr/local/bin/virtualenvwrapper.sh
-
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -72,9 +69,6 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
-  # sudo Simply hitting ESC twice puts sudo in front of the current command,
-  # or the last one if your cli is empty
-  zgen oh-my-zsh plugins/sudo
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
   #zgen load unixorn/autoupdate-zgen
@@ -139,4 +133,4 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-eval "$(jenv init -)"
+#eval "$(jenv init -)"

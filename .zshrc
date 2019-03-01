@@ -16,6 +16,11 @@ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 # Overrides NOMATCH
 setopt nullglob
 
+# Enable virtualenvwrapper
+[ -z $VIRTUALENVWRAPPER_SCRIPT ] && source /usr/local/bin/virtualenvwrapper.sh
+# Init jenv
+[ -z $JENV_LOADED ] && eval "$(jenv init -)"
+
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -82,7 +87,7 @@ export AUTOSWITCH_SILENT=true
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+[ -z $SSH_AGENT_PID  ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
@@ -133,4 +138,3 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-#eval "$(jenv init -)"

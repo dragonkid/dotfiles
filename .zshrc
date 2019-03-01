@@ -17,7 +17,7 @@ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 setopt nullglob
 
 # Enable virtualenvwrapper
-[ -e /usr/bin/virtualenvwrapper.sh ] && source /usr/bin/virtualenvwrapper.sh || source /usr/local/bin/virtualenvwrapper.sh
+source /usr/local/bin/virtualenvwrapper.sh
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -51,7 +51,7 @@ export UPDATE_ZSH_DAYS=7
 # HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
-ZSH_CUSTOM=~/.zshrc_private
+#ZSH_CUSTOM=~/.zshrc_private
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
@@ -67,7 +67,6 @@ if ! zgen saved; then
   # specify plugins here
   zgen oh-my-zsh
   zgen oh-my-zsh themes/af-magic
-  # zgen oh-my-zsh themes/amuse
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
@@ -79,7 +78,6 @@ if ! zgen saved; then
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
   #zgen load unixorn/autoupdate-zgen
-  # slient virtualenv autoswitch
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
 
   # generate the init script from plugins above

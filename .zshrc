@@ -17,7 +17,7 @@ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 setopt nullglob
 
 # Enable virtualenvwrapper
-[ -z $VIRTUALENVWRAPPER_SCRIPT ] && source /usr/local/bin/virtualenvwrapper.sh
+source /usr/local/bin/virtualenvwrapper.sh
 # Init jenv
 [ -z $JENV_LOADED ] && eval "$(jenv init -)"
 
@@ -87,7 +87,7 @@ export AUTOSWITCH_SILENT=true
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-[ -z $SSH_AGENT_PID  ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
@@ -95,10 +95,6 @@ export LC_ALL=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 export EDITOR='/usr/bin/vim'
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
 export LESS=-SRXF
 # execute
 alias -s tgz='tar -zxvf'

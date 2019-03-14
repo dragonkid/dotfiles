@@ -36,3 +36,8 @@
 [pager]
     diff = diff-so-fancy | less --tabs=1,5 -RFX
     show = diff-so-fancy | less --tabs=1,5 -RFX
+[diff "daff-csv"]
+	command = daff diff --git --output-format html --output /tmp/diff.html
+[merge "daff-csv"]
+	name = daff tabular csv merge
+	driver = daff merge --output %A %O %A %B

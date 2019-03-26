@@ -20,6 +20,9 @@ node_modules/
 # Python
 *.egg-info/
 
+# Logs
+*.log
+
 # Backup files
 *.bak
 *.swp

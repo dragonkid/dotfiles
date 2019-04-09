@@ -17,8 +17,9 @@
 # NPM
 node_modules/
 
-# Python
+# Python Dist
 *.egg-info/
+dist/
 
 # Logs
 *.log

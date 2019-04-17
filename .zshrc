@@ -87,7 +87,7 @@ export AUTOSWITCH_SILENT=true
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-[ -z $SSH_AGENT_PID  ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+[ -z $SSH_AGENT_PID  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8

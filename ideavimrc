@@ -20,3 +20,7 @@ set hlsearch
 
 " Makes search act like search in modern browsers
 set incsearch
+
+" Mute bell
+set visualbell
+set noerrorbells

@@ -61,6 +61,8 @@ brew "jq"
 brew "keychain"
 # Kubernetes command-line interface
 brew "kubernetes-cli"
+# Clone of ls with colorful output, file type icons, and more
+brew "lsd"
 # TCP port scanner, scans entire Internet in under 5 minutes
 brew "masscan"
 # Interpreted, interactive, object-oriented programming language
@@ -87,8 +89,6 @@ brew "noti"
 brew "ntfs-3g"
 # Open source computer vision library
 brew "opencv"
-# Shell command parallelization utility
-brew "parallel"
 # Python dependency management tool
 brew "pipenv"
 # Wrapper to colorize and simplify ping's output
@@ -130,6 +130,7 @@ cask "balenaetcher"
 cask "docker"
 cask "dozer"
 cask "ezip"
+cask "font-hack-nerd-font"
 cask "font-monofur-nerd-font"
 cask "genymotion"
 cask "goland"

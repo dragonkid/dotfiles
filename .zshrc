@@ -123,7 +123,7 @@ alias zshconfig="vi ~/.zshrc"
 alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
 alias help='tldr'
 # https://github.com/robbyrussell/oh-my-zsh/issues/5349#issuecomment-387210275
-alias ls="gls --color=always"
+alias ls="lsd"
 alias awk='gawk'
 alias sed='gsed'
 alias h='history'

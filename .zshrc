@@ -89,6 +89,10 @@ export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 # User configuration
 [ -z $SSH_AGENT_PID  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 
+# cursor navigation mapping
+bindkey "^[h" backward-word
+bindkey "^[l" forward-word
+
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8

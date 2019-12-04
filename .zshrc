@@ -3,7 +3,7 @@
 [[ "$PATH" =~ /usr/local/bin ]] || export PATH=/usr/local/bin:$PATH
 export PATH="/usr/local/sbin:$PATH"
 # for coreutils
-export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+#export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
 # for java env
 export PATH="$HOME/.jenv/bin:$PATH"
@@ -138,3 +138,8 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# init nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

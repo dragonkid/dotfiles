@@ -7,7 +7,6 @@
 
 
 function fix_venv {
-    echo 'fixing '$1
     activate=${VIRTUALENVWRAPPER_HOOK_DIR}/${env}/bin/activate
     if [ ! -f "$activate" ]
     then
@@ -15,13 +14,19 @@ function fix_venv {
         return 1
     fi
     source "$activate"
-    if [ $(python --version) = $(python2 --version) ]
+    if [[ "`python --version 2>&1`" != *'Library not loaded'*  ]]
     then
-        cd ${VIRTUALENVWRAPPER_HOOK_DIR}/${env} && gfind . -type l -xtype l -delete
-        virtualenv -p python2 .
+        return
+    fi
+
+    echo 'fixing '$1
+    if [[ "$(ls -l `which python`)" == *'python2'* ]]
+    then
+        cd ${VIRTUALENVWRAPPER_HOOK_DIR}/${env} 2>/dev/null
+        gfind . -type l -xtype l -delete && /usr/local/bin/virtualenv -p /usr/local/bin/python2 .
     else
-        cd ${VIRTUALENVWRAPPER_HOOK_DIR}/${env} && gfind . -type l -xtype l -delete
-        virtualenv .
+        cd ${VIRTUALENVWRAPPER_HOOK_DIR}/${env} || true
+        gfind . -type l -xtype l -delete && /usr/local/bin/virtualenv -p /usr/local/bin/python3 .
     fi
 }
 

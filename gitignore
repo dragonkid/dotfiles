@@ -1,8 +1,12 @@
 # Mr. Developer
 .idea/
+.vscode/
 
 # Mr. Python
 *.py[co]
+
+# Tests
+.pytest*
 
 # Virtualenv
 .venv
@@ -28,6 +32,8 @@ dist/
 *.bak
 *.swp
 
+# Secret
+.secret
+
 # Others
 .DS_Store
-

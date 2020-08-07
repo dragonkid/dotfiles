@@ -24,3 +24,11 @@ set incsearch
 " Mute bell
 set visualbell
 set noerrorbells
+
+" With a map leader it's possible to do extra key combinations
+" like <leader>w saves the current file
+let mapleader = " "
+let g:mapleader = " "
+
+" Clear highlight when <leader><cr> is pressed
+map <silent> <leader><cr> :noh<cr>

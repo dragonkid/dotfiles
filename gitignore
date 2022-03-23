@@ -4,6 +4,7 @@
 
 # Mr. Python
 *.py[co]
+build/
 
 # Tests
 .pytest*

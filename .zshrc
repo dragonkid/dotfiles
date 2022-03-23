@@ -75,6 +75,19 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
   zgen load zsh-users/zsh-syntax-highlighting
+  ### Fix slowness of pastes with zsh-syntax-highlighting.zsh
+  pasteinit() {
+    OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
+    zle -N self-insert url-quote-magic # I wonder if you'd need `.url-quote-magic`?
+  }
+
+  pastefinish() {
+    zle -N self-insert $OLD_SELF_INSERT
+  }
+  zstyle :bracketed-paste-magic paste-init pasteinit
+  zstyle :bracketed-paste-magic paste-finish pastefinish
+  ### Fix slowness of pastes
+  zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
   #zgen load unixorn/autoupdate-zgen
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
@@ -82,6 +95,7 @@ if ! zgen saved; then
   # generate the init script from plugins above
   zgen save
 fi
+
 
 export AUTOSWITCH_SILENT=true
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'

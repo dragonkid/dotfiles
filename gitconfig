@@ -18,6 +18,7 @@
 [core]
     editor = vim
     excludesfile = ~/.gitignore
+    attributesfile = ~/.gitattributes
 [color "status"]
     added = green
     changed = red
@@ -29,6 +30,9 @@
     new = green bold
 [diff]
     tool = vimdiff
+[diff "archive"]
+	textconv = 7z -so l
+	binary = true
 [merge]
     tool = vimdiff
 [difftool]

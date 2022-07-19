@@ -1,12 +1,7 @@
-# work around bug of Pycharm PATH
-# https://youtrack.jetbrains.com/issue/IDEA-176888
-[[ "$PATH" =~ /usr/local/bin ]] || export PATH=/usr/local/bin:$PATH
-export PATH="/usr/local/sbin:$PATH"
+[ -f ~/.zshrc_private  ] && source $HOME/.zshrc_private
 # for coreutils
 #export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
-# for java env
-export PATH="$HOME/.jenv/bin:$PATH"
 # for ssh libs
 export LDFLAGS="-L/usr/local/opt/openssl/lib"
 export CPPFLAGS="-I/usr/local/opt/openssl/include"
@@ -17,9 +12,7 @@ export CPPFLAGS="-I/usr/local/opt/openssl/include"
 setopt nullglob
 
 # Enable virtualenvwrapper
-source /usr/local/bin/virtualenvwrapper.sh
-# Init jenv
-[ -z $JENV_LOADED ] && eval "$(jenv init -)"
+source virtualenvwrapper.sh
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -70,6 +63,7 @@ if ! zgen saved; then
   zgen oh-my-zsh
   zgen oh-my-zsh themes/af-magic
   zgen oh-my-zsh plugins/git
+  zgen oh-my-zsh plugins/fzf
   zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
@@ -151,9 +145,3 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 # search file ignore files which ignored by .gitignore
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# init nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

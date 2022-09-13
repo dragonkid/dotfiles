@@ -1,0 +1,3 @@
+[submodule "snokai-iterm2"]
+	path = snokai-iterm2
+	url = https://github.com/jose-elias-alvarez/sonokai-iterm2.git

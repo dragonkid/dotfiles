@@ -19,6 +19,7 @@
     editor = vim
     excludesfile = ~/.gitignore
     attributesfile = ~/.gitattributes
+    sshCommand = /usr/bin/ssh
 [color "status"]
     added = green
     changed = red

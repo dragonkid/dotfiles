@@ -63,6 +63,7 @@ if ! zgen saved; then
   zgen oh-my-zsh
   zgen oh-my-zsh themes/af-magic
   zgen oh-my-zsh plugins/git
+  zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
   zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump

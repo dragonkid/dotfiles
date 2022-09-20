@@ -6,6 +6,9 @@
 *.py[co]
 build/
 
+# Mrs. Java
+*.class
+
 # Tests
 .pytest*
 

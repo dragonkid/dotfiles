@@ -86,6 +86,7 @@ if ! zgen saved; then
   zgen load zsh-users/zsh-autosuggestions
   #zgen load unixorn/autoupdate-zgen
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
+  zgen load Dabz/kafka-zsh-completions
 
   # generate the init script from plugins above
   zgen save

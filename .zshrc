@@ -65,11 +65,15 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
+  zgen oh-my-zsh plugins/qemu
+  zgen oh-my-zsh plugins/kubectl
+  zgen oh-my-zsh plugins/minikube
   zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
   zgen load zsh-users/zsh-syntax-highlighting
+  zgen load Dabz/kafka-zsh-completions
   ### Fix slowness of pastes with zsh-syntax-highlighting.zsh
   pasteinit() {
     OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
@@ -86,7 +90,6 @@ if ! zgen saved; then
   zgen load zsh-users/zsh-autosuggestions
   #zgen load unixorn/autoupdate-zgen
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
-  zgen load Dabz/kafka-zsh-completions
 
   # generate the init script from plugins above
   zgen save
@@ -116,14 +119,6 @@ alias -s gz='gunzip'
 alias -s tar='tar -xvf'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
-# deal with it laterly on git
-suspend() {
-    mv "$1"{,.suspend}
-}
-restore() {
-    mv "$1" "${1:0:-8}"
-}
-alias lssuspend='find . -name "*.suspend"'
 # vim
 alias vi='vim'
 alias viminstall='vim +PluginInstall +qall'

@@ -6,6 +6,9 @@
 *.py[co]
 build/
 
+# Mr. Golang
+.air.toml
+
 # Mrs. Java
 *.class
 
@@ -41,3 +44,4 @@ dist/
 
 # Others
 .DS_Store
+tmp/

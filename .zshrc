@@ -65,7 +65,6 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
-  zgen oh-my-zsh plugins/qemu
   zgen oh-my-zsh plugins/kubectl
   zgen oh-my-zsh plugins/minikube
   zgen oh-my-zsh plugins/docker
@@ -74,6 +73,7 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/colored-man-pages
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load Dabz/kafka-zsh-completions
+  zgen load jeffreytse/zsh-vi-mode
   ### Fix slowness of pastes with zsh-syntax-highlighting.zsh
   pasteinit() {
     OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
@@ -123,6 +123,8 @@ alias -s bz2='tar -xjvf'
 alias vi='vim'
 alias viminstall='vim +PluginInstall +qall'
 alias vimupdate='vim +PluginUpdate +qall'
+# kubecm
+alias kc='kubecm'
 # more history
 export HISTSIZE=1000000
 export HISTFILESIZE=1000000
@@ -142,3 +144,11 @@ alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUn
 # search file ignore files which ignored by .gitignore
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
+autoload -U compinit; compinit
+[[ ! -f ~/.kubecm ]] || source ~/.kubecm
+
+# the fuck
+eval $(thefuck --alias)
+
+# gpt-comrade
+alias comrade='gpt-comrade "$@" -k="$(fc -ln -1)"'

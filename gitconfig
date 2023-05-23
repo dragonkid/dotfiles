@@ -16,10 +16,20 @@
     d = difftool
     lg = log --pretty=format:\"[%h] %ae, %ar: %s\" --stat
 [core]
+    pager = delta
     editor = vim
     excludesfile = ~/.gitignore
     attributesfile = ~/.gitattributes
     sshCommand = /usr/bin/ssh
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+#    side-by-side = true
+    line-numbers = true
+
 [color "status"]
     added = green
     changed = red
@@ -30,17 +40,19 @@
     old = red bold
     new = green bold
 [diff]
-    tool = vimdiff
+    #tool = vimdiff
+    colorMoved = default
 [diff "archive"]
 	textconv = 7z -so l
 	binary = true
 [merge]
     tool = vimdiff
+    conflictstyle = diff3
 [difftool]
     prompt = false
-[pager]
-    diff = diff-so-fancy | less --tabs=1,5 -RFX
-    show = diff-so-fancy | less --tabs=1,5 -RFX
+#[pager]
+#    diff = diff-so-fancy | less --tabs=1,5 -RFX
+#    show = diff-so-fancy | less --tabs=1,5 -RFX
 [diff "daff-csv"]
 	command = daff diff --git --output-format html --output /tmp/diff.html
 [merge "daff-csv"]
@@ -48,3 +60,10 @@
 	driver = daff merge --output %A %O %A %B
 [pull]
 	rebase = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[url "git@git.servaltech.cn:"]
+    insteadOf = "https://git.servaltech.cn"

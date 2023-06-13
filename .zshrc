@@ -1,17 +1,15 @@
 [ -f ~/.zshrc_private  ] && source $HOME/.zshrc_private
-# for coreutils
-#export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
-# for ssh libs
-export LDFLAGS="-L/usr/local/opt/openssl/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl/include"
 
 # If a pattern for filename generation has no matches, delete  the
 # pattern  from  the  argument list instead of reporting an error.
 # Overrides NOMATCH
 setopt nullglob
+export PATH="~/.cargo/bin:~/go/bin:$PATH"
 
 # Enable virtualenvwrapper
+export VIRTUALENVWRAPPER_PYTHON=/opt/homebrew/bin/python
+export WORKON_HOME="$HOME/Coding/.virtualenvs"
+export VIRTUALENVWRAPPER_HOOK_DIR=$WORKON_HOME
 source virtualenvwrapper.sh
 
 # Uncomment the following line to use case-sensitive completion.
@@ -97,10 +95,14 @@ fi
 
 
 export AUTOSWITCH_SILENT=true
+export AUTOSWITCH_DEFAULT_PYTHON=/opt/homebrew/bin/python
+export AUTOSWITCH_VIRTUAL_ENV_DIR=$WORKON_HOME
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
 [ -z $SSH_AGENT_PID  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+# Golang speed up
+export GOPROXY=https://goproxy.cn
 
 # cursor navigation mapping
 bindkey "^[h" backward-word
@@ -133,6 +135,7 @@ alias cat='bat'
 alias zshconfig="vi ~/.zshrc"
 alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"
 alias help='tldr'
+alias fgw="export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890"
 # https://github.com/robbyrussell/oh-my-zsh/issues/5349#issuecomment-387210275
 alias ls="lsd"
 alias awk='gawk'

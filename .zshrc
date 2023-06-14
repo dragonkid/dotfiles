@@ -4,10 +4,10 @@
 # pattern  from  the  argument list instead of reporting an error.
 # Overrides NOMATCH
 setopt nullglob
-export PATH="~/.cargo/bin:~/go/bin:$PATH"
+eval "$(/usr/local/bin/brew shellenv)"
 
 # Enable virtualenvwrapper
-export VIRTUALENVWRAPPER_PYTHON=/opt/homebrew/bin/python
+export VIRTUALENVWRAPPER_PYTHON=python3
 export WORKON_HOME="$HOME/Coding/.virtualenvs"
 export VIRTUALENVWRAPPER_HOOK_DIR=$WORKON_HOME
 source virtualenvwrapper.sh
@@ -95,7 +95,7 @@ fi
 
 
 export AUTOSWITCH_SILENT=true
-export AUTOSWITCH_DEFAULT_PYTHON=/opt/homebrew/bin/python
+export AUTOSWITCH_DEFAULT_PYTHON=$VIRTUALENVWRAPPER_PYTHON
 export AUTOSWITCH_VIRTUAL_ENV_DIR=$WORKON_HOME
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 

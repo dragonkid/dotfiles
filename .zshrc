@@ -4,7 +4,11 @@
 # pattern  from  the  argument list instead of reporting an error.
 # Overrides NOMATCH
 setopt nullglob
-eval "$(/usr/local/bin/brew shellenv)"
+if test -x /usr/local/bin/brew; then
+  eval "$(/usr/local/bin/brew shellenv)"
+else
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 # Enable virtualenvwrapper
 export VIRTUALENVWRAPPER_PYTHON=python3

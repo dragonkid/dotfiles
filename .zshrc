@@ -65,17 +65,20 @@ if ! zgen saved; then
   zgen oh-my-zsh
   zgen oh-my-zsh themes/af-magic
   zgen oh-my-zsh plugins/git
+  zgen oh-my-zsh plugins/aws
   zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
+  zgen oh-my-zsh plugins/flink
   zgen oh-my-zsh plugins/kubectl
   zgen oh-my-zsh plugins/minikube
   zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
+  zgen oh-my-zsh plugins/docker-compose
   zgen load zsh-users/zsh-syntax-highlighting
-  zgen load Dabz/kafka-zsh-completions
-  zgen load jeffreytse/zsh-vi-mode
+  #zgen load Dabz/kafka-zsh-completions
+  #zgen load jeffreytse/zsh-vi-mode
   ### Fix slowness of pastes with zsh-syntax-highlighting.zsh
   pasteinit() {
     OLD_SELF_INSERT=${${(s.:.)widgets[self-insert]}[2,3]}
@@ -159,3 +162,26 @@ eval $(thefuck --alias)
 
 # gpt-comrade
 alias comrade='gpt-comrade "$@" -k="$(fc -ln -1)"'
+eval export PATH="/Users/dk/.jenv/shims:${PATH}"
+export JENV_SHELL=zsh
+export JENV_LOADED=1
+unset JAVA_HOME
+unset JDK_HOME
+source '/opt/homebrew/Cellar/jenv/0.5.6/libexec/libexec/../completions/jenv.zsh'
+jenv rehash 2>/dev/null
+jenv refresh-plugins
+jenv() {
+  type typeset &> /dev/null && typeset command
+  command="$1"
+  if [ "$#" -gt 0 ]; then
+    shift
+  fi
+
+  case "$command" in
+  enable-plugin|rehash|shell|shell-options)
+    eval `jenv "sh-$command" "$@"`;;
+  *)
+    command jenv "$command" "$@";;
+  esac
+}
+export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"

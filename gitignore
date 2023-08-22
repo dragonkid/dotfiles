@@ -11,6 +11,10 @@ build/
 
 # Mrs. Java
 *.class
+**/.factorypath
+.settings/
+bin/
+pkg/
 
 # Tests
 .pytest*
@@ -21,6 +25,7 @@ build/
 
 # Data
 *.xlsx
+.session
 
 # Suspend
 *.suspend

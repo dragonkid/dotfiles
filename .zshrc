@@ -63,7 +63,7 @@ if ! zgen saved; then
 
   # specify plugins here
   zgen oh-my-zsh
-  zgen oh-my-zsh themes/af-magic
+  # zgen oh-my-zsh themes/af-magic
   zgen oh-my-zsh plugins/git
   zgen oh-my-zsh plugins/aws
   zgen oh-my-zsh plugins/golang
@@ -71,12 +71,13 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/flink
   zgen oh-my-zsh plugins/kubectl
   zgen oh-my-zsh plugins/minikube
-  zgen oh-my-zsh plugins/docker
   zgen oh-my-zsh plugins/autojump
   zgen oh-my-zsh plugins/colorize
   zgen oh-my-zsh plugins/colored-man-pages
   zgen oh-my-zsh plugins/docker-compose
   zgen load zsh-users/zsh-syntax-highlighting
+
+  zgen load romkatv/powerlevel10k powerlevel10k
   #zgen load Dabz/kafka-zsh-completions
   #zgen load jeffreytse/zsh-vi-mode
   ### Fix slowness of pastes with zsh-syntax-highlighting.zsh

@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 [ -f ~/.zshrc_private  ] && source $HOME/.zshrc_private
 
 # If a pattern for filename generation has no matches, delete  the
@@ -6,14 +13,14 @@
 setopt nullglob
 if test -x /usr/local/bin/brew; then
   eval "$(/usr/local/bin/brew shellenv)"
+elif test -x /home/linuxbrew/.linuxbrew/bin/brew; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 else
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 # Enable virtualenvwrapper
 export VIRTUALENVWRAPPER_PYTHON=python3
-export WORKON_HOME="$HOME/Coding/.virtualenvs"
-export VIRTUALENVWRAPPER_HOOK_DIR=$WORKON_HOME
 source virtualenvwrapper.sh
 
 # Uncomment the following line to use case-sensitive completion.
@@ -163,26 +170,13 @@ eval $(thefuck --alias)
 
 # gpt-comrade
 alias comrade='gpt-comrade "$@" -k="$(fc -ln -1)"'
-eval export PATH="/Users/dk/.jenv/shims:${PATH}"
-export JENV_SHELL=zsh
-export JENV_LOADED=1
-unset JAVA_HOME
-unset JDK_HOME
-source '/opt/homebrew/Cellar/jenv/0.5.6/libexec/libexec/../completions/jenv.zsh'
-jenv rehash 2>/dev/null
-jenv refresh-plugins
-jenv() {
-  type typeset &> /dev/null && typeset command
-  command="$1"
-  if [ "$#" -gt 0 ]; then
-    shift
-  fi
 
-  case "$command" in
-  enable-plugin|rehash|shell|shell-options)
-    eval `jenv "sh-$command" "$@"`;;
-  *)
-    command jenv "$command" "$@";;
-  esac
-}
+# jevn
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
+
+# postgresql
 export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

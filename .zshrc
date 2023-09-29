@@ -153,8 +153,10 @@ alias help='tldr'
 alias fgw="export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890"
 # https://github.com/robbyrussell/oh-my-zsh/issues/5349#issuecomment-387210275
 alias ls="lsd"
-alias awk='gawk'
-alias sed='gsed'
+if [[ "$(uname)" == "Darwin" ]]; then
+    alias awk='gawk'
+    alias sed='gsed'
+fi
 alias h='history'
 alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && (cd ~/.hammerspoon && git pull) && brew update && brew upgrade && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'

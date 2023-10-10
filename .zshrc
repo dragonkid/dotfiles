@@ -1,3 +1,4 @@
+export PATH=$PATH:/usr/local/sbin:/usr/sbin
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -115,7 +116,7 @@ export AUTOSWITCH_VIRTUAL_ENV_DIR=$WORKON_HOME
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-[ -z $SSH_AGENT_PID  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+[ -z $SSH_AGENT_PID ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 # Golang speed up
 export GOPROXY=https://goproxy.cn
 

@@ -177,6 +177,7 @@ alias comrade='gpt-comrade "$@" -k="$(fc -ln -1)"'
 # jevn
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
+export JAVA_HOME="$HOME/.jenv/versions/`jenv version-name`"
 
 # postgresql
 export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"

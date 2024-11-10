@@ -76,8 +76,6 @@ link_config() {
     ln -sf "$src" "$dst"
 }
 
-#apt-get update && apt-get install cmake build-essential python2.7-dev -y
-
 # Install Homebrew if needed
 if [ "$INSTALL_BREW" = true ]; then
     if ! command -v brew &> /dev/null; then

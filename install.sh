@@ -1,9 +1,11 @@
 #!/bin/bash
-SCRIPT="$(cd "$(dirname "$0")" && pwd -P)"/"$(basename "$0")"
-BASEDIR=$(dirname "${SCRIPT}")
+BASEDIR=~/.dotfiles
 
 #apt-get update && apt-get install cmake build-essential python2.7-dev -y
-brew install zsh tmux-mem-cpu-load lsd jenv bat fzf thefuck autojump ncdu
+brew install zsh tmux-mem-cpu-load lsd jenv bat fzf thefuck autojump ncdu tmux font-monofur-nerd-font hammerspoon
+
+# config hammerspoon
+git clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
 
 # config vim
 VIM_RUNTIME=~/.vim_runtime

@@ -117,6 +117,8 @@ export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
 [ -z $SSH_AGENT_PID ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+#export SSH_AUTH_SOCK=/Users/$USER/.bitwarden-ssh-agent.sock
+
 # Golang speed up
 export GOPROXY=https://goproxy.cn
 
@@ -184,3 +186,6 @@ export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+

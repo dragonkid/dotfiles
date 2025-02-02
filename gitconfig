@@ -1,6 +1,7 @@
 [user]
     name = dragonkid
     email = idragonkid@gmail.com
+    signingkey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCegDKL8RPTuKHJREfp1Xz6EjVEilBoQekyVZL/dClAq9eyrKmq3yQvOiuM5SG2K/xMg+QZpjbJTEyGfmOcKdmOpOUoGOkZUTyuhyLlNl5k7svsh50wI6I5BFFAIEYgBI18Lz996HUg8HVYkA2gf6Woj89d2it40Ntcfu9gIhLzEjqTvlGBUqPcKWz9s1LfYlteH9eAvOFVPvEp6HAJEg3h2i06pnM1M1IvCHucjNuZPSwNpwSADS+apN8RsXE3sNKVTYISi/J30+xWsFhO4bofMqv4ehXun+ct7W0MzlNoXbAYlBbI5hPbYph4Jw1Xc/WlToVDtg+hxkoPPDGmFm/F"
 [filter "hawser"]
     clean = git hawser clean %f
     smudge = git hawser smudge %f
@@ -65,5 +66,7 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[url "git@git.servaltech.cn:"]
-    insteadOf = "https://git.servaltech.cn"
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true

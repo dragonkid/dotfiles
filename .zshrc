@@ -116,7 +116,7 @@ export AUTOSWITCH_VIRTUAL_ENV_DIR=$WORKON_HOME
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-[ -z $SSH_AGENT_PID ] && [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
+[ -z $SSH_AGENT_PID ] || [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
 #export SSH_AUTH_SOCK=/Users/$USER/.bitwarden-ssh-agent.sock
 
 # Golang speed up
@@ -170,11 +170,8 @@ export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 autoload -U compinit; compinit
 [[ ! -f ~/.kubecm ]] || source ~/.kubecm
 
-# the fuck
-eval $(thefuck --alias)
-
-# gpt-comrade
-alias comrade='gpt-comrade "$@" -k="$(fc -ln -1)"'
+# new or attach tmux by workspace
+alias wtmux='tmux new -A -s ${PWD##*/}'
 
 # jevn
 export PATH="$HOME/.jenv/bin:$PATH"

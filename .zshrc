@@ -1,4 +1,5 @@
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
+export PATH=~/.cargo/bin:$PATH
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -164,6 +165,9 @@ alias h='history'
 alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && (cd ~/.hammerspoon && git pull) && brew update && brew upgrade && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 
+# kill tmux sessions which has not been activated in the past two weeks
+alias tmuxc='tmux ls -F "#{session_name}:#{session_created}" | awk -F":" "{if (systime() - \$2 > 1209600) print \$1}" |  xargs -I{} tmux kill-session -t {}'
+
 # search file ignore files which ignored by .gitignore
 export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
@@ -177,9 +181,6 @@ alias wtmux='tmux new -A -s ${PWD##*/}'
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
 export JAVA_HOME="$HOME/.jenv/versions/`jenv version-name`"
-
-# postgresql
-export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

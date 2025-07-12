@@ -1,6 +1,8 @@
 # Mr. Developer
 .idea/
 .vscode/
+.claude/
+.cursor/
 
 # Mr. Python
 *.py[co]

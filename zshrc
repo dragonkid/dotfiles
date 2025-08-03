@@ -77,7 +77,7 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/aws
   zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
-  zgen oh-my-zsh plugins/flink
+  zgen oh-my-zsh plugins/rust
   zgen oh-my-zsh plugins/kubectl
   zgen oh-my-zsh plugins/minikube
   zgen oh-my-zsh plugins/autojump
@@ -175,7 +175,7 @@ autoload -U compinit; compinit
 [[ ! -f ~/.kubecm ]] || source ~/.kubecm
 
 # new or attach tmux by workspace
-alias wtmux='tmux new -A -s ${PWD##*/}'
+alias tmux='tmux new -A -s ${PWD##*/}'
 
 # jevn
 export PATH="$HOME/.jenv/bin:$PATH"
@@ -186,4 +186,8 @@ export JAVA_HOME="$HOME/.jenv/versions/`jenv version-name`"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 

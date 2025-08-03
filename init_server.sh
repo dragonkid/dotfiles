@@ -7,7 +7,7 @@ echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/god/.bash
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 sudo apt install build-essential
-brew install gcc tmux zsh tmux-mem-cpu-load bat fzf autojump ncdu lsd keychain jenv
+brew install gcc tmux zsh tmux-mem-cpu-load bat fzf autojump ncdu lsd keychain jenv diff-so-fancy
 
 
 BASEDIR=~/.dotfiles

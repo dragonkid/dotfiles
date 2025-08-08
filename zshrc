@@ -165,6 +165,8 @@ alias h='history'
 alias up='(cd ~/.tmux && git pull) && (cd ~/.vim_runtime && git pull) && (cd ~/.dotfiles && git pull) && (cd ~/.hammerspoon && git pull) && brew update && brew upgrade && brew cask outdated | awk -F " " "{print $1}" | xargs brew cask install --force && brew cleanup'
 alias burpsuite='jenv shell oracle64-1.8.0.172 && java -jar /Applications/BurpUnlimited/BurpUnlimited.jar'
 
+# new or attach tmux by workspace
+alias tmuxa='tmux new -A -s ${PWD##*/}'
 # kill tmux sessions which has not been activated in the past two weeks
 alias tmuxc='tmux ls -F "#{session_name}:#{session_created}" | awk -F":" "{if (systime() - \$2 > 1209600) print \$1}" |  xargs -I{} tmux kill-session -t {}'
 
@@ -173,9 +175,6 @@ export FZF_CTRL_T_COMMAND="ag -g \"\""
 export FZF_CTRL_T_OPTS="--preview 'bat --color \"always\" {}'"
 autoload -U compinit; compinit
 [[ ! -f ~/.kubecm ]] || source ~/.kubecm
-
-# new or attach tmux by workspace
-alias tmux='tmux new -A -s ${PWD##*/}'
 
 # jevn
 export PATH="$HOME/.jenv/bin:$PATH"

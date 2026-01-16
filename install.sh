@@ -160,6 +160,7 @@ mkdir -p ~/.claude
 link_config "${BASEDIR}/claude/commands" ~/.claude/commands
 link_config "${BASEDIR}/claude/settings.json" ~/.claude/settings.json
 link_config "${BASEDIR}/claude/skills" ~/.claude/skills
+link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 log_success "Claude Code config linked"
 
 # config jupyter notebook

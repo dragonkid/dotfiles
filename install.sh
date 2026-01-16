@@ -1,19 +1,70 @@
 #!/bin/bash
+set -euo pipefail
+
 BASEDIR=~/.dotfiles
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
+log_error() { echo -e "${RED}[✗]${NC} $1"; }
+
+trap 'log_error "Failed at line $LINENO"' ERR
+
+# Function to safely link with backup
+link_config() {
+    local src=$1 dst=$2
+    if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+        log_info "Backing up $dst"
+        mv "$dst" "${dst}.backup.$(date +%Y%m%d)"
+    fi
+    ln -sf "$src" "$dst"
+}
+
 #apt-get update && apt-get install cmake build-essential python2.7-dev -y
-brew install zsh tmux-mem-cpu-load lsd jenv keychain bat fzf thefuck autojump ncdu tmux font-monofur-nerd-font hammerspoon
+
+# Install Homebrew if needed
+if ! command -v brew &> /dev/null; then
+    log_info "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Setup PATH for current session
+    if [ -f "/opt/homebrew/bin/brew" ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f "/usr/local/bin/brew" ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    log_success "Homebrew installed"
+else
+    log_info "Homebrew already installed"
+fi
+
+# Use Brewfile instead of hardcoded packages
+log_info "Installing packages from Brewfile..."
+brew bundle install --file="$BASEDIR/Brewfile"
+log_success "Packages installed"
 
 # config hammerspoon
-git clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
+log_info "Configuring Hammerspoon..."
+if [ -d ~/.hammerspoon ]; then
+    log_info "Hammerspoon config exists, pulling latest changes..."
+    git -C ~/.hammerspoon pull origin master || log_info "Pull failed or no changes"
+else
+    git clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
+fi
+log_success "Hammerspoon configured"
 
 # config vim
+log_info "Configuring Vim..."
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
     git clone --depth 1 https://github.com/dragonkid/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 else
-    cd ${VIM_RUNTIME} && git pull origin master
+    git -C ${VIM_RUNTIME} pull origin master
 fi
 ## add colors
 COLORS_DIR=~/.vim/colors/
@@ -26,45 +77,90 @@ if [ ! -e ${VUNDLE} ]; then
     ## install YouCompleteMe
     # cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
 else
-    cd ${VUNDLE} && git pull origin master
+    git -C ${VUNDLE} pull origin master
     vim +PluginUpdate +qall
 fi
+log_success "Vim configured"
 
 ## install zgen
-git clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen"
-# config zsh
-chsh -s `which zsh`
-## install virtualenvwrapper
-sudo pip3 install virtualenvwrapper
-## add project path to PYTHONPATH automatically
-echo 'export PYTHONPATH=${PYTHONPATH}:`pwd`' >> ~/.virtualenvs/postactivate
-## install ipdb alfter virtualenv is created. `-i` parameter can also be used.
-echo '[[ $VIRTUAL_ENV ]] && pip install ipdb' >> ~/.virtualenvs/postmkvirtualenv
-## linking zshrc
-ZSHRC=~/.zshrc
-if [ -f ${ZSHRC} ]; then
-    echo -ne "\n\033[0;31m${ZSHRC} existed. 'force' to replace it by force, 'merge' to merge them with vimdiff(f/M):\033[0m"
-    read choice
-    [ "${choice}" == "f" ] && ln -sf ${BASEDIR}/.zshrc ${ZSHRC} || vimdiff ${BASEDIR}/.zshrc ${ZSHRC}
+log_info "Installing zgen..."
+if [ -d "${HOME}/.zgen" ]; then
+    log_info "zgen already installed, pulling latest changes..."
+    git -C "${HOME}/.zgen" pull origin master || log_info "Pull failed or no changes"
 else
-    ln -sf ${BASEDIR}/.zshrc ${ZSHRC}
+    git clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen"
+fi
+log_success "zgen installed"
+
+# config zsh
+log_info "Configuring zsh..."
+if [ "$(basename "$SHELL")" != "zsh" ]; then
+    zsh_path=$(which zsh)
+    grep -q "^$zsh_path$" /etc/shells 2>/dev/null || echo "$zsh_path" | sudo tee -a /etc/shells > /dev/null
+    chsh -s "$zsh_path"
+    log_info "Shell changed to zsh (restart terminal to use)"
+else
+    log_info "Shell already set to zsh"
 fi
 
+## install virtualenvwrapper
+log_info "Installing virtualenvwrapper..."
+pip3 install --user virtualenvwrapper
+log_success "virtualenvwrapper installed"
+
+## add project path to PYTHONPATH automatically
+mkdir -p ~/.virtualenvs
+if ! grep -q "export PYTHONPATH" ~/.virtualenvs/postactivate 2>/dev/null; then
+    echo 'export PYTHONPATH=${PYTHONPATH}:`pwd`' >> ~/.virtualenvs/postactivate
+    log_info "Added PYTHONPATH to postactivate"
+fi
+
+## install ipdb alfter virtualenv is created. `-i` parameter can also be used.
+if ! grep -q "pip install ipdb" ~/.virtualenvs/postmkvirtualenv 2>/dev/null; then
+    echo '[[ $VIRTUAL_ENV ]] && pip install ipdb' >> ~/.virtualenvs/postmkvirtualenv
+    log_info "Added ipdb to postmkvirtualenv"
+fi
+## linking zshrc
+log_info "Linking zshrc..."
+link_config "${BASEDIR}/zshrc" ~/.zshrc
+log_success "zshrc linked"
+
 # config tmux
+log_info "Configuring tmux..."
 TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
     git clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## install tmux plugin manager
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    if [ ! -d ~/.tmux/plugins/tpm ]; then
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    fi
 else
-    cd ${TMUX} && git pull origin master
+    git -C ${TMUX} pull origin master
+    ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
+    ## install tmux plugin manager if not present
+    if [ ! -d ~/.tmux/plugins/tpm ]; then
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    else
+        git -C ~/.tmux/plugins/tpm pull origin master || log_info "Pull failed or no changes"
+    fi
 fi
+log_success "tmux configured"
 
 # config git
-ln -sf ${BASEDIR}/gitconfig ~/.gitconfig
-ln -sf ${BASEDIR}/gitignore ~/.gitignore
-ln -sf ${BASEDIR}/gitattributes ~/.gitattributes
+log_info "Linking git config files..."
+link_config "${BASEDIR}/gitconfig" ~/.gitconfig
+link_config "${BASEDIR}/gitignore" ~/.gitignore
+link_config "${BASEDIR}/gitattributes" ~/.gitattributes
+log_success "Git config linked"
+
+# config claude
+log_info "Linking Claude Code config..."
+mkdir -p ~/.claude
+link_config "${BASEDIR}/claude/commands" ~/.claude/commands
+link_config "${BASEDIR}/claude/settings.json" ~/.claude/settings.json
+link_config "${BASEDIR}/claude/skills" ~/.claude/skills
+log_success "Claude Code config linked"
 
 # config jupyter notebook
 # JUPYTER_CONFIG_PATH=~/.jupyter
@@ -72,4 +168,8 @@ ln -sf ${BASEDIR}/gitattributes ~/.gitattributes
 # ln -sf ${BASEDIR}/jupyter_notebook_config.py ~/${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py
 
 # disable macos press and hold
+log_info "Disabling macOS press and hold..."
 defaults write -g ApplePressAndHoldEnabled -bool false
+log_success "macOS press and hold disabled"
+
+log_success "Installation complete!"

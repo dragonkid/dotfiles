@@ -77,7 +77,6 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/aws
   zgen oh-my-zsh plugins/golang
   zgen oh-my-zsh plugins/fzf
-  zgen oh-my-zsh plugins/rust
   zgen oh-my-zsh plugins/kubectl
   zgen oh-my-zsh plugins/minikube
   zgen oh-my-zsh plugins/autojump
@@ -103,7 +102,6 @@ if ! zgen saved; then
   ### Fix slowness of pastes
   zgen load zsh-users/zsh-syntax-highlighting
   zgen load zsh-users/zsh-autosuggestions
-  #zgen load unixorn/autoupdate-zgen
   zgen load "MichaelAquilina/zsh-autoswitch-virtualenv"
 
   # generate the init script from plugins above
@@ -117,8 +115,7 @@ export AUTOSWITCH_VIRTUAL_ENV_DIR=$WORKON_HOME
 export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
 # User configuration
-[ -z $SSH_AGENT_PID ] || [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --agents ssh --eval ~/.ssh/id_rsa)
-#export SSH_AUTH_SOCK=/Users/$USER/.bitwarden-ssh-agent.sock
+[ -z $SSH_AGENT_PID ] || [ -z $SSH_AUTH_SOCK  ] && eval $(keychain -Q -q --eval ~/.ssh/id_rsa)
 
 # Golang speed up
 export GOPROXY=https://goproxy.cn

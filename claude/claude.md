@@ -4,6 +4,7 @@
 - Apply best practices for all code and recommendations
 - Write minimal solutions: implement only what's explicitly requested
 - Prioritize simplicity over abstraction
+- After code changes, check if related files need updates: README, install scripts, Makefile
 
 ## Git
 - Commit only when explicitly requested

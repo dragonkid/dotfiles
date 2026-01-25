@@ -13,6 +13,27 @@ log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
 log_error() { echo -e "${RED}[✗]${NC} $1"; }
 
+# Retry git operations with exponential backoff
+git_with_retry() {
+    local max_attempts=5
+    local attempt=1
+    local delay=2
+
+    while [ $attempt -le $max_attempts ]; do
+        if git "$@"; then
+            return 0
+        fi
+        if [ $attempt -lt $max_attempts ]; then
+            log_info "Git operation failed (attempt $attempt/$max_attempts), retrying in ${delay}s..."
+            sleep $delay
+            delay=$((delay * 2))
+        fi
+        attempt=$((attempt + 1))
+    done
+    log_error "Git operation failed after $max_attempts attempts"
+    return 1
+}
+
 trap 'log_error "Failed at line $LINENO"' ERR
 
 # Function to safely link with backup
@@ -71,7 +92,7 @@ if [ -d ~/.zgen ]; then
     log_info "zgen already installed, pulling latest changes..."
     git -C ~/.zgen pull origin master || log_info "Pull failed or no changes"
 else
-    git clone https://github.com/tarjoilija/zgen.git ~/.zgen
+    git_with_retry clone https://github.com/tarjoilija/zgen.git ~/.zgen
 fi
 log_success "zgen installed"
 
@@ -86,11 +107,6 @@ else
     log_info "Shell already set to zsh"
 fi
 
-## install virtualenvwrapper
-log_info "Installing virtualenvwrapper..."
-pip3 install --user virtualenvwrapper --break-system-packages
-log_success "virtualenvwrapper installed"
-
 ## linking zshrc
 log_info "Linking zshrc..."
 link_config "${BASEDIR}/zshrc" ~/.zshrc
@@ -99,18 +115,18 @@ log_success "zshrc linked"
 # tmux
 log_info "Configuring tmux..."
 if [ ! -e ~/.tmux ]; then
-    git clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
+    git_with_retry clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## install tmux plugin manager
     if [ ! -d ~/.tmux/plugins/tpm ]; then
-        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        git_with_retry clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     fi
 else
     git -C ~/.tmux pull origin master
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## install tmux plugin manager if not present
     if [ ! -d ~/.tmux/plugins/tpm ]; then
-        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        git_with_retry clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     else
         git -C ~/.tmux/plugins/tpm pull origin master || log_info "Pull failed or no changes"
     fi

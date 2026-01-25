@@ -13,6 +13,27 @@ log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
 log_error() { echo -e "${RED}[✗]${NC} $1"; }
 
+# Retry git operations with exponential backoff
+git_with_retry() {
+    local max_attempts=5
+    local attempt=1
+    local delay=2
+
+    while [ $attempt -le $max_attempts ]; do
+        if git "$@"; then
+            return 0
+        fi
+        if [ $attempt -lt $max_attempts ]; then
+            log_info "Git operation failed (attempt $attempt/$max_attempts), retrying in ${delay}s..."
+            sleep $delay
+            delay=$((delay * 2))
+        fi
+        attempt=$((attempt + 1))
+    done
+    log_error "Git operation failed after $max_attempts attempts"
+    return 1
+}
+
 trap 'log_error "Failed at line $LINENO"' ERR
 
 # Function to safely link with backup
@@ -53,7 +74,7 @@ if [ -d ~/.hammerspoon ]; then
     log_info "Hammerspoon config exists, pulling latest changes..."
     git -C ~/.hammerspoon pull origin master || log_info "Pull failed or no changes"
 else
-    git clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
+    git_with_retry clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
 fi
 log_success "Hammerspoon configured"
 
@@ -61,7 +82,7 @@ log_success "Hammerspoon configured"
 log_info "Configuring Vim..."
 VIM_RUNTIME=~/.vim_runtime
 if [ ! -e ${VIM_RUNTIME} ]; then
-    git clone --depth 1 https://github.com/dragonkid/vimrc.git ~/.vim_runtime
+    git_with_retry clone --depth 1 https://github.com/dragonkid/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
 else
     git -C ${VIM_RUNTIME} pull origin master
@@ -72,10 +93,10 @@ mkdir -p ${COLORS_DIR} && cp ${BASEDIR}/colors/* ${COLORS_DIR}
 ## install Vundle & plugins
 VUNDLE=~/.vim/bundle/Vundle.vim
 if [ ! -e ${VUNDLE} ]; then
-    git clone --depth 1 https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    git_with_retry clone --depth 1 https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     vim +PluginInstall +qall
     ## install YouCompleteMe
-    # cd ~/.vim/bundle/YouCompleteMe/ && ./install.py --clang-completer --gocode-completer --tern-completer
+    cd ~/.vim/bundle/YouCompleteMe/ && python3 install.py --clangd-completer
 else
     git -C ${VUNDLE} pull origin master
     vim +PluginUpdate +qall
@@ -88,7 +109,7 @@ if [ -d "${HOME}/.zgen" ]; then
     log_info "zgen already installed, pulling latest changes..."
     git -C "${HOME}/.zgen" pull origin master || log_info "Pull failed or no changes"
 else
-    git clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen"
+    git_with_retry clone https://github.com/tarjoilija/zgen.git "${HOME}/.zgen"
 fi
 log_success "zgen installed"
 
@@ -102,11 +123,6 @@ if [ "$(basename "$SHELL")" != "zsh" ]; then
 else
     log_info "Shell already set to zsh"
 fi
-
-## install virtualenvwrapper
-log_info "Installing virtualenvwrapper..."
-pip3 install --user virtualenvwrapper
-log_success "virtualenvwrapper installed"
 
 ## add project path to PYTHONPATH automatically
 mkdir -p ~/.virtualenvs
@@ -129,18 +145,18 @@ log_success "zshrc linked"
 log_info "Configuring tmux..."
 TMUX=~/.tmux
 if [ ! -e ${TMUX} ]; then
-    git clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
+    git_with_retry clone --depth 1 https://github.com/dragonkid/tmux-config.git ~/.tmux
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## install tmux plugin manager
     if [ ! -d ~/.tmux/plugins/tpm ]; then
-        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        git_with_retry clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     fi
 else
     git -C ${TMUX} pull origin master
     ln -sf ~/.tmux/.tmux.conf ~/.tmux.conf
     ## install tmux plugin manager if not present
     if [ ! -d ~/.tmux/plugins/tpm ]; then
-        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        git_with_retry clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     else
         git -C ~/.tmux/plugins/tpm pull origin master || log_info "Pull failed or no changes"
     fi

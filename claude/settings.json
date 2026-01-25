@@ -1,13 +1,15 @@
 {
+  "extraKnownMarketplaces": {
+    "everything-claude-code": {
+      "source": {
+        "source": "github",
+        "repo": "affaan-m/everything-claude-code"
+      }
+    }
+  },
   "enabledPlugins": {
-    "context7@claude-plugins-official": true,
-    "playwright@claude-plugins-official": true,
-    "pyright-lsp@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": true,
-    "jdtls-lsp@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true
+    "everything-claude-code@everything-claude-code": true
   },
   "autoUpdatesChannel": "latest",
   "mcpServers": {

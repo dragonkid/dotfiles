@@ -1,15 +1,38 @@
 {
+  "enabledPlugins": {
+    "commit-commands@claude-plugins-official": true,
+    "everything-claude-code@everything-claude-code": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "mgrep@Mixedbread-Grep": true
+  },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
       "source": {
         "source": "github",
         "repo": "affaan-m/everything-claude-code"
       }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    "Mixedbread-Grep": {
+      "source": {
+        "source": "github",
+        "repo": "mixedbread-ai/mgrep"
+      }
     }
-  },
-  "enabledPlugins": {
-    "commit-commands@claude-plugins-official": true,
-    "everything-claude-code@everything-claude-code": true
   },
   "autoUpdatesChannel": "latest",
   "mcpServers": {

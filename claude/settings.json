@@ -12,7 +12,8 @@
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
-    "mgrep@Mixedbread-Grep": true
+    "mgrep@Mixedbread-Grep": true,
+    "superpowers@superpowers-marketplace": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -31,6 +32,12 @@
       "source": {
         "source": "github",
         "repo": "mixedbread-ai/mgrep"
+      }
+    },
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
       }
     }
   },

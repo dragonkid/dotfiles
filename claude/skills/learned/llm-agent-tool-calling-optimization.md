@@ -51,12 +51,45 @@ Analyze from API response:
 |----------|------------|
 | Predefined search queries | Reduces flexibility but ensures coverage of specific topics. Good for well-defined domains. |
 | Add year to search terms | May miss historical events, but helps focus on recent information when recency matters. |
-| Limit search count | Most SDKs don't support this, but if available, useful for cost control. |
+| Limit search count | See "Explicit Tool Call Budgeting" section below. |
 
 Choose based on your specific requirements:
 - **Predefined queries**: When you know exactly what information you need
 - **Year in search terms**: When only recent events matter
 - **Search count limits**: When cost/latency is critical and some information loss is acceptable
+
+### Explicit Tool Call Budgeting
+
+When LLMs have access to multiple search tools, they tend to over-search. Add explicit numeric limits in prompts:
+
+```
+## Search Constraints (CRITICAL)
+- Maximum N total searches: up to X tool_a + up to Y tool_b
+- Plan ALL search queries upfront, then execute them in ONE parallel batch
+- Do NOT add follow-up searches based on initial results
+- Use OR operators to combine multiple intents into single queries
+```
+
+**Budget allocation strategy:**
+- Allocate more queries to higher-value tools (e.g., x_search for crypto projects)
+- Example: `4 x_search + 3 web_search = 7 total` (reduced from ~10 uncontrolled)
+
+**Query consolidation:**
+- Group related intents using OR operators
+- Before: 4 separate searches for "launch", "migration", "listing", "partnership"
+- After: 1 search for "TOKEN (launch OR migration OR listing OR partnership)"
+
+**Structured query allocation template:**
+```
+1. **tool_a** (up to X queries):
+   - Query 1: [Primary intent]
+   - Query 2: [Secondary intent]
+   ...
+
+2. **tool_b** (up to Y queries):
+   - Query 1: [Primary intent]
+   ...
+```
 
 ## When to Use
 

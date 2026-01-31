@@ -180,6 +180,14 @@ if ! command -v mgrep &> /dev/null; then
 else
     log_info "mgrep already installed"
 fi
+# Install typescript-language-server (dependency for Claude Code)
+if ! command -v typescript-language-server &> /dev/null; then
+    log_info "Installing typescript-language-server..."
+    npm install -g typescript-language-server
+    log_success "typescript-language-server installed"
+else
+    log_info "typescript-language-server already installed"
+fi
 # Link Claude Code config files
 log_info "Linking Claude Code config..."
 mkdir -p ~/.claude

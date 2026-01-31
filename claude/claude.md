@@ -19,10 +19,11 @@
 - Exclude secrets from commits (.env, credentials, API keys)
 
 ## Tool Selection
-1. File operations: Read, Edit, Grep, Glob (not bash)
-2. Documentation lookup: context7 MCP server
-3. Parallelize independent operations
-4. Read files before editing
+1. File operations: Read, Edit, mgrep, Glob (not bash)
+2. Web search: mgrep --web preferred, WebSearch as fallback
+3. Documentation lookup: context7 MCP server
+4. Parallelize independent operations
+5. Read files before editing
 
 ## Response Style
 - Concise: omit filler and unnecessary explanation

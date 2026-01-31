@@ -171,18 +171,23 @@ link_config "${BASEDIR}/gitattributes" ~/.gitattributes
 log_success "Git config linked"
 
 # config claude
+log_info "Setting up Claude Code..."
+# Install mgrep (semantic search tool for Claude Code)
+if ! command -v mgrep &> /dev/null; then
+    log_info "Installing mgrep..."
+    npm install -g @mixedbread/mgrep
+    log_success "mgrep installed"
+else
+    log_info "mgrep already installed"
+fi
+# Link Claude Code config files
 log_info "Linking Claude Code config..."
 mkdir -p ~/.claude
 link_config "${BASEDIR}/claude/commands" ~/.claude/commands
 link_config "${BASEDIR}/claude/settings.json" ~/.claude/settings.json
 link_config "${BASEDIR}/claude/skills" ~/.claude/skills
 link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
-log_success "Claude Code config linked"
-
-# config jupyter notebook
-# JUPYTER_CONFIG_PATH=~/.jupyter
-# mkdir -p ${JUPYTER_CONFIG_PATH}
-# ln -sf ${BASEDIR}/jupyter_notebook_config.py ~/${JUPYTER_CONFIG_PATH}/jupyter_notebook_config.py
+log_success "Claude Code configured"
 
 # disable macos press and hold
 log_info "Disabling macOS press and hold..."

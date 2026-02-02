@@ -2,6 +2,36 @@
 set -euo pipefail
 
 BASEDIR=~/.dotfiles
+INSTALL_BREW=false
+
+show_help() {
+    cat << EOF
+Usage: $0 [OPTIONS]
+
+Options:
+    --brew      Install Homebrew and packages from Brewfile (default: skip)
+    -h, --help  Show this help message
+
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --brew)
+            INSTALL_BREW=true
+            shift
+            ;;
+        -h|--help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            show_help
+            exit 1
+            ;;
+    esac
+done
 
 # Colors
 RED='\033[0;31m'
@@ -49,24 +79,26 @@ link_config() {
 #apt-get update && apt-get install cmake build-essential python2.7-dev -y
 
 # Install Homebrew if needed
-if ! command -v brew &> /dev/null; then
-    log_info "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Setup PATH for current session
-    if [ -f "/opt/homebrew/bin/brew" ]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -f "/usr/local/bin/brew" ]; then
-        eval "$(/usr/local/bin/brew shellenv)"
+if [ "$INSTALL_BREW" = true ]; then
+    if ! command -v brew &> /dev/null; then
+        log_info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        if [ -f "/opt/homebrew/bin/brew" ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [ -f "/usr/local/bin/brew" ]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+        fi
+        log_success "Homebrew installed"
+    else
+        log_info "Homebrew already installed"
     fi
-    log_success "Homebrew installed"
-else
-    log_info "Homebrew already installed"
-fi
 
-# Use Brewfile instead of hardcoded packages
-log_info "Installing packages from Brewfile..."
-brew bundle install --file="$BASEDIR/Brewfile"
-log_success "Packages installed"
+    log_info "Installing packages from Brewfile..."
+    brew bundle install --file="$BASEDIR/Brewfile"
+    log_success "Packages installed"
+else
+    log_info "Skipping Homebrew installation (use --brew to install)"
+fi
 
 # config hammerspoon
 log_info "Configuring Hammerspoon..."

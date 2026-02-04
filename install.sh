@@ -3,14 +3,16 @@ set -euo pipefail
 
 BASEDIR=~/.dotfiles
 INSTALL_BREW=false
+SETUP_HAMMERSPOON=false
 
 show_help() {
     cat << EOF
 Usage: $0 [OPTIONS]
 
 Options:
-    --brew      Install Homebrew and packages from Brewfile (default: skip)
-    -h, --help  Show this help message
+    --brew         Install Homebrew and packages from Brewfile (default: skip)
+    --hammerspoon  Setup Hammerspoon config (default: skip)
+    -h, --help     Show this help message
 
 EOF
 }
@@ -19,6 +21,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --brew)
             INSTALL_BREW=true
+            shift
+            ;;
+        --hammerspoon)
+            SETUP_HAMMERSPOON=true
             shift
             ;;
         -h|--help)
@@ -99,14 +105,18 @@ else
 fi
 
 # config hammerspoon
-log_info "Configuring Hammerspoon..."
-if [ -d ~/.hammerspoon ]; then
-    log_info "Hammerspoon config exists, pulling latest changes..."
-    git -C ~/.hammerspoon pull origin master || log_info "Pull failed or no changes"
+if [ "$SETUP_HAMMERSPOON" = true ]; then
+    log_info "Configuring Hammerspoon..."
+    if [ -d ~/.hammerspoon ]; then
+        log_info "Hammerspoon config exists, pulling latest changes..."
+        git -C ~/.hammerspoon pull origin master || log_info "Pull failed or no changes"
+    else
+        git_with_retry clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
+    fi
+    log_success "Hammerspoon configured"
 else
-    git_with_retry clone https://github.com/dragonkid/awesome-hammerspoon.git ~/.hammerspoon
+    log_info "Skipping Hammerspoon setup (use --hammerspoon to enable)"
 fi
-log_success "Hammerspoon configured"
 
 # config vim
 log_info "Configuring Vim..."

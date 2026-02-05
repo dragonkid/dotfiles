@@ -1,9 +1,21 @@
+---
+name: dto-factory-method
+description: Use when consuming external APIs with non-standard field names, need default value handling for missing fields, or want to decouple API response structure from domain model with clean conversion patterns.
+---
+
 # DTO with Factory Method Pattern
 
-## Problem
-External API responses have inconsistent field names, nested structures, and optional fields. Need clean conversion to domain models with default handling.
+## Overview
+External API responses have inconsistent field names, nested structures, and optional fields. This pattern provides clean conversion to domain models with default handling using Pydantic models with factory methods.
 
-## Solution
+## When to Use
+- Consuming external APIs with non-standard field names
+- Need default value handling for missing/optional fields
+- Want to decouple API response structure from domain model
+- Need multiple output formats (prompt text, JSON, display strings)
+
+## Core Pattern
+
 Use Pydantic models with `from_api_response` class method for conversion and optional `to_*` methods for output formatting.
 
 ```python
@@ -47,8 +59,7 @@ token = TokenInfo.from_api_response(api_response)
 prompt_text = "\n".join(token.to_prompt_lines(["symbol", "price"]))
 ```
 
-## When to Use
-- Consuming external APIs with non-standard field names
-- Need default value handling for missing/optional fields
-- Want to decouple API response structure from domain model
-- Need multiple output formats (prompt text, JSON, display strings)
+## Common Mistakes
+- Not handling nested response structures (check `response.get("data", response)`)
+- Forgetting to convert types (e.g., `float(data.get("p", 0))`)
+- Over-complicating with unnecessary transformations

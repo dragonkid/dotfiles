@@ -1,10 +1,20 @@
+---
+name: llm-parse-retry
+description: Use when LLM agents expect structured JSON output but responses are non-deterministic with potential malformed JSON or unexpected formats that need application-level retry logic with graceful degradation.
+---
+
 # LLM Response Parsing with Application-Level Retry
 
-## Problem
-LLM responses are non-deterministic and may return malformed JSON or unexpected formats. Network-level retries (tenacity) don't help when the API succeeds but the content is unparseable.
+## Overview
+LLM responses are non-deterministic and may return malformed JSON or unexpected formats. Network-level retries (tenacity) don't help when the API succeeds but the content is unparseable. Use tenacity's `retry_if_result` to retry when parse returns None.
 
-## Solution
-Use tenacity's `retry_if_result` to retry when parse returns None, with exponential backoff.
+## When to Use
+- LLM agents that expect structured JSON output
+- Need resilience against LLM response variability
+- Want graceful degradation rather than hard failures
+- Combine with network-level retries for comprehensive error handling
+
+## Core Pattern
 
 ```python
 import structlog
@@ -60,8 +70,7 @@ class LLMAgent:
         return json_match.group(0) if json_match else None
 ```
 
-## When to Use
-- LLM agents that expect structured JSON output
-- Need resilience against LLM response variability
-- Want graceful degradation rather than hard failures
-- Combine with network-level retries for comprehensive error handling
+## Common Mistakes
+- Only retrying on network errors but not parse failures
+- Not providing graceful fallback when all retries fail
+- Forgetting to handle both code block and bare JSON formats

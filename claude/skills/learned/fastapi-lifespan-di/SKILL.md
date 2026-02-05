@@ -1,9 +1,21 @@
+---
+name: fastapi-lifespan-di
+description: Use when building FastAPI applications with async resources like HTTP clients or database connections that need proper lifecycle management with type-safe dependency injection to route handlers.
+---
+
 # FastAPI Lifespan + Dependency Injection
 
-## Problem
-Need to manage async resource lifecycle (HTTP clients, database connections) with clean initialization and shutdown, while providing type-safe dependency injection to route handlers.
+## Overview
+Manage async resource lifecycle (HTTP clients, database connections) with clean initialization and shutdown, while providing type-safe dependency injection to route handlers using FastAPI's lifespan context manager.
 
-## Solution
+## When to Use
+- FastAPI applications with async resources (httpx clients, aiohttp sessions)
+- Need guaranteed cleanup on shutdown
+- Want type-safe dependency injection without complex DI frameworks
+- Resources shared across multiple route handlers
+
+## Core Pattern
+
 Use FastAPI's lifespan context manager for resource lifecycle, combined with getter functions for dependency injection.
 
 ```python
@@ -44,8 +56,7 @@ async def get_data(
     return await db.fetch_data()
 ```
 
-## When to Use
-- FastAPI applications with async resources (httpx clients, aiohttp sessions)
-- Need guaranteed cleanup on shutdown
-- Want type-safe dependency injection without complex DI frameworks
-- Resources shared across multiple route handlers
+## Common Mistakes
+- Not checking for None in getter functions (service not initialized)
+- Forgetting to cleanup resources in lifespan shutdown
+- Using complex DI frameworks when simple Depends suffices

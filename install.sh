@@ -235,6 +235,8 @@ link_config "${BASEDIR}/claude/commands" ~/.claude/commands
 link_config "${BASEDIR}/claude/settings.json" ~/.claude/settings.json
 link_config "${BASEDIR}/claude/skills" ~/.claude/skills
 link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
+link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
+link_config "${BASEDIR}/claude/hooks.json" ~/.claude/hooks.json
 log_success "Claude Code configured"
 
 # disable macos press and hold

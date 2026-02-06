@@ -208,6 +208,11 @@ log_info "Linking git config files..."
 link_config "${BASEDIR}/gitconfig" ~/.gitconfig
 link_config "${BASEDIR}/gitignore" ~/.gitignore
 link_config "${BASEDIR}/gitattributes" ~/.gitattributes
+# create empty gitconfig.local for machine-specific settings
+if [ ! -f ~/.gitconfig.local ]; then
+    echo "# Machine-specific git settings (user email, credentials, etc.)" > ~/.gitconfig.local
+    log_info "Created ~/.gitconfig.local"
+fi
 log_success "Git config linked"
 
 # config claude

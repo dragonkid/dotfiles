@@ -1,5 +1,4 @@
 {
-  "model": "bedrock-claude-4-6-opus",
   "enabledPlugins": {
     "commit-commands@claude-plugins-official": true,
     "everything-claude-code@everything-claude-code": true,
@@ -51,5 +50,6 @@
         "--extension"
       ]
     }
-  }
+  },
+  "model": "opus"
 }

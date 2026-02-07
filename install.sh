@@ -244,6 +244,13 @@ link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
 link_config "${BASEDIR}/claude/hooks.json" ~/.claude/hooks.json
 log_success "Claude Code configured"
 
+# config openclaw
+log_info "Setting up OpenClaw..."
+mkdir -p ~/.openclaw
+link_config "${BASEDIR}/openclaw/workspace" ~/.openclaw/workspace
+link_config "${BASEDIR}/openclaw/skills" ~/.openclaw/skills
+log_success "OpenClaw configured"
+
 # disable macos press and hold
 log_info "Disabling macOS press and hold..."
 defaults write -g ApplePressAndHoldEnabled -bool false

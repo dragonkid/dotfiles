@@ -9,6 +9,11 @@ user-invocable: true
 
 Quick TODO list management via Telegram bot commands.
 
+## 执行规则
+
+1. **必须展示结果** - 执行 `todo.sh` 后，必须将输出结果直接展示给用户，绝不能用 `NO_REPLY` 吞掉
+2. **这是用户命令** - 当系统提示 "Use the todo skill for this request"，说明用户发了 `/todo` 相关命令，直接执行对应操作并展示结果
+
 ## Work Rules
 
 1. **TODO 文档位置：** `~/.openclaw/workspace/TODO.md` （本地 Markdown 文件）

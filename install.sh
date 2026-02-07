@@ -4,6 +4,7 @@ set -euo pipefail
 BASEDIR=~/.dotfiles
 INSTALL_BREW=false
 SETUP_HAMMERSPOON=false
+SETUP_OPENCLAW=false
 
 show_help() {
     cat << EOF
@@ -12,6 +13,7 @@ Usage: $0 [OPTIONS]
 Options:
     --brew         Install Homebrew and packages from Brewfile (default: skip)
     --hammerspoon  Setup Hammerspoon config (default: skip)
+    --openclaw     Setup OpenClaw workspace and skills (default: skip)
     -h, --help     Show this help message
 
 EOF
@@ -25,6 +27,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --hammerspoon)
             SETUP_HAMMERSPOON=true
+            shift
+            ;;
+        --openclaw)
+            SETUP_OPENCLAW=true
             shift
             ;;
         -h|--help)
@@ -245,11 +251,22 @@ link_config "${BASEDIR}/claude/hooks.json" ~/.claude/hooks.json
 log_success "Claude Code configured"
 
 # config openclaw
-log_info "Setting up OpenClaw..."
-mkdir -p ~/.openclaw
-link_config "${BASEDIR}/openclaw/workspace" ~/.openclaw/workspace
-link_config "${BASEDIR}/openclaw/skills" ~/.openclaw/skills
-log_success "OpenClaw configured"
+if [ "$SETUP_OPENCLAW" = true ]; then
+    log_info "Setting up OpenClaw..."
+    mkdir -p ~/.openclaw
+    if [ -L ~/.openclaw/workspace ]; then
+        rm ~/.openclaw/workspace
+    fi
+    mkdir -p ~/.openclaw/workspace
+    for f in "${BASEDIR}"/openclaw/workspace/*.md; do
+        link_config "$f" ~/.openclaw/workspace/"$(basename "$f")"
+    done
+    link_config "${BASEDIR}/openclaw/workspace/.gitignore" ~/.openclaw/workspace/.gitignore
+    link_config "${BASEDIR}/openclaw/skills" ~/.openclaw/skills
+    log_success "OpenClaw configured"
+else
+    log_info "Skipping OpenClaw setup (use --openclaw to enable)"
+fi
 
 # disable macos press and hold
 log_info "Disabling macOS press and hold..."

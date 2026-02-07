@@ -1,6 +1,6 @@
 ---
 name: todo
-description: Manage TODO list via Telegram commands. Use when user wants to add, list, complete, or remove TODO items. Supports /todo add, /todo list, /todo done, /todo remove.
+description: Use when user wants to manage TODO items - adding tasks, listing pending items, marking done, removing, or searching. Triggers on /todo command or TODO-related requests.
 command-dispatch: tool
 user-invocable: true
 ---
@@ -77,39 +77,12 @@ Marks TODO(s) as complete. Supports:
 
 Removes TODO(s) entirely. Supports same matching as `done`.
 
-## Implementation
-
-The skill uses `scripts/todo.sh` for all operations:
-- **Fast path:** List/search/done/remove execute directly (no AI)
-- **Smart matching:** Fuzzy text search with disambiguation
-- **Batch operations:** Comma-separated numbers for bulk actions
-- **Abbreviations:** `l`/`d`/`r`/`s` for common commands
-
-AI is only invoked for auto-research when adding items with URLs or tech keywords.
-
-## File Location
-
-`~/.openclaw/workspace/TODO.md`
-
 ## Features
 
 ### Smart Matching
 - **By number:** `/todo done 3` - exact line
 - **By text:** `/todo done 探索` - fuzzy search
 - **Disambiguation:** Shows matches if multiple items found
-
-### Batch Operations
-```
-/todo done 1,3,5    # Complete multiple
-/todo rm 2,4,6      # Remove multiple
-```
-
-### Abbreviations
-All commands support short forms:
-- `l` → list
-- `d` → done
-- `r` / `rm` / `del` → remove
-- `s` → search
 
 ### Auto-Research
 When adding a TODO, auto-research if:

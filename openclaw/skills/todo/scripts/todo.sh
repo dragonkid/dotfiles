@@ -10,19 +10,44 @@ if [ ! -f "$TODO_FILE" ]; then
     exit 1
 fi
 
-# Helper: Find line numbers by fuzzy text match (case-insensitive)
-find_todo_lines() {
-    local search="$1"
-    grep -in "^- \[ \].*$search" "$TODO_FILE" | cut -d: -f1
+# Helper: Get all pending TODO file line numbers (ordered)
+get_todo_file_lines() {
+    grep -n "^- \[ \]" "$TODO_FILE" | cut -d: -f1
 }
 
-# Helper: Get TODO text by line number
+# Helper: Map display index (1-based) to file line number
+index_to_line() {
+    local idx="$1"
+    local lines=($(get_todo_file_lines))
+    local arr_idx=$((idx - 1))
+    if [ "$arr_idx" -ge 0 ] && [ "$arr_idx" -lt "${#lines[@]}" ]; then
+        echo "${lines[$arr_idx]}"
+    else
+        echo ""
+    fi
+}
+
+# Helper: Find display indices by fuzzy text match (case-insensitive)
+find_todo_indices() {
+    local search="$1"
+    local lines=($(get_todo_file_lines))
+    local results=()
+    for i in "${!lines[@]}"; do
+        local text=$(sed -n "${lines[$i]}p" "$TODO_FILE")
+        if echo "$text" | grep -iq "$search"; then
+            results+=($((i + 1)))
+        fi
+    done
+    echo "${results[@]}"
+}
+
+# Helper: Get TODO text by file line number
 get_todo_text() {
     local line_num="$1"
     sed -n "${line_num}p" "$TODO_FILE" | sed 's/^- \[ \] //'
 }
 
-# Helper: Mark multiple lines as done
+# Helper: Mark multiple file lines as done
 mark_done_multiple() {
     local line_nums=("$@")
     local temp_file="${TODO_FILE}.tmp"
@@ -35,7 +60,7 @@ mark_done_multiple() {
     rm -f "${TODO_FILE}.bak" "${temp_file}.bak"
 }
 
-# Helper: Remove multiple lines
+# Helper: Remove multiple file lines
 remove_multiple() {
     local line_nums=("$@")
     local temp_file="${TODO_FILE}.tmp"
@@ -100,19 +125,21 @@ case "$ACTION" in
         ;;
     
     list)
-        # List all pending TODOs with numbers
+        # List all pending TODOs with sequential numbers
         echo "📋 **TODO 列表**"
         echo ""
+        idx=0
         grep -n "^- \[ \]" "$TODO_FILE" | while IFS=: read -r num line; do
+            idx=$((idx + 1))
             text=$(echo "$line" | sed 's/^- \[ \] //')
             # Extract URL from Markdown links [text](url) and show both
             if [[ "$text" =~ \[([^\]]+)\]\(([^\)]+)\) ]]; then
                 title="${BASH_REMATCH[1]}"
                 url="${BASH_REMATCH[2]}"
-                echo "$num. $title"
+                echo "$idx. $title"
                 echo "   🔗 $url"
             else
-                echo "$num. $text"
+                echo "$idx. $text"
             fi
         done
         ;;
@@ -127,14 +154,18 @@ case "$ACTION" in
         
         echo "🔍 搜索结果："
         echo ""
-        grep -in "^- \[ \].*$KEYWORD" "$TODO_FILE" | while IFS=: read -r num line; do
-            text=$(echo "$line" | sed 's/^- \[ \] //')
-            echo "$num. $text"
+        idx=0
+        grep -n "^- \[ \]" "$TODO_FILE" | while IFS=: read -r num line; do
+            idx=$((idx + 1))
+            if echo "$line" | grep -iq "$KEYWORD"; then
+                text=$(echo "$line" | sed 's/^- \[ \] //')
+                echo "$idx. $text"
+            fi
         done
         ;;
     
     done)
-        # Mark TODO(s) as complete - supports: line number, range, or fuzzy text
+        # Mark TODO(s) as complete - supports: index number, range, or fuzzy text
         TARGET="$*"
         if [ -z "$TARGET" ]; then
             echo "❌ Usage: /todo done <number|range|text>"
@@ -147,45 +178,62 @@ case "$ACTION" in
         
         # Check if it's a comma-separated list of numbers
         if [[ "$TARGET" =~ ^[0-9,]+$ ]]; then
-            IFS=',' read -ra NUMS <<< "$TARGET"
-            mark_done_multiple "${NUMS[@]}"
-            echo "✅ Marked ${#NUMS[@]} item(s) as done"
+            IFS=',' read -ra INDICES <<< "$TARGET"
+            FILE_LINES=()
+            for idx in "${INDICES[@]}"; do
+                fl=$(index_to_line "$idx")
+                if [ -n "$fl" ]; then
+                    FILE_LINES+=("$fl")
+                fi
+            done
+            if [ ${#FILE_LINES[@]} -eq 0 ]; then
+                echo "❌ No valid items found"
+                exit 1
+            fi
+            mark_done_multiple "${FILE_LINES[@]}"
+            echo "✅ Marked ${#FILE_LINES[@]} item(s) as done"
         # Check if it's a single number
         elif [[ "$TARGET" =~ ^[0-9]+$ ]]; then
-            LINE_NUM="$TARGET"
+            LINE_NUM=$(index_to_line "$TARGET")
+            if [ -z "$LINE_NUM" ]; then
+                echo "❌ Item #$TARGET not found"
+                exit 1
+            fi
             TODO_TEXT=$(get_todo_text "$LINE_NUM")
             sed -i.bak "${LINE_NUM}s/^- \[ \]/- [x]/" "$TODO_FILE"
             rm -f "${TODO_FILE}.bak"
             echo "✅ Marked as done: $TODO_TEXT"
         # Otherwise, fuzzy text search
         else
-            FOUND_LINES=($(find_todo_lines "$TARGET"))
+            FOUND_INDICES=($(find_todo_indices "$TARGET"))
             
-            if [ ${#FOUND_LINES[@]} -eq 0 ]; then
+            if [ ${#FOUND_INDICES[@]} -eq 0 ]; then
                 echo "❌ No matching TODO found for: $TARGET"
                 exit 1
-            elif [ ${#FOUND_LINES[@]} -eq 1 ]; then
-                LINE_NUM="${FOUND_LINES[0]}"
+            elif [ ${#FOUND_INDICES[@]} -eq 1 ]; then
+                IDX="${FOUND_INDICES[0]}"
+                LINE_NUM=$(index_to_line "$IDX")
                 TODO_TEXT=$(get_todo_text "$LINE_NUM")
                 sed -i.bak "${LINE_NUM}s/^- \[ \]/- [x]/" "$TODO_FILE"
                 rm -f "${TODO_FILE}.bak"
                 echo "✅ Marked as done: $TODO_TEXT"
             else
-                echo "🔍 Found ${#FOUND_LINES[@]} matches:"
+                echo "🔍 Found ${#FOUND_INDICES[@]} matches:"
                 echo ""
-                for line in "${FOUND_LINES[@]}"; do
-                    text=$(get_todo_text "$line")
-                    echo "$line. $text"
+                for idx in "${FOUND_INDICES[@]}"; do
+                    fl=$(index_to_line "$idx")
+                    text=$(get_todo_text "$fl")
+                    echo "$idx. $text"
                 done
                 echo ""
-                echo "Please specify line number or be more specific"
+                echo "Please specify item number or be more specific"
                 exit 1
             fi
         fi
         ;;
     
     remove)
-        # Remove TODO(s) - supports: line number, range, or fuzzy text
+        # Remove TODO(s) - supports: index number, range, or fuzzy text
         TARGET="$*"
         if [ -z "$TARGET" ]; then
             echo "❌ Usage: /todo remove <number|range|text>"
@@ -198,38 +246,55 @@ case "$ACTION" in
         
         # Check if it's a comma-separated list of numbers
         if [[ "$TARGET" =~ ^[0-9,]+$ ]]; then
-            IFS=',' read -ra NUMS <<< "$TARGET"
-            remove_multiple "${NUMS[@]}"
-            echo "✅ Removed ${#NUMS[@]} item(s)"
+            IFS=',' read -ra INDICES <<< "$TARGET"
+            FILE_LINES=()
+            for idx in "${INDICES[@]}"; do
+                fl=$(index_to_line "$idx")
+                if [ -n "$fl" ]; then
+                    FILE_LINES+=("$fl")
+                fi
+            done
+            if [ ${#FILE_LINES[@]} -eq 0 ]; then
+                echo "❌ No valid items found"
+                exit 1
+            fi
+            remove_multiple "${FILE_LINES[@]}"
+            echo "✅ Removed ${#FILE_LINES[@]} item(s)"
         # Check if it's a single number
         elif [[ "$TARGET" =~ ^[0-9]+$ ]]; then
-            LINE_NUM="$TARGET"
+            LINE_NUM=$(index_to_line "$TARGET")
+            if [ -z "$LINE_NUM" ]; then
+                echo "❌ Item #$TARGET not found"
+                exit 1
+            fi
             TODO_TEXT=$(get_todo_text "$LINE_NUM")
             sed -i.bak "${LINE_NUM}d" "$TODO_FILE"
             rm -f "${TODO_FILE}.bak"
             echo "✅ Removed: $TODO_TEXT"
         # Otherwise, fuzzy text search
         else
-            FOUND_LINES=($(find_todo_lines "$TARGET"))
+            FOUND_INDICES=($(find_todo_indices "$TARGET"))
             
-            if [ ${#FOUND_LINES[@]} -eq 0 ]; then
+            if [ ${#FOUND_INDICES[@]} -eq 0 ]; then
                 echo "❌ No matching TODO found for: $TARGET"
                 exit 1
-            elif [ ${#FOUND_LINES[@]} -eq 1 ]; then
-                LINE_NUM="${FOUND_LINES[0]}"
+            elif [ ${#FOUND_INDICES[@]} -eq 1 ]; then
+                IDX="${FOUND_INDICES[0]}"
+                LINE_NUM=$(index_to_line "$IDX")
                 TODO_TEXT=$(get_todo_text "$LINE_NUM")
                 sed -i.bak "${LINE_NUM}d" "$TODO_FILE"
                 rm -f "${TODO_FILE}.bak"
                 echo "✅ Removed: $TODO_TEXT"
             else
-                echo "🔍 Found ${#FOUND_LINES[@]} matches:"
+                echo "🔍 Found ${#FOUND_INDICES[@]} matches:"
                 echo ""
-                for line in "${FOUND_LINES[@]}"; do
-                    text=$(get_todo_text "$line")
-                    echo "$line. $text"
+                for idx in "${FOUND_INDICES[@]}"; do
+                    fl=$(index_to_line "$idx")
+                    text=$(get_todo_text "$fl")
+                    echo "$idx. $text"
                 done
                 echo ""
-                echo "Please specify line number or be more specific"
+                echo "Please specify item number or be more specific"
                 exit 1
             fi
         fi

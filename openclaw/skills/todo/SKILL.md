@@ -11,9 +11,9 @@ Quick TODO list management via Telegram bot commands.
 
 ## 执行规则
 
-1. **脚本输出即用户回复** - `todo.sh` 的输出就是要展示给用户的内容，必须作为回复发送。**严禁使用 NO_REPLY**
-2. **这是用户命令** - 当系统提示 "Use the todo skill for this request"，说明用户发了 `/todo` 相关命令，直接执行对应操作并展示结果
-3. **操作后展示完整列表** - 每次增删改操作后，都要展示完整的 TODO 列表
+1. **必须回复用户** - 这是用户主动发起的命令，执行后**必须**发送可见的回复。绝对不能回复 NO_REPLY。
+2. **操作后展示完整列表** - 每次增删改操作后，先确认操作（如 ✅ 已添加：xxx），再展示完整的 TODO 列表
+3. **直接操作 TODO.md** - 读取和编辑 `~/.openclaw/workspace/TODO.md`，无需外部脚本
 
 ## Work Rules
 

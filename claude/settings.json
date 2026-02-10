@@ -1,4 +1,28 @@
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/marketplaces/everything-claude-code/skills/continuous-learning-v2/hooks/observe.sh pre"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/plugins/marketplaces/everything-claude-code/skills/continuous-learning-v2/hooks/observe.sh post"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "commit-commands@claude-plugins-official": true,
     "everything-claude-code@everything-claude-code": true,
@@ -11,7 +35,7 @@
     "security-guidance@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": false,
     "mgrep@Mixedbread-Grep": true,
     "superpowers@superpowers-marketplace": true
   },
@@ -50,6 +74,5 @@
         "--extension"
       ]
     }
-  },
-  "model": "opus"
+  }
 }

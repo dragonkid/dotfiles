@@ -66,3 +66,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[filter "claude-settings"]
+	clean = jq 'del(.fastMode, .model)'
+	smudge = cat

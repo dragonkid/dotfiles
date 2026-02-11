@@ -1,7 +1,7 @@
 #!/bin/bash
 read -r input
 
-eval "$(echo "$input" | jq -r '@sh "model=\(.model.display_name // "?") remaining=\(.context_window.remaining_percentage // "?") in_tok=\(.context_window.total_input_tokens // 0) out_tok=\(.context_window.total_output_tokens // 0) added=\(.cost.total_lines_added // 0) removed=\(.cost.total_lines_removed // 0) duration_ms=\(.cost.total_duration_ms // 0)"')"
+eval "$(echo "$input" | jq -r '@sh "model=\(.model.display_name // "?") remaining=\(.context_window.remaining_percentage // "?") in_tok=\(.context_window.total_input_tokens // 0) out_tok=\(.context_window.total_output_tokens // 0) added=\(.cost.total_lines_added // 0) removed=\(.cost.total_lines_removed // 0) duration_ms=\(.cost.total_duration_ms // 0) version=\(.version // "?")"')"
 dir=$(echo "$input" | jq -r '.workspace.project_dir // .cwd')
 dir="${dir/#$HOME/~}"
 
@@ -44,4 +44,4 @@ else
   ctx_color=$green
 fi
 
-printf "${green}[%s]${reset} ctx: ${ctx_color}%s%%${reset} | ${yellow}%s${reset} | ${dim}%s${reset} | ${green}+%s${reset} ${red}-%s${reset} | ${cyan}%s${reset}" "$model" "$remaining" "$tokens" "$duration" "$added" "$removed" "$dir"
+printf "${dim}v%s${reset} ${green}[%s]${reset} ${cyan}%s${reset} ctx: ${ctx_color}%s%%${reset} | ${yellow}%s${reset} | ${dim}%s${reset} | ${green}+%s${reset} ${red}-%s${reset}" "$version" "$model" "$dir" "$remaining" "$tokens" "$duration" "$added" "$removed"

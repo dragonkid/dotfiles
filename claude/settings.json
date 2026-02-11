@@ -89,6 +89,7 @@
       }
     }
   },
+  "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "mcpServers": {
     "playwright-extension": {
@@ -98,6 +99,5 @@
         "--extension"
       ]
     }
-  },
-  "alwaysThinkingEnabled": true
+  }
 }

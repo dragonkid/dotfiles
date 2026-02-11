@@ -17,6 +17,11 @@ MANDATORY workflow:
 5. Refactor (IMPROVE)
 6. Verify coverage (80%+)
 
+## Test Accuracy
+
+- Match exact exception types from production code
+- Run tests before claiming success
+
 ## Troubleshooting Test Failures
 
 1. Use **tdd-guide** agent
@@ -24,6 +29,3 @@ MANDATORY workflow:
 3. Verify mocks are correct
 4. Fix implementation, not tests (unless tests are wrong)
 
-## Agent Support
-
-- **tdd-guide** - Use PROACTIVELY for new features, enforces write-tests-first

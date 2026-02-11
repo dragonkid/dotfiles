@@ -189,5 +189,6 @@ export NVM_DIR="$HOME/.nvm"
 
 # Claude Code Configurations
 export CLAUDE_CODE_EFFORT_LEVEL=high
+export MAX_THINKING_TOKENS=10000
 
 [ -f ~/.zshrc_private ] && source ~/.zshrc_private

@@ -89,7 +89,6 @@
       }
     }
   },
-  "fastMode": true,
   "autoUpdatesChannel": "latest",
   "mcpServers": {
     "playwright-extension": {

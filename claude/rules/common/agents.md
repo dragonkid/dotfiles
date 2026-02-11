@@ -2,7 +2,7 @@
 
 ## Available Agents
 
-Located in `~/.claude/agents/`:
+Provided by the `everything-claude-code` plugin via Task tool `subagent_type`:
 
 | Agent | Purpose | When to Use |
 |-------|---------|-------------|

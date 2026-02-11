@@ -14,15 +14,15 @@ Use with caution:
 - Never use dangerously-skip-permissions flag
 - Configure `allowedTools` in `~/.claude.json` instead
 
-## TodoWrite Best Practices
+## Task Tracking Best Practices
 
-Use TodoWrite tool to:
+Use TaskCreate/TaskUpdate/TaskList tools to:
 - Track progress on multi-step tasks
 - Verify understanding of instructions
 - Enable real-time steering
 - Show granular implementation steps
 
-Todo list reveals:
+Task list reveals:
 - Out of order steps
 - Missing items
 - Extra unnecessary items

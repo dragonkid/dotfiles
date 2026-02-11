@@ -98,5 +98,6 @@
         "--extension"
       ]
     }
-  }
+  },
+  "alwaysThinkingEnabled": true
 }

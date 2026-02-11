@@ -248,6 +248,7 @@ link_config "${BASEDIR}/claude/skills" ~/.claude/skills
 link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
 link_config "${BASEDIR}/claude/hooks.json" ~/.claude/hooks.json
+link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
 log_success "Claude Code configured"
 
 # config openclaw

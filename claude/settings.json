@@ -1,4 +1,24 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(mgrep:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:mcp-registry.com)",
+      "WebFetch(domain:docs.starrocks.io)",
+      "WebFetch(domain:clickhouse.com)",
+      "WebFetch(domain:www.reddit.com)",
+      "WebFetch(domain:scottspence.com)",
+      "WebFetch(domain:blog.fsck.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(ln:*)"
+    ],
+    "defaultMode": "default"
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -22,6 +42,10 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
     "commit-commands@claude-plugins-official": true,
@@ -65,6 +89,7 @@
       }
     }
   },
+  "fastMode": true,
   "autoUpdatesChannel": "latest",
   "mcpServers": {
     "playwright-extension": {

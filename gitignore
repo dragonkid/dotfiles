@@ -1,3 +1,6 @@
+# Git worktrees
+.worktrees/
+
 # Mr. Developer
 .idea/
 .vscode/

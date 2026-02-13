@@ -25,6 +25,8 @@ DOCS_ROOT = ~/Documents/second-brain/jobs/{project_name}
 
 ### Step 1: Discover Affected Code
 
+**Context hint:** Project architecture and conventions are already loaded from the project's CLAUDE.md. Use that as your starting point — only explore areas where CLAUDE.md lacks sufficient detail for the refactoring.
+
 Invoke Skill `everything-claude-code:iterative-retrieval` with the refactoring goal above as context.
 
 Follow the skill exactly — progressively refine searches (max 3 cycles) to find all files and dependencies affected by this refactoring: target files, consumers, related tests, downstream imports.
@@ -202,6 +204,10 @@ Use AskUserQuestion to confirm:
 
 If "Fix issues first": address remaining issues, then re-run the failing verification steps.
 If "Stop workflow": end here.
+
+### Step 4: Update Project Context
+
+If the refactoring changed module boundaries, file organization, or architectural patterns documented in the project's CLAUDE.md, update it to reflect the new structure. Only update sections that are factually outdated — do not rewrite unchanged sections.
 
 Announce: **"Phase 6 complete — verified and reviewed. Moving to Phase 7."**
 

@@ -21,9 +21,17 @@ DOCS_ROOT = ~/Documents/second-brain/jobs/{project_name}
 
 ---
 
-## Phase 1: Brainstorm
+## Phase 1: Brainstorm (skippable)
+
+Use AskUserQuestion to ask:
+- Question: "How would you like to start?"
+- Options: "Brainstorm from scratch", "I have a design — skip to planning"
+
+### If brainstorming:
 
 Invoke Skill `superpowers:brainstorming` with the feature request above as context.
+
+**Context hint:** Project architecture and conventions are already loaded from the project's CLAUDE.md. Use that as your starting point — only explore areas where CLAUDE.md lacks sufficient detail for the feature.
 
 Follow the skill exactly. It will:
 - Explore the codebase and ask questions one at a time
@@ -33,6 +41,10 @@ Follow the skill exactly. It will:
 
 When brainstorming completes and the design document is saved, announce:
 **"Phase 1 complete — design document saved. Moving to Phase 2."**
+
+### If skipping:
+
+Ask the user for the design document path or description, then proceed directly to Phase 2.
 
 ---
 
@@ -137,6 +149,10 @@ Use AskUserQuestion to confirm:
 
 If "Fix issues first": address remaining issues, then re-run the failing verification steps.
 If "Stop workflow": end here.
+
+### Step 4: Update Project Context
+
+If the feature introduced new modules, patterns, or architectural changes, update the project's CLAUDE.md to reflect them. Only update sections that are factually outdated — do not rewrite unchanged sections.
 
 Announce: **"Phase 5 complete — verified and reviewed. Moving to Phase 6."**
 

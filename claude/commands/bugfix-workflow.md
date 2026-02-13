@@ -25,6 +25,8 @@ DOCS_ROOT = ~/Documents/second-brain/jobs/{project_name}
 
 ### Step 1: Gather Context
 
+**Context hint:** Project architecture and conventions are already loaded from the project's CLAUDE.md. Use that as your starting point — only explore areas where CLAUDE.md lacks sufficient detail for the bug.
+
 Invoke Skill `everything-claude-code:iterative-retrieval` with the bug report above as context.
 
 Follow the skill exactly — progressively refine searches (max 3 cycles) to find the relevant code paths, files, and dependencies related to the bug.
@@ -184,6 +186,10 @@ Use AskUserQuestion to confirm:
 
 If "Fix issues first": address remaining issues, then re-run the failing verification steps.
 If "Stop workflow": end here.
+
+### Step 4: Update Project Context
+
+If the fix revealed undocumented architectural patterns, failure modes, or conventions worth recording, update the project's CLAUDE.md to reflect them. Only update sections that are factually outdated — do not rewrite unchanged sections.
 
 Announce: **"Phase 5 complete — verified and reviewed. Moving to Phase 6."**
 

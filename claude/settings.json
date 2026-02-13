@@ -58,6 +58,17 @@
         ]
       }
     ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-context-freshness.sh"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "*",

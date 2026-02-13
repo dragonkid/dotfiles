@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/everything-claude-code/skills/continuous-learning-v2/hooks/observe.sh pre"
+            "command": "~/.claude/hooks/observe.sh pre"
           }
         ]
       },
@@ -35,7 +35,25 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/everything-claude-code/skills/strategic-compact/suggest-compact.sh"
+            "command": "~/.claude/hooks/suggest-compact.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-mgrep-first.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-co-authored-by.sh"
           }
         ]
       }
@@ -46,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/plugins/marketplaces/everything-claude-code/skills/continuous-learning-v2/hooks/observe.sh post"
+            "command": "~/.claude/hooks/observe.sh post"
           }
         ]
       }

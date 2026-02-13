@@ -81,11 +81,13 @@ trap 'log_error "Failed at line $LINENO"' ERR
 # Function to safely link with backup
 link_config() {
     local src=$1 dst=$2
-    if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+    if [ -L "$dst" ]; then
+        rm "$dst"
+    elif [ -e "$dst" ]; then
         log_info "Backing up $dst"
         mv "$dst" "${dst}.backup.$(date +%Y%m%d)"
     fi
-    ln -sf "$src" "$dst"
+    ln -s "$src" "$dst"
 }
 
 # Install Homebrew if needed
@@ -247,7 +249,6 @@ link_config "${BASEDIR}/claude/settings.json" ~/.claude/settings.json
 link_config "${BASEDIR}/claude/skills" ~/.claude/skills
 link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
-link_config "${BASEDIR}/claude/hooks.json" ~/.claude/hooks.json
 link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
 log_success "Claude Code configured"
 

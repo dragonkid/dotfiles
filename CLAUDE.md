@@ -54,3 +54,4 @@ This means `model` and `fastMode` exist in the working copy but are never commit
 ## TODO
 
 - [ ] Configure per-agent model tiers to reduce costs: create `~/.claude/agents/` override files setting lightweight agents (build-error-resolver, refactor-cleaner, doc-updater) to `model: haiku`, mid-tier agents (code-reviewer, tdd-guide) to `model: sonnet`, and keep complex reasoning agents (architect, planner, security-reviewer) on `model: opus`
+- [ ] After ECC upgrades, check if `everything-claude-code:verification-loop` has frontmatter — if so, delete local wrapper `claude/skills/verification-loop/SKILL.md` and update `feature-workflow.md` to use `everything-claude-code:verification-loop`

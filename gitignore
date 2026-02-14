@@ -6,6 +6,7 @@
 .vscode/
 .claude/
 .cursor/
+.plan/
 
 # Mr. Python
 *.py[co]

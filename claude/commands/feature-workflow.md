@@ -11,13 +11,21 @@ You are orchestrating a complete feature development pipeline. Execute the phase
 
 ## Document Output
 
-All design documents and implementation plans are saved outside the project repo:
+All design documents and implementation plans are saved in the project repo:
 
 ```
-DOCS_ROOT = ~/Documents/second-brain/jobs/{project_name}
+DOCS_ROOT = .plan/
 ```
 
-`{project_name}` is derived from `basename $(git rev-parse --show-toplevel)`. If `DOCS_ROOT` does not exist, inform the user and ask whether to create it or specify an alternative path.
+If `.plan/` does not exist, create it (`mkdir -p .plan`).
+
+### Vault Sync
+
+After creating or updating any document in `DOCS_ROOT`, ask:
+- Question: "同步此文档到 Obsidian vault？"
+- Options: "Yes — sync to vault", "No — skip"
+
+If yes: copy the file to `~/Documents/second-brain/Jobs/{project_name}/` where `{project_name}` is derived from `basename $(git rev-parse --show-toplevel)`. Create the directory if it doesn't exist.
 
 ---
 
@@ -37,7 +45,7 @@ Follow the skill exactly. It will:
 - Explore the codebase and ask questions one at a time
 - Propose 2-3 approaches with trade-offs
 - Present the design in sections for incremental validation
-- Write the validated design to `DOCS_ROOT/YYYY-MM-DD-<topic>-design.md`
+- Write the validated design to `.plan/YYYY-MM-DD-<topic>-design.md`
 
 When brainstorming completes and the design document is saved, announce:
 **"Phase 1 complete — design document saved. Moving to Phase 2."**
@@ -68,7 +76,7 @@ Invoke Skill `superpowers:writing-plans`.
 Follow the skill exactly. It will:
 - Create a detailed implementation plan based on the Phase 1 design
 - Structure tasks with TDD steps (write test → verify fail → implement → verify pass → commit)
-- Save the plan to `DOCS_ROOT/YYYY-MM-DD-<feature-name>.md`
+- Save the plan to `.plan/YYYY-MM-DD-<feature-name>.md`
 - Present the execution mode choice at the end:
   1. **Subagent-Driven** (this session) — fresh subagent per task with two-stage review
   2. **Parallel Session** (separate session) — batch execution with checkpoints
@@ -85,10 +93,10 @@ Remember the user's execution mode choice for Phase 4.
 ### Context Protection & Compact
 
 Before suggesting compact, ensure:
-1. Design document and plan file are saved to `DOCS_ROOT`
+1. Design document and plan file are saved to `.plan/`
 3. TodoWrite records: worktree choice, execution mode choice, current phase
 
-Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in DOCS_ROOT and TodoWrite. After compact, I'll recover context by reading those files."**
+Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in .plan/ and TodoWrite. After compact, I'll recover context by reading those files."**
 
 Announce: **"Phase 3 complete — plan saved. Moving to Phase 4."**
 
@@ -109,7 +117,7 @@ Before suggesting compact, ensure:
 1. TodoWrite has all task statuses updated
 2. Note the base branch name for later use
 
-Then suggest: **"Implementation complete. Consider running `/compact` before verification — progress is tracked in TodoWrite and git history. After compact, I'll recover context from TodoWrite + git log + DOCS_ROOT."**
+Then suggest: **"Implementation complete. Consider running `/compact` before verification — progress is tracked in TodoWrite and git history. After compact, I'll recover context from TodoWrite + git log + .plan/."**
 
 Announce: **"Phase 4 complete — implementation done. Moving to Phase 5."**
 

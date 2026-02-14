@@ -11,13 +11,21 @@ You are orchestrating a complete refactoring pipeline. The core constraint: **be
 
 ## Document Output
 
-Plans (if written) are saved outside the project repo:
+Plans (if written) are saved in the project repo:
 
 ```
-DOCS_ROOT = ~/Documents/second-brain/jobs/{project_name}
+DOCS_ROOT = .plan/
 ```
 
-`{project_name}` is derived from `basename $(git rev-parse --show-toplevel)`. If `DOCS_ROOT` does not exist, inform the user and ask whether to create it or specify an alternative path.
+If `.plan/` does not exist, create it (`mkdir -p .plan`).
+
+### Vault Sync
+
+After creating or updating any document in `DOCS_ROOT`, ask:
+- Question: "同步此文档到 Obsidian vault？"
+- Options: "Yes — sync to vault", "No — skip"
+
+If yes: copy the file to `~/Documents/second-brain/Jobs/{project_name}/` where `{project_name}` is derived from `basename $(git rev-parse --show-toplevel)`. Create the directory if it doesn't exist.
 
 ---
 
@@ -88,7 +96,7 @@ Invoke Skill `superpowers:writing-plans`.
 Follow the skill exactly. It will:
 - Create a detailed refactoring plan with incremental steps
 - Each step must preserve behavior — all existing tests pass after every step
-- Save the plan to `DOCS_ROOT/YYYY-MM-DD-<refactor-summary>.md`
+- Save the plan to `.plan/YYYY-MM-DD-<refactor-summary>.md`
 - Present the execution mode choice at the end:
   1. **Subagent-Driven** (this session) — fresh subagent per task with two-stage review
   2. **Parallel Session** (separate session) — batch execution with checkpoints
@@ -105,10 +113,10 @@ Remember the user's execution mode choice for Phase 4.
 ### Context Protection & Compact
 
 Before suggesting compact, ensure:
-1. Plan file is saved to `DOCS_ROOT`
+1. Plan file is saved to `.plan/`
 2. TodoWrite records: test baseline, affected files, execution mode choice, current phase
 
-Then suggest: **"The scope analysis and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in TodoWrite and DOCS_ROOT. After compact, I'll recover context by reading those files."**
+Then suggest: **"The scope analysis and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in TodoWrite and .plan/. After compact, I'll recover context by reading those files."**
 
 Announce: **"Phase 3 complete — plan saved. Moving to Phase 4."**
 

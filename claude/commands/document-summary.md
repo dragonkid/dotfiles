@@ -76,13 +76,13 @@ After showing full summary, ask: "确认要保存吗？"
 
 #### Configuration
 
-- Root path: `~/Library/CloudStorage/GoogleDrive-idragonkid@gmail.com/My Drive/Second Brain`
+- Root path: `~/Documents/second-brain`
 - Ignored dirs: `Attachments/`, `Bookshelf/`, `Clippings/`, `Excalidraw/`, `Interview/`, `Jobs/`, `Personal/`
 
 #### Step 1: Scan Available Directories
 
 ```bash
-for dir in "/Users/dragonkid/Library/CloudStorage/GoogleDrive-idragonkid@gmail.com/My Drive/Second Brain"/*/; do
+for dir in ~/Documents/second-brain/*/; do
   basename "$dir"
 done | grep -v -E "^(Attachments|Bookshelf|Clippings|Excalidraw|Interview|Jobs|Personal)$"
 ```
@@ -173,5 +173,5 @@ Process directly with summary generation.
 - **Skipping directory selection**: Always show available directories
 - **Forgetting to filter ignored directories**: Always exclude Attachments/Bookshelf/Clippings/Excalidraw/Interview/Jobs/Personal
 - **Not checking duplicates**: Always check for existing files before writing
-- **Using wrong root path**: Always use fixed Second Brain path
+- **Using wrong root path**: Always use `~/Documents/second-brain`
 - **Auto-saving without confirmation**: Never save without explicit user confirmation

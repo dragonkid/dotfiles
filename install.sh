@@ -283,18 +283,18 @@ fi
 
 # separated git dir + .git file
 if ([ -d "$VAULT_LINK" ] || [ -L "$VAULT_LINK" ]) && [ ! -d "$VAULT_GIT" ]; then
-    read -rp "Use SSH remote? [Y/n]: " use_ssh
-    if [ "$use_ssh" != "n" ] && [ "$use_ssh" != "N" ]; then
-        VAULT_REMOTE="git@github.com:dragonkid/second-brain.git"
-    else
-        VAULT_REMOTE="https://github.com/dragonkid/second-brain.git"
-    fi
+    VAULT_REMOTE="https://github.com/dragonkid/second-brain.git"
     log_info "Initializing vault git ($VAULT_REMOTE)..."
     mkdir -p "$HOME/Coding"
-    git -C "$VAULT_LINK" init --separate-git-dir="$VAULT_GIT"
-    git -C "$VAULT_LINK" remote add origin "$VAULT_REMOTE"
-    git_with_retry -C "$VAULT_LINK" fetch origin
-    git -C "$VAULT_LINK" reset origin/main
+    # Resolve symlink — git -C through a symlink can't find the .git file
+    # created by --separate-git-dir in the resolved target
+    VAULT_REAL="$(cd "$VAULT_LINK" && pwd -P)"
+    # Clean up stale .git file/dir from a previous failed run
+    rm -rf "$VAULT_REAL/.git" "$VAULT_GIT"
+    git init --separate-git-dir="$VAULT_GIT" "$VAULT_REAL"
+    git -C "$VAULT_REAL" remote add origin "$VAULT_REMOTE"
+    git_with_retry -C "$VAULT_REAL" fetch origin
+    git -C "$VAULT_REAL" reset origin/main
 fi
 log_success "Obsidian vault configured"
 

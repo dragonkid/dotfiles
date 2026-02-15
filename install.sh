@@ -252,6 +252,52 @@ link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
 link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
 log_success "Claude Code configured"
 
+# config obsidian vault
+log_info "Setting up Obsidian vault..."
+VAULT_LINK="$HOME/Documents/second-brain"
+VAULT_GIT="$HOME/Coding/second-brain.git"
+
+# symlink: ~/Documents/second-brain → Google Drive vault
+if [ -L "$VAULT_LINK" ] || [ -d "$VAULT_LINK" ]; then
+    log_info "Vault symlink already exists, skipping"
+else
+    VAULT_GDRIVE="$HOME/Google Drive/My Drive/Second Brain"
+    while true; do
+        if [ -d "$VAULT_GDRIVE" ]; then
+            break
+        fi
+        read -rp "Obsidian vault not found at $VAULT_GDRIVE. Enter vault path (or 'skip'): " input
+        if [ "$input" = "skip" ]; then
+            VAULT_GDRIVE=""
+            break
+        fi
+        VAULT_GDRIVE="$input"
+    done
+    if [ -n "$VAULT_GDRIVE" ]; then
+        link_config "$VAULT_GDRIVE" "$VAULT_LINK"
+        log_success "Vault symlink created"
+    else
+        log_info "Skipping Obsidian vault setup"
+    fi
+fi
+
+# separated git dir + .git file
+if ([ -d "$VAULT_LINK" ] || [ -L "$VAULT_LINK" ]) && [ ! -d "$VAULT_GIT" ]; then
+    read -rp "Use SSH remote? [Y/n]: " use_ssh
+    if [ "$use_ssh" != "n" ] && [ "$use_ssh" != "N" ]; then
+        VAULT_REMOTE="git@github.com:dragonkid/second-brain.git"
+    else
+        VAULT_REMOTE="https://github.com/dragonkid/second-brain.git"
+    fi
+    log_info "Initializing vault git ($VAULT_REMOTE)..."
+    mkdir -p "$HOME/Coding"
+    git -C "$VAULT_LINK" init --separate-git-dir="$VAULT_GIT"
+    git -C "$VAULT_LINK" remote add origin "$VAULT_REMOTE"
+    git_with_retry -C "$VAULT_LINK" fetch origin
+    git -C "$VAULT_LINK" reset origin/main
+fi
+log_success "Obsidian vault configured"
+
 # config openclaw
 if [ "$SETUP_OPENCLAW" = true ]; then
     log_info "Setting up OpenClaw..."

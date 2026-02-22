@@ -15,11 +15,13 @@ Read `references/vault-rules.md` before writing any notes.
 ### Phase 1: Quick Preview
 
 1. Fetch content from URL (`web_fetch`) or read provided text / existing Clipping
-2. Present 3-5 bullet points:
+2. Present a detailed preview including:
+   - Source link (original URL from frontmatter)
+   - Content structure overview (major sections/chapters)
    - Core topic and thesis
-   - Key insights or techniques
-   - Practical value / relevance
-   - Freshness assessment
+   - Key insights, techniques, or unique angles
+   - Practical value / relevance / target audience
+   - Length/depth assessment
 3. Present three options via inline buttons:
    - **继续** → Phase 2
    - **跳过** → keep Clipping, move to next

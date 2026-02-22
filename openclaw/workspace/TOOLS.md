@@ -3,6 +3,7 @@
 ## Telegram Topics (AI 工作台 -1003885917198)
 
 - topic:1 — General（日常对话、TODO 提醒）
+- topic:3 — Obsidian（裸 URL 自动抓取 → Clippings/，Obsidian 笔记工作流）
 - topic:7 — Tools（安全审计、自我改进等系统任务）
 
 ## Obsidian Vault
@@ -28,8 +29,9 @@
 
 - Node（x86_64）：`/usr/local/Cellar/node/25.6.1/bin/node`
 - Brave Search：已配置
-- Gateway restart：允许直接执行，用 `gateway(action=restart)` 工具
+- Gateway restart：用 `gateway(action=restart)` 工具直接重启；CLI 方式（`openclaw gateway restart`）作为备用
 - clawhub：`/usr/local/Cellar/node/25.6.1/bin/node $(which clawhub)`
+- 当前默认模型：`anthropic-custom/claude-sonnet-4-6`
 
 ## 重要教训
 
@@ -41,5 +43,11 @@
 
 | Job | ID | 时间 | 用途 |
 |---|---|---|---|
-| weekly-self-improvement | 8bf068d4 | 每周一 09:00 | 自我分析 → 提案给用户审核 |
-| TODO reminder | adf8f141 | 每天早上 | 读取 TODO.md 发提醒 |
+| weekly-self-improvement | 8bf068d4 | 每周一 09:00 (Asia/Shanghai) | 自我分析 → 提案给用户审核 |
+| daily-todo-reminder | adf8f141 | 每天 10:00 (Asia/Shanghai) | 读取 TODO.md 发提醒到 topic:1 |
+| healthcheck:security-audit | b86dcc27 | 每周三 09:00 (Asia/Shanghai) | 安全审计 + 版本检查 → topic:7 |
+
+## Telegram Cron Delivery 格式
+
+- 发送到指定 topic：`-1003885917198:topic:1`（General）或 `-1003885917198:topic:7`（Tools）
+- 格式：`delivery.channel = "telegram"`, `delivery.to = "<chatId>:topic:<topicId>"`

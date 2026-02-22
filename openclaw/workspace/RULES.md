@@ -30,6 +30,7 @@
 
 1. **可直接重启** - 用 `gateway(action=restart)` 工具，无需征得同意
 2. **重启后主动通知** - 重启前创建延迟 60 秒的一次性 cron job 发送通知
+3. **config 修改优先用 config.patch** - `openclaw configure` wizard 有时不能正确保存，用 `gateway(action=config.patch)` 更可靠
 
 ---
 

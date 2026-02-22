@@ -255,7 +255,7 @@ log_success "Claude Code configured"
 # config obsidian vault
 log_info "Setting up Obsidian vault..."
 VAULT_LINK="$HOME/Documents/second-brain"
-VAULT_GIT="$HOME/Coding/second-brain.git"
+VAULT_GIT="/usr/local/data/second-brain.git"
 
 # symlink: ~/Documents/second-brain → Google Drive vault
 if [ -L "$VAULT_LINK" ] || [ -d "$VAULT_LINK" ]; then
@@ -285,7 +285,7 @@ fi
 if ([ -d "$VAULT_LINK" ] || [ -L "$VAULT_LINK" ]) && [ ! -d "$VAULT_GIT" ]; then
     VAULT_REMOTE="https://github.com/dragonkid/second-brain.git"
     log_info "Initializing vault git ($VAULT_REMOTE)..."
-    mkdir -p "$HOME/Coding"
+    sudo mkdir -p /usr/local/data && sudo chown "$USER" /usr/local/data
     # Resolve symlink — git -C through a symlink can't find the .git file
     # created by --separate-git-dir in the resolved target
     VAULT_REAL="$(cd "$VAULT_LINK" && pwd -P)"

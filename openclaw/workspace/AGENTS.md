@@ -167,5 +167,17 @@ Periodically (every few days), use a heartbeat to:
 3. Update `MEMORY.md` with distilled learnings
 4. Remove outdated info from MEMORY.md that's no longer relevant
 
+### 🧬 Self-Improvement (Weekly Cron Job)
+
+A weekly cron job triggers an isolated session to review and propose improvements:
+
+1. Analyze recent memory files for recurring issues or inefficiencies
+2. Reference Claude and OpenClaw best practices when proposing changes
+   - OpenClaw docs: `/usr/local/lib/node_modules/openclaw/docs`
+   - OpenClaw mirror: `https://docs.openclaw.ai`
+3. Draft proposed changes and send to user for approval before applying
+4. Never self-modify without explicit user confirmation
+5. Proposed changes may cover: SOUL.md, AGENTS.md, RULES.md, TOOLS.md
+
 The goal: Be helpful without being annoying. Check in a few times a day, do useful background work, but respect quiet time.
 

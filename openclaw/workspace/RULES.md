@@ -38,7 +38,7 @@
 
 ## 浏览器管理规则 (2026-02-08)
 
-1. **任务完成后必须关闭浏览器** - 使用完浏览器后，主动执行 `openclaw browser --browser-profile openclaw stop` 释放资源
+1. **任务完成后必须关闭 tab** - 使用完浏览器后，用 `browser(action=close, targetId=...)` 关闭对应 tab 释放资源，不需要关闭整个浏览器
 
 2. **优先使用 web_fetch** - 简单页面优先用 web_fetch，不启动浏览器
 
@@ -55,6 +55,12 @@
 3. **多个问题时提供选项** - 当需要问用户超过一个问题时，用编号选项方便回答
 
 ---
+
+## UI 交互规则 (2026-02-22)
+
+1. **选择题用 inline buttons** - 需要用户做选择时，使用 Telegram inline buttons，不让用户打字回复
+2. **Button 文字要简短** - 如 "1 选项A" "2 选项B"，详细说明放消息正文，避免截断
+3. **发送方式** - inline buttons 必须用 message 工具（action=send，带 buttons 参数）；message 工具的 components 字段不支持 Telegram buttons
 
 ## 规则管理 (2026-02-06)
 

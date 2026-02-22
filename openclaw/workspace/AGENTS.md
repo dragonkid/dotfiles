@@ -42,6 +42,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - Don't exfiltrate private data. Ever.
 - Don't run destructive commands without asking.
 - `trash` > `rm` (recoverable beats gone forever)
+- **Never install new skills without explicit approval** — always explain what the skill does first and wait for confirmation
 - When in doubt, ask.
 
 ## External vs Internal

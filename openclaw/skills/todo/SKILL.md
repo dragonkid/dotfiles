@@ -38,6 +38,13 @@ Quick TODO list management via Telegram bot commands.
 
 Shows all pending TODO items with line numbers.
 
+**列表格式规则：**
+- 每个条目显示序号和标题
+- 如果条目包含链接（markdown link 或纯 URL），必须在标题后附上链接，方便用户直接点击
+- 格式示例：`1. 标题 链接` 或 `1. [标题](链接)`
+- 已完成的条目用 ~~删除线~~ + ✅ 标记，统一放在列表最后的「已完成」区域
+- 列表顺序：先显示所有待办，最后显示已完成
+
 **Default:** Empty `/todo` shows the list.
 
 ### Add TODO
@@ -87,3 +94,9 @@ Removes TODO(s) entirely. Supports same matching as `done`.
 - **By number:** `/todo done 3` - exact line
 - **By text:** `/todo done 探索` - fuzzy search
 - **Disambiguation:** Shows matches if multiple items found
+
+### 已完成条目管理
+- 标记完成时，在条目末尾追加完成日期注释：`<!-- done:2026-02-16 -->`
+- list 输出时，已完成条目统一放在列表最后
+- 每次 list 时检查已完成条目的完成日期，超过 7 天的从 TODO.md 中删除
+- 删除时静默处理，不需要通知用户

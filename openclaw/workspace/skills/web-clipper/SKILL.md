@@ -128,6 +128,13 @@ Brief message: file path, image count, one-line topic summary.
 - Fall back to browser for JS-rendered content
 - Look for `article`, `main`, `.post-content`, `.entry-content` selectors
 
+### 5. 清理
+
+任务完成后关闭 tab：
+```
+browser(action=close, profile=openclaw, targetId=<targetId>)
+```
+
 ## Ask user if unclear
 
 - Target folder (default: `Clippings/`)

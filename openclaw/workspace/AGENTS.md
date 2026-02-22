@@ -8,7 +8,7 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+3. Read `memory/YYYY-MM-DD.md` (last 7 days) for recent context
 
 Don't ask permission. Just do it.
 
@@ -50,7 +50,7 @@ Skills provide your tools. When you need one, check its `SKILL.md`. Keep local n
 
 HEARTBEAT.md controls what runs on each heartbeat. Keep it short to limit token burn.
 
-**Use heartbeat for:** batched periodic checks (inbox, calendar, memory maintenance).
+**Use heartbeat for:** batched periodic checks (inbox, calendar).
 **Use cron for:** exact timing, isolated tasks, one-shot reminders.
 
 | Use Case | Recommended |
@@ -60,24 +60,20 @@ HEARTBEAT.md controls what runs on each heartbeat. Keep it short to limit token 
 | 一次性提醒 | Cron (main, --at) |
 | 需要不同模型/隔离上下文 | Cron (isolated) |
 
-**Reach out when:** important email arrived, calendar event <2h away, it's been >8h since last contact.
-**Stay quiet when:** late night (23:00–08:00), human is busy, nothing new since last check.
+**Reach out when:** important email arrived, calendar event <2h away.
+**Stay quiet when:** late night (23:00–08:00), nothing needs attention.
 
-### 🔄 Memory Maintenance (via Heartbeat)
+## 🧬 Self-Improvement + Memory Maintenance (Weekly Cron Job)
 
-On each heartbeat, if it's been 3+ days since last memory review:
+A weekly cron job triggers an isolated session to:
 
-1. Read recent `memory/YYYY-MM-DD.md` files
-2. Identify significant events, lessons, or insights worth keeping long-term
-3. Update `TOOLS.md` with tool/environment changes (工具配置、工作流更新)
-4. Update `RULES.md` or `AGENTS.md` with new behavioral lessons (行为教训、规则补充)
-5. Remove outdated info from relevant files
-6. Update `memory/heartbeat-state.json` with `lastMemoryReview` timestamp
+**Memory Maintenance:**
+1. Read recent `memory/YYYY-MM-DD.md` files (last 7 days)
+2. Update `TOOLS.md` with tool/environment changes
+3. Update `RULES.md` or `AGENTS.md` with new behavioral lessons
+4. Remove outdated info from relevant files
 
-## 🧬 Self-Improvement (Weekly Cron Job)
-
-A weekly cron job triggers an isolated session to review and propose improvements:
-
+**Self-Improvement:**
 1. Analyze recent memory files for recurring issues or inefficiencies
 2. Reference Claude and OpenClaw best practices when proposing changes
    - OpenClaw docs: `/usr/local/lib/node_modules/openclaw/docs`

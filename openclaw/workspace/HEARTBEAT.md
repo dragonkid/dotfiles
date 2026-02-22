@@ -1,5 +1,4 @@
-# HEARTBEAT.md
+# Heartbeat checklist
 
-# Keep this file empty (or with only comments) to skip heartbeat API calls.
-
-# Add tasks below when you want the agent to check something periodically.
+- If it's been 3+ days since last memory review (check memory/heartbeat-state.json), run Memory Maintenance (see AGENTS.md)
+- If it's been 8+ hours since last contact, send a brief check-in

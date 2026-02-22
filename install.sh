@@ -310,7 +310,7 @@ if [ "$SETUP_OPENCLAW" = true ]; then
         link_config "$f" ~/.openclaw/workspace/"$(basename "$f")"
     done
     link_config "${BASEDIR}/openclaw/workspace/.gitignore" ~/.openclaw/workspace/.gitignore
-    link_config "${BASEDIR}/openclaw/skills" ~/.openclaw/skills
+    link_config "${BASEDIR}/openclaw/workspace/skills" ~/.openclaw/workspace/skills
     log_success "OpenClaw configured"
 else
     log_info "Skipping OpenClaw setup (use --openclaw to enable)"

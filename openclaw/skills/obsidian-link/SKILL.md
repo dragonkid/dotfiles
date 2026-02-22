@@ -1,6 +1,7 @@
 ---
 name: obsidian-link
 description: Analyze an Obsidian note and find related notes to suggest wikilinks. Triggers on /link command, or when user asks to find connections between notes or improve note linking.
+user-invocable: true
 ---
 
 # Obsidian Link Finder

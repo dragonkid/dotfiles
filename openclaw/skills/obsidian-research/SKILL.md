@@ -1,6 +1,7 @@
 ---
 name: obsidian-research
 description: Research a topic with brainstorming dialogue, staged web exploration, and Obsidian vault integration. Triggers on /research command, deep research requests, or when user wants to explore a topic and save findings to their knowledge base.
+user-invocable: true
 ---
 
 # Obsidian Research

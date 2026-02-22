@@ -1,6 +1,7 @@
 ---
 name: obsidian-search
 description: Search Obsidian vault and answer questions using vault knowledge. Triggers on /search command, vault search requests, or when user asks questions that might be answered by their existing notes.
+user-invocable: true
 ---
 
 # Obsidian Vault Search

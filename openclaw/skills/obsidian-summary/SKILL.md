@@ -1,6 +1,7 @@
 ---
 name: obsidian-summary
-description: Summarize documents (URLs, text, or existing Clippings) and save to Obsidian vault. Triggers on document summary requests, URL processing for knowledge base, /summary command, or when user shares an article/link to process into notes.
+description: Summarize documents (URLs, text, or existing Clippings) and save to Obsidian vault. Triggers on /summary command, document summary requests, URL processing for knowledge base, or when user shares an article/link to process into notes.
+user-invocable: true
 ---
 
 # Document Summary → Obsidian
@@ -19,12 +20,31 @@ Read `references/vault-rules.md` before writing any notes.
    - Key insights or techniques
    - Practical value / relevance
    - Freshness assessment
-3. Ask: "需要保存吗？"
-4. User says skip → stop. User confirms → Phase 2.
+3. Present three options via inline buttons:
+   - **继续** → Phase 2
+   - **跳过** → keep Clipping, move to next
+   - **跳过并删除** → delete Clipping file, move to next
 
-### Phase 2: Full Summary + Save
+### Phase 2: Full Summary Preview
 
-On confirmation, generate two notes:
+On "继续", generate and display the complete structured summary in chat so the user can review the content in detail. This serves both as a learning/reading step and a preview of what will be saved.
+
+After displaying, present inline buttons:
+   - **保存** → Phase 3 (write to vault)
+   - **跳过** → discard summary, keep Clipping, move to next
+   - **跳过并删除** → discard summary, delete Clipping, move to next
+
+### Phase 3: Save to Vault
+
+Before writing, search the target folder and related MOC for existing notes with overlapping content:
+- Use grep to find notes with similar keywords/topics
+- If related notes found, present options per note via inline buttons:
+  - **合并** → merge new content into existing note (append new sections, deduplicate)
+  - **关联** → keep both, add `[[wikilinks]]` in both directions
+  - **跳过** → no relationship
+- If no related notes found, create new note directly.
+
+On "保存", write two notes:
 
 **A. Domain note** → `<folder>/<optimized-title>.md`
 
@@ -57,11 +77,11 @@ tags: [clippings]
 
 **Title optimization:** Create concise, descriptive title. Avoid catchy original titles. Focus on clarity and searchability.
 
-### Phase 3: Update MOC
+### Phase 4: Update MOC
 
 Add domain note to relevant MOC's `## Unsorted` section. Create a new heading if a clear category exists.
 
-### Phase 4: Confirm
+### Phase 5: Confirm
 
 Report file paths and MOC update. Keep it brief.
 
@@ -85,9 +105,17 @@ Ignored dirs (never save to): `Attachments/`, `Excalidraw/`, `Interview/`, `Jobs
 
 Before saving, search target directory for existing files with similar names. If found, ask user: merge or save as new file.
 
-## Batch Mode
+## Sequential Review Mode
 
-`/summary` with no args → iterate through `Clippings/`, present bullet points per file, user decides: process or skip.
+`/summary` with no args → iterate through `Clippings/` one by one. For each file: present bullet points → user decides (save / skip) → proceed to next file.
+
+After each file is processed (saved, skipped, or deleted), present inline buttons:
+- **继续下一篇** → proceed to next Clipping
+- **结束** → stop review
+
+## Auto-trigger
+
+In the "AI 工作台" topic 3 chat, if the user sends a message containing only a URL (no other text), automatically trigger Phase 1 (fetch + quick preview) without requiring `/summary`.
 
 ## Command
 

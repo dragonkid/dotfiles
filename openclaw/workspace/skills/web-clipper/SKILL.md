@@ -10,7 +10,7 @@ Clip web articles to Obsidian vault with full text and images.
 ## Vault Location
 
 ```
-/Users/dk/Library/CloudStorage/GoogleDrive-idragonkid@gmail.com/My Drive/Second Brain
+~/Documents/second-brain
 ```
 
 Default save folder: `Clippings/`

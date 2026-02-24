@@ -1,23 +1,20 @@
 #!/bin/bash
+# Block git commit commands that contain Co-Authored-By lines.
+# Runs as PreToolUse hook on Bash tool calls.
 
-# Get the command from Claude tool input
-COMMAND=$(echo "$CLAUDE_TOOL_INPUT" | jq -r '.command' 2>/dev/null)
+# Read tool input from stdin (Claude Code hook format)
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
-# Check if this is a git commit command
+# Check if this is a git commit command with Co-Authored-By
 if echo "$COMMAND" | grep -q "git commit"; then
-    # Check if the commit message contains Co-Authored-By
     if echo "$COMMAND" | grep -qi "Co-Authored-By"; then
-        # Block the commit
         cat <<EOF
 {
   "decision": "block",
-  "reason": "❌ **Co-Authored-By not allowed**\n\nYour global CLAUDE.md specifies:\n> Omit Co-Authored-By lines from commit messages\n\nPlease remove the Co-Authored-By line from the commit message."
+  "reason": "Co-Authored-By not allowed. Your CLAUDE.md specifies: Omit Co-Authored-By lines from commit messages."
 }
 EOF
         exit 0
     fi
 fi
-
-# Approve all other operations
-echo '{"decision": "approve"}'
-exit 0

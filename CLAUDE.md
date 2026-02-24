@@ -28,7 +28,7 @@ The `claude/` directory is the source of truth for Claude Code configuration. Sy
 - `claude.md` → global CLAUDE.md instructions
 - `settings.json` → permissions, plugins, model, MCP servers
 - `rules/` → ECC rules (common + language-specific)
-- `skills/`, `commands/`, `hooks/`, `hooks.json`, `statusline.sh`
+- `skills/`, `commands/`, `hooks/`, `statusline.sh`
 
 Not symlinked (runtime state): `sessions/`, `plans/`, `plugins/`, `cache/`, `history.jsonl`
 
@@ -55,5 +55,5 @@ This means `model` and `fastMode` exist in the working copy but are never commit
 
 - [ ] Configure per-agent model tiers to reduce costs: create `~/.claude/agents/` override files setting lightweight agents (build-error-resolver, refactor-cleaner, doc-updater) to `model: haiku`, mid-tier agents (code-reviewer, tdd-guide) to `model: sonnet`, and keep complex reasoning agents (architect, planner, security-reviewer) on `model: opus`
 - [ ] After ECC upgrades, check if `everything-claude-code:verification-loop` has frontmatter — if so, delete local wrapper `claude/skills/verification-loop/SKILL.md` and update `feature-workflow.md` to use `everything-claude-code:verification-loop`
-- [ ] After ECC upgrades, check if `observe.sh` (JSON triple-quote parse bug) and `suggest-compact.sh` (`$$` PID counter bug) are fixed upstream — if so, switch `settings.json` hooks back to plugin paths and remove `claude/hooks/{observe,suggest-compact}.sh`
+- [ ] After ECC upgrades, check if `observe.sh` (JSON triple-quote parse bug) and `suggest-compact.sh` (`$$` PID counter bug) are fixed in upstream **shell** versions — if so, switch `settings.json` hooks back to plugin paths and remove `claude/hooks/{observe,suggest-compact}.sh`. Note: ECC v1.4.1 has a JS rewrite of suggest-compact that fixes the `$$` bug, but it uses `CLAUDE_PLUGIN_ROOT` which is only available in plugin hooks.json, not user settings.json
 - [ ] After ECC upgrades, check observer trigger mechanism — if fixed upstream (e.g., SessionStart hook), remove `/analyze-observations` command; if observer updated but command still needed, update command to align with new observer logic

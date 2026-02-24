@@ -3,6 +3,7 @@
 #
 # Fix: original uses $$ (PID) for counter file, but each hook invocation is a
 # new process so the counter never increments. This version uses a fixed filename.
+# Fix: original writes to stderr which is silently discarded by Claude Code hooks.
 #
 # Source: everything-claude-code plugin strategic-compact/suggest-compact.sh
 
@@ -19,12 +20,12 @@ else
   count=1
 fi
 
-# Suggest compact after threshold tool calls
+# Suggest compact after threshold Edit/Write calls
 if [ "$count" -eq "$THRESHOLD" ]; then
-  echo "[StrategicCompact] $THRESHOLD tool calls reached - consider /compact if transitioning phases" >&2
+  echo "[StrategicCompact] $THRESHOLD Edit/Write calls reached - consider /compact if transitioning phases"
 fi
 
 # Suggest at regular intervals after threshold
 if [ "$count" -gt "$THRESHOLD" ] && [ $((count % 25)) -eq 0 ]; then
-  echo "[StrategicCompact] $count tool calls - good checkpoint for /compact if context is stale" >&2
+  echo "[StrategicCompact] $count Edit/Write calls - good checkpoint for /compact if context is stale"
 fi

@@ -57,9 +57,22 @@ Examples:
 - If still uncertain after verification: explicitly state uncertainty and ask the user
 - NEVER make changes based on unverified assumptions
 
-## Decision Principle
+## Decision Principle (CRITICAL)
 - When presenting multiple options: research best practices first, mark the recommended option, and explain why
 - ALWAYS use `AskUserQuestion` tool when presenting options or asking for decisions, so the user can select directly instead of typing
+- NEVER list options as plain text (numbered lists, bullet points, "Option A / Option B") — if the user needs to choose, it MUST go through `AskUserQuestion`
+- The ONLY exception: explaining steps in a plan or tutorial where no user decision is needed
+
+WRONG (plain text options):
+```
+Here are three approaches:
+1. Use Redis
+2. Use Memcached
+3. Use in-memory cache
+Which do you prefer?
+```
+
+RIGHT: call `AskUserQuestion` with the options as structured choices
 
 ## Response Style
 - Concise: omit filler and unnecessary explanation

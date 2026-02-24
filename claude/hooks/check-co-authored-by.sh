@@ -8,7 +8,7 @@ COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
 # Check if this is a git commit command with Co-Authored-By
 if echo "$COMMAND" | grep -q "git commit"; then
-    if echo "$COMMAND" | grep -qi "Co-Authored-By"; then
+    if echo "$COMMAND" | grep -qi "Co-Authored-By:"; then
         cat <<EOF
 {
   "decision": "block",

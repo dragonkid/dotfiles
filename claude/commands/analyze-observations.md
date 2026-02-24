@@ -25,15 +25,9 @@ ARCHIVE      = ~/.claude/homunculus/observations.archive/
 
 **Skip if** `$ARGUMENTS` contains `--evolve-only`.
 
-Run a Python script via Bash to parse `OBSERVATIONS`. Collect and present:
+Run: `python3 ~/.claude/scripts/analyze-observations.py OBSERVATIONS`
 
-1. Total entries, parse_error count, success count
-2. Tool usage frequency (tool_start + tool_complete counts)
-3. Tool sequences — consecutive tool pairs (bigrams) with counts >= 3
-4. Per-session breakdown — top 5 sessions by tool count, dominant tools each
-5. Distinct session count
-
-Present results as a summary table. Wait for user acknowledgment before proceeding.
+Present the output. Wait for user acknowledgment before proceeding.
 
 ---
 
@@ -129,6 +123,18 @@ For each cluster of 3+ related instincts, determine type:
 | **Skill** | Auto-triggered behaviors, patterns, style enforcement |
 | **Command** | User-invoked repeatable workflows |
 | **Agent** | Complex multi-step processes needing isolation |
+
+### Actionability Gate
+
+Before proposing a cluster for evolution, verify ALL three criteria:
+
+| Criterion | Pass | Fail |
+|-----------|------|------|
+| **Prescriptive** | "Do X when Y" | "Sessions tend to be Bash-heavy" |
+| **Non-obvious** | Not already in CLAUDE.md or rules/ | "Edit before Read" (already a rule) |
+| **Decision-changing** | Changes a specific tool/approach choice | "User prefers short sessions" |
+
+Skip clusters that fail any criterion — note as "observed, not actionable".
 
 ### Check for Overlap
 

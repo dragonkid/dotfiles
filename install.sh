@@ -250,6 +250,7 @@ link_config "${BASEDIR}/claude/skills" ~/.claude/skills
 link_config "${BASEDIR}/claude/rules" ~/.claude/rules
 link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
+link_config "${BASEDIR}/claude/scripts" ~/.claude/scripts
 link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
 log_success "Claude Code configured"
 

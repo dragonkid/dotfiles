@@ -4,6 +4,9 @@
 # Fix: original uses triple-quoted shell variable to pass JSON to python3,
 # which breaks on inputs containing single quotes. This version pipes via stdin.
 #
+# v2: merged 3 python3 calls into 1, removed dead observer signal code,
+# fixed shell variable embedding in write phase.
+#
 # Source: everything-claude-code plugin continuous-learning-v2/hooks/observe.sh
 
 set -e
@@ -26,12 +29,27 @@ if [ -z "$INPUT_JSON" ]; then
   exit 0
 fi
 
-# Parse using python3 - pipe JSON via stdin instead of shell variable embedding
-PARSED=$(echo "$INPUT_JSON" | python3 -c '
+# Archive if file too large
+if [ -f "$OBSERVATIONS_FILE" ]; then
+  file_size_mb=$(du -m "$OBSERVATIONS_FILE" 2>/dev/null | cut -f1)
+  if [ "${file_size_mb:-0}" -ge "$MAX_FILE_SIZE_MB" ]; then
+    archive_dir="${CONFIG_DIR}/observations.archive"
+    mkdir -p "$archive_dir"
+    mv "$OBSERVATIONS_FILE" "$archive_dir/observations-$(date +%Y%m%d-%H%M%S).jsonl"
+  fi
+fi
+
+# Single python3 call: parse input, build observation, write to file
+echo "$INPUT_JSON" | python3 -c '
 import json, sys
+from datetime import datetime, timezone
+
+obs_file = sys.argv[1]
+raw = sys.stdin.read()
+timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 try:
-    data = json.load(sys.stdin)
+    data = json.loads(raw)
 
     hook_type = data.get("hook_type", data.get("hook_event_name", "unknown"))
     tool_name = data.get("tool_name", data.get("tool", "unknown"))
@@ -51,68 +69,29 @@ try:
 
     event = "tool_start" if "Pre" in hook_type else "tool_complete"
 
-    print(json.dumps({
-        "parsed": True,
+    observation = {
+        "timestamp": timestamp,
         "event": event,
         "tool": tool_name,
-        "input": tool_input_str if event == "tool_start" else None,
-        "output": tool_output_str if event == "tool_complete" else None,
         "session": session_id
-    }))
+    }
+
+    if event == "tool_start" and tool_input_str:
+        observation["input"] = tool_input_str
+    if event == "tool_complete" and tool_output_str:
+        observation["output"] = tool_output_str
+
+    with open(obs_file, "a") as f:
+        f.write(json.dumps(observation) + "\n")
+
 except Exception as e:
-    print(json.dumps({"parsed": False, "error": str(e)}))
-')
-
-# Check if parsing succeeded
-PARSED_OK=$(echo "$PARSED" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("parsed", False))')
-
-if [ "$PARSED_OK" != "True" ]; then
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  raw=$(echo "$INPUT_JSON" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()[:1000]))')
-  echo "{\"timestamp\":\"$timestamp\",\"event\":\"parse_error\",\"raw\":$raw}" >> "$OBSERVATIONS_FILE"
-  exit 0
-fi
-
-# Archive if file too large
-if [ -f "$OBSERVATIONS_FILE" ]; then
-  file_size_mb=$(du -m "$OBSERVATIONS_FILE" 2>/dev/null | cut -f1)
-  if [ "${file_size_mb:-0}" -ge "$MAX_FILE_SIZE_MB" ]; then
-    archive_dir="${CONFIG_DIR}/observations.archive"
-    mkdir -p "$archive_dir"
-    mv "$OBSERVATIONS_FILE" "$archive_dir/observations-$(date +%Y%m%d-%H%M%S).jsonl"
-  fi
-fi
-
-# Build and write observation via stdin pipe
-timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-echo "$PARSED" | python3 -c "
-import json, sys
-
-parsed = json.load(sys.stdin)
-observation = {
-    'timestamp': '$timestamp',
-    'event': parsed['event'],
-    'tool': parsed['tool'],
-    'session': parsed['session']
-}
-
-if parsed['input']:
-    observation['input'] = parsed['input']
-if parsed['output']:
-    observation['output'] = parsed['output']
-
-with open('$OBSERVATIONS_FILE', 'a') as f:
-    f.write(json.dumps(observation) + '\n')
-"
-
-# Signal observer if running
-OBSERVER_PID_FILE="${CONFIG_DIR}/.observer.pid"
-if [ -f "$OBSERVER_PID_FILE" ]; then
-  observer_pid=$(cat "$OBSERVER_PID_FILE")
-  if kill -0 "$observer_pid" 2>/dev/null; then
-    kill -USR1 "$observer_pid" 2>/dev/null || true
-  fi
-fi
+    with open(obs_file, "a") as f:
+        f.write(json.dumps({
+            "timestamp": timestamp,
+            "event": "parse_error",
+            "raw": raw[:1000],
+            "error": str(e)
+        }) + "\n")
+' "$OBSERVATIONS_FILE"
 
 exit 0

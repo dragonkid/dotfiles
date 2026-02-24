@@ -195,9 +195,16 @@ Use AskUserQuestion to confirm:
 If "Fix issues first": address remaining issues, then re-run the failing verification steps.
 If "Stop workflow": end here.
 
-### Step 4: Update Project Context
+### Step 4: Update Project Docs
 
-If the fix revealed undocumented architectural patterns, failure modes, or conventions worth recording, update the project's CLAUDE.md to reflect them. Only update sections that are factually outdated — do not rewrite unchanged sections.
+Check if the following files need updates based on the changes made:
+- **CLAUDE.md**: New patterns, failure modes, or conventions discovered during the fix
+- **README.md**: New features, usage examples, configuration options, API endpoints
+- **Makefile**: New commands, updated targets, new dependencies
+- **Install scripts**: New dependencies, setup steps, environment variables
+- **Other project docs**: CHANGELOG, API docs, deployment guides, docker-compose, etc.
+
+For each file: read current content, compare against actual changes, update only what is factually outdated or missing. Do not rewrite unchanged sections.
 
 Announce: **"Phase 5 complete — verified and reviewed. Moving to Phase 6."**
 

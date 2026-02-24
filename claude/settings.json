@@ -1,4 +1,5 @@
 {
+  "respectGitignore": false,
   "permissions": {
     "allow": [
       "Bash(mgrep:*)",

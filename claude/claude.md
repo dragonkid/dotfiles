@@ -3,7 +3,7 @@
 ## Task Execution (CRITICAL)
 - Write minimal solutions: implement only what's explicitly requested
 - Prioritize simplicity over abstraction
-- After code changes, check if related files need updates: README, install scripts, Makefile
+- After code changes, check if related files need updates: README, install scripts, Makefile, CLAUDE.md
 - No "helpful" additions: refactoring, extra tests, documentation updates, or code cleanup
 - No "while I'm here" changes
 - When tempted to do extra work: ask "Should I also...?" instead
@@ -59,6 +59,7 @@ Examples:
 
 ## Decision Principle
 - When presenting multiple options: research best practices first, mark the recommended option, and explain why
+- ALWAYS use `AskUserQuestion` tool when presenting options or asking for decisions, so the user can select directly instead of typing
 
 ## Response Style
 - Concise: omit filler and unnecessary explanation

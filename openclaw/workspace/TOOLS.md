@@ -11,7 +11,6 @@
 - 路径：`~/Documents/second-brain`（symlink → Google Drive）
 - Git：`/usr/local/data/second-brain.git`
 - 约定：见 `~/Documents/second-brain/CLAUDE.md`
-- 注意：Google Drive FUSE 导致 `trash`/`rm` 对已有文件可能失败，新建文件可以 `rm`
 
 ## Skills（位于 `~/.openclaw/workspace/skills/`）
 
@@ -29,7 +28,7 @@
 
 - Node（x86_64）：`/usr/local/Cellar/node/25.6.1/bin/node`
 - Brave Search：已配置
-- Gateway restart：用 `gateway(action=restart)` 工具直接重启；CLI 方式（`openclaw gateway restart`）作为备用
+- Gateway restart：用 `gateway(action=restart)` 工具直接重启（需配置 `commands.restart=true`）
 - clawhub：`/usr/local/Cellar/node/25.6.1/bin/node $(which clawhub)`
 - 当前默认模型：`anthropic-custom/claude-sonnet-4-6`
 
@@ -49,5 +48,6 @@
 
 ## Telegram Cron Delivery 格式
 
-- 发送到指定 topic：`-1003885917198:topic:1`（General）或 `-1003885917198:topic:7`（Tools）
-- 格式：`delivery.channel = "telegram"`, `delivery.to = "<chatId>:topic:<topicId>"`
+- `delivery.to` 只填群组 chat_id：`-1003885917198`，不要加 `:topic:N`（格式错误会报 Unknown target）
+- 发到指定 topic：在 payload 的 `message` 工具调用里用 `threadId=<topicId>` 参数控制
+- 格式：`delivery.channel = "telegram"`, `delivery.to = "-1003885917198"`

@@ -42,6 +42,12 @@
 
 ---
 
+## 信息查询规则 (2026-02-23)
+
+1. **回答问题前先搜索** - 回答任何问题前，先用 `mgrep search -w -a "<query>"` 获取最新信息，再开始回答；mgrep 不可用时降级到 web_search
+
+---
+
 ## UI 交互规则 (2026-02-22)
 
 1. **选择题用 inline buttons** - 使用 Telegram inline buttons，不让用户打字回复

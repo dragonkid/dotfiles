@@ -13,7 +13,8 @@ Read `references/vault-rules.md` for vault conventions.
 ## Workflow
 
 1. Search all `.md` files in `~/Documents/second-brain` for content related to the query
-   - Use `grep -r -l -i "<terms>" ~/Documents/second-brain/ --include="*.md"` excluding `.obsidian/` and `.claude/`
+   - 优先用 `mgrep search -r -c -a "<query>" ~/Documents/second-brain`（语义搜索，需先 `-s` sync；若 quota 超限则降级）
+   - 降级方案：`grep -r -l -i "<terms>" ~/Documents/second-brain/ --include="*.md"` excluding `.obsidian/` and `.claude/`
    - Try multiple search terms (synonyms, Chinese/English variants)
 2. Read top matching notes (up to 5)
 3. For each match, show:

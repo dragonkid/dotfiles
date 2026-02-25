@@ -1,6 +1,6 @@
 ---
 name: obsidian-clipper
-description: Clip web articles to Obsidian vault with full content and images. Use when user sends a URL and wants to save it to Obsidian, or says "clip this", "save to Obsidian", "保存到 Obsidian", "clip 到 vault" etc. Also auto-triggers in "AI 工作台" topic 3 when user sends a message containing only a URL. Handles WeChat articles, X/Twitter articles, and general web pages. Saves to Clippings/ folder by default.
+description: Clip web articles to Obsidian vault with full content and images. Use when user sends a URL and wants to save it to Obsidian, or says "clip this", "save to Obsidian", "保存到 Obsidian", "clip 到 vault" etc. Also auto-triggers in "AI 工作台" topic 3 when user sends a message containing only a URL or a PDF file attachment. Handles WeChat articles, X/Twitter articles, general web pages, and PDF files. Saves to Clippings/ folder by default.
 user-invocable: true
 ---
 
@@ -98,11 +98,7 @@ tags:
 - Clean up promotional content, ads, "follow me" sections
 - Save to: `~/Documents/second-brain/Clippings/<title>.md`
 
-### 6. Confirm
-
-Brief message: file path, image count, one-line topic summary.
-
-### 7. 更新语义索引
+### 6. 更新语义索引
 
 文件保存后，触发增量索引（只索引新文件，不影响其他笔记）：
 
@@ -110,7 +106,17 @@ Brief message: file path, image count, one-line topic summary.
 python3 ~/.openclaw/workspace/scripts/vault_index.py --file "Clippings/<title>.md"
 ```
 
-索引完成后无需额外通知用户。
+### 7. Confirm
+
+**只在索引完成后发一条消息**，过程中保持静默。格式（多行）：
+
+```
+✅ Clippings/<title>.md
+N 张图 · 索引完成（N chunks）
+<一句话主题摘要>
+```
+
+索引失败时第二行改为 `N 张图 · 索引失败：<错误原因>`。
 
 ## Platform-Specific Handling
 
@@ -149,3 +155,38 @@ browser(action=close, profile=openclaw, targetId=<targetId>)
 
 - Target folder (default: `Clippings/`)
 - Whether to include images (default: yes)
+
+---
+
+## PDF 处理流程
+
+当用户在 topic:3 发送 PDF 附件时（消息中包含文件路径或 Telegram file_id），触发此流程。
+
+### 1. 获取文件
+
+OpenClaw 会将附件保存到本地临时路径，从消息 metadata 中获取该路径。
+
+### 2. 复制到 Clippings/
+
+```bash
+cp "<tmp_path>/<filename>.pdf" ~/Documents/second-brain/Clippings/<filename>.pdf
+```
+
+保持原始文件名，不做重命名。
+
+### 3. 更新语义索引
+
+```bash
+python3 ~/.openclaw/workspace/scripts/vault_index.py --file "Clippings/<filename>.pdf"
+```
+
+### 4. Confirm
+
+**只在索引完成后发一条消息**，格式：
+
+```
+✅ Clippings/<filename>.pdf
+索引完成（N chunks）
+```
+
+索引失败时第二行改为 `索引失败：<错误原因>`。

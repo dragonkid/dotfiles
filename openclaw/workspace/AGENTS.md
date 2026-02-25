@@ -50,33 +50,18 @@ Skills provide your tools. When you need one, check its `SKILL.md`. Keep local n
 
 HEARTBEAT.md controls what runs on each heartbeat. Keep it short to limit token burn.
 
-**Use heartbeat for:** batched periodic checks (inbox, calendar).
+**Use heartbeat for:** batched periodic checks.
 **Use cron for:** exact timing, isolated tasks, one-shot reminders.
 
 | Use Case | Recommended |
 |---|---|
-| 周期性检查（邮件、日历、通知） | Heartbeat |
+| 周期性检查 | Heartbeat |
 | 精确时间任务（每周一 9:00） | Cron (isolated) |
 | 一次性提醒 | Cron (main, --at) |
 | 需要不同模型/隔离上下文 | Cron (isolated) |
 
-**Reach out when:** important email arrived, calendar event <2h away.
 **Stay quiet when:** late night (23:00–08:00), nothing needs attention.
 
-## 🧬 Self-Improvement + Memory Maintenance (Weekly Cron Job)
+## 🧬 Self-Improvement + Memory Maintenance
 
-A weekly cron job triggers an isolated session to:
-
-**Memory Maintenance:**
-1. Read recent `memory/YYYY-MM-DD.md` files (last 7 days)
-2. Update `TOOLS.md` with tool/environment changes
-3. Update `RULES.md` or `AGENTS.md` with new behavioral lessons
-4. Remove outdated info from relevant files
-
-**Self-Improvement:**
-1. Analyze recent memory files for recurring issues or inefficiencies
-2. Reference Claude and OpenClaw best practices when proposing changes
-   - OpenClaw docs: `/usr/local/lib/node_modules/openclaw/docs`
-3. Draft proposed changes and send to user for approval before applying
-4. Never self-modify without explicit user confirmation
-5. Proposed changes may cover: SOUL.md, AGENTS.md, RULES.md, TOOLS.md
+每周一 09:00 自动触发，也可手动 `/self_improve`。详见 `skills/self-improve/SKILL.md`。

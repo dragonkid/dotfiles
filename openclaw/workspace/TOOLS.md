@@ -21,6 +21,8 @@
 | obsidian-research | `/obsidian_research` | 深度研究 + 头脑风暴 |
 | obsidian-link | `/obsidian_link` | 笔记关系分析 + wikilink 建议 |
 | obsidian-clipper | 自动（topic 3 裸 URL）| 抓取网页全文 + 图片 → Clippings/ |
+| obsidian-index | `/obsidian_index` | vault 语义索引（ChromaDB + bge-m3） |
+| self-improve | `/self_improve` | 自我改进 + 记忆维护 |
 | skill-creator | 手动 | 创建/打包新 skill |
 | todo | `/todo` | TODO 管理 |
 
@@ -30,7 +32,7 @@
 - Brave Search：已配置
 - Gateway restart：用 `gateway(action=restart)` 工具直接重启（需配置 `commands.restart=true`）
 - clawhub：`/usr/local/Cellar/node/25.6.1/bin/node $(which clawhub)`
-- 当前默认模型：`anthropic-custom/claude-sonnet-4-6`
+- 当前默认模型：`claude-sonnet-4-6`
 
 ## 重要教训
 

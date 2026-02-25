@@ -42,6 +42,18 @@
 
 ---
 
+## launchd 规则 (2026-02-25)
+
+1. **创建 plist 必须记录** - 每次创建 launchd plist 后，立即更新 TOOLS.md 的 launchd Agents 表格，包含 Label、plist 路径、用途、频率、日志路径
+
+---
+
+## 安装规则 (2026-02-25)
+
+1. **安装前必须征得同意** - 执行任何 `pip install`、`npm install`、`brew install` 等安装命令前，先说明要装什么、为什么，等用户确认后再执行
+
+---
+
 ## 信息查询规则 (2026-02-23)
 
 1. **回答问题前先搜索** - 回答任何问题前，先用 `mgrep search -w -a "<query>"` 获取最新信息，再开始回答；mgrep 不可用时降级到 web_search

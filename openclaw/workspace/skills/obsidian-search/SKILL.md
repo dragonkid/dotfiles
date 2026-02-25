@@ -12,15 +12,21 @@ Read `references/vault-rules.md` for vault conventions.
 
 ## Workflow
 
-1. Search all `.md` files in `~/Documents/second-brain` for content related to the query
-   - 优先用 `mgrep search -r -c -a "<query>" ~/Documents/second-brain`（语义搜索，需先 `-s` sync；若 quota 超限则降级）
+1. **语义搜索（优先）**：用 ChromaDB 索引搜索
+   ```bash
+   python3 ~/.openclaw/workspace/scripts/vault_search.py "<query>" --top 5
+   ```
+   - 若索引不存在或报错，提示用户先运行 `/obsidian_index` 建立索引
    - 降级方案：`grep -r -l -i "<terms>" ~/Documents/second-brain/ --include="*.md"` excluding `.obsidian/` and `.claude/`
-   - Try multiple search terms (synonyms, Chinese/English variants)
-2. Read top matching notes (up to 5)
+
+2. Read top matching notes (up to 5)，获取完整内容
+
 3. For each match, show:
    - File path (relative to vault root)
    - Key relevant excerpt (2-3 lines)
+
 4. Synthesize a comprehensive answer citing notes with `[[wikilinks]]`
+
 5. If information is sparse, note what's missing and suggest using `/research` to explore the topic
 
 ## Command

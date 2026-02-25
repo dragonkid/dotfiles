@@ -38,6 +38,21 @@
 - `openclaw configure` wizard 有时不能正确保存配置，用 `gateway config.patch` 更可靠
 - clawhub install 默认装到 `~/.openclaw/workspace/skills/`
 
+## launchd Agents
+
+| Label | plist 路径 | 用途 | 频率 | 日志 |
+|---|---|---|---|---|
+| com.dk.vault-index | `~/Library/LaunchAgents/com.dk.vault-index.plist` | Obsidian vault 增量语义索引 | 每小时 | `~/.openclaw/workspace/logs/vault-index.log` |
+| com.dk.secondbrain-sync | `~/Library/LaunchAgents/com.dk.secondbrain-sync.plist` | Google Drive → iCloud rsync 同步 Second Brain | 每分钟 | `/tmp/secondbrain-sync.log` |
+
+管理命令：
+```bash
+launchctl start com.dk.vault-index   # 手动触发
+launchctl stop com.dk.vault-index    # 停止
+launchctl unload ~/Library/LaunchAgents/com.dk.vault-index.plist  # 注销
+launchctl load ~/Library/LaunchAgents/com.dk.vault-index.plist    # 重新注册
+```
+
 ## Cron Jobs
 
 | Job | ID | 时间 | 用途 |

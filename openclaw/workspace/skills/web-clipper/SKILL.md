@@ -102,6 +102,16 @@ tags:
 
 Brief message: file path, image count, one-line topic summary.
 
+### 7. 更新语义索引
+
+文件保存后，触发增量索引（只索引新文件，不影响其他笔记）：
+
+```bash
+python3 ~/.openclaw/workspace/scripts/vault_index.py --file "Clippings/<title>.md"
+```
+
+索引完成后无需额外通知用户。
+
 ## Platform-Specific Handling
 
 ### WeChat (mp.weixin.qq.com)

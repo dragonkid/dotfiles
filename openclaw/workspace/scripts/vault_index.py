@@ -12,7 +12,9 @@ import time
 import subprocess
 import urllib.request
 import warnings
+import logging
 warnings.filterwarnings("ignore")
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -82,18 +84,46 @@ BATCH_SIZE = 16   # ChromaDB 批量写入大小
 SKIP_DIRS = {".obsidian", ".claude", ".git", ".trash", "Attachments"}
 SKIP_SUFFIXES = {".excalidraw.md"}
 SUPPORTED_EXTS = {".md", ".pdf"}
-PDF_MAX_PAGES = 10  # PDF 只索引前 N 页
+PDF_MAX_PAGES = 15  # PDF 最多读取有效页数（跳过的不计入）
 
 
 # ── 分块 ──────────────────────────────────────────────────────────────────────
+
+SKIP_PDF_SECTIONS = {"acknowledgment", "acknowledgements", "dedication", "致谢", "献给"}
+
+
+def clean_pdf_text(text: str) -> str:
+    """清理 PDF 提取文本：压缩多余空格、规范换行"""
+    text = re.sub(r' {2,}', ' ', text)       # 多余空格
+    text = re.sub(r'\n{3,}', '\n\n', text)   # 多余空行
+    return text.strip()
+
+
+def is_skip_section(text: str) -> bool:
+    """判断是否为致谢/献词等不重要章节"""
+    first_line = text.strip().split('\n')[0].strip().lower()
+    return any(kw in first_line for kw in SKIP_PDF_SECTIONS)
+
 
 def extract_text(f: Path) -> str:
     """提取文件文本，支持 .md 和 .pdf"""
     if f.suffix == ".pdf":
         try:
             reader = PdfReader(str(f))
-            pages = reader.pages[:PDF_MAX_PAGES]
-            return "\n\n".join(p.extract_text() or "" for p in pages)
+            parts = []
+            valid_count = 0
+            for p in reader.pages:
+                if valid_count >= PDF_MAX_PAGES:
+                    break
+                t = p.extract_text() or ""
+                t = clean_pdf_text(t)
+                if not t:
+                    continue
+                if is_skip_section(t):
+                    continue  # 跳过不计入配额
+                parts.append(t)
+                valid_count += 1
+            return "\n\n".join(parts)
         except Exception:
             return ""
     return f.read_text(errors="ignore")

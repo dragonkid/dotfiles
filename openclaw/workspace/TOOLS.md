@@ -37,6 +37,7 @@
 - `trash` > `rm`，但 Google Drive 文件用 `rm` 更可靠
 - `openclaw configure` wizard 有时不能正确保存配置，用 `gateway config.patch` 更可靠
 - clawhub install 默认装到 `~/.openclaw/workspace/skills/`
+- **Browser 非 headless 模式**：LaunchAgent 启动 Chrome 需要 `TMPDIR` 环境变量，否则 GUI 初始化失败。修复：在 plist `EnvironmentVariables` 里加 `TMPDIR`（值用 `echo $TMPDIR` 获取）。如果重装系统需重新确认路径。
 
 ## launchd Agents
 

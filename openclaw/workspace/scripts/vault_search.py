@@ -7,6 +7,9 @@ Obsidian Vault Search
 import os
 import sys
 import argparse
+import subprocess
+import time
+import urllib.request
 from pathlib import Path
 
 import chromadb
@@ -16,9 +19,35 @@ from ollama import Client as OllamaClient
 VAULT = Path(os.path.realpath(Path.home() / "Documents/second-brain"))
 DB_PATH = Path.home() / ".openclaw/workspace/.vault_chroma"
 COLLECTION = "vault"
-EMBED_MODEL = "nomic-embed-text"
+EMBED_MODEL = "bge-m3"
 REMOTE_HOST = "http://192.168.1.100:11434"
 LOCAL_HOST = "http://localhost:11434"
+CHROMA_PORT = 8000
+
+
+def ensure_chroma_server():
+    try:
+        urllib.request.urlopen(f"http://127.0.0.1:{CHROMA_PORT}/api/v2/heartbeat", timeout=2)
+        return
+    except Exception:
+        pass
+    log_path = Path.home() / ".openclaw/workspace/logs/chroma-server.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(log_path, "a") as log:
+        subprocess.Popen(
+            ["uvx", "--python", "3.11", "--from", "chromadb==1.5.1",
+             "chroma", "run", "--path", str(DB_PATH),
+             "--host", "127.0.0.1", "--port", str(CHROMA_PORT)],
+            stdout=log, stderr=log, start_new_session=True
+        )
+    for _ in range(30):
+        time.sleep(1)
+        try:
+            urllib.request.urlopen(f"http://127.0.0.1:{CHROMA_PORT}/api/v2/heartbeat", timeout=2)
+            return
+        except Exception:
+            pass
+    raise RuntimeError("ChromaDB server 启动超时")
 
 
 def _pick_ollama_client(prefer_local: bool = False) -> OllamaClient:
@@ -33,13 +62,13 @@ def _pick_ollama_client(prefer_local: bool = False) -> OllamaClient:
     raise RuntimeError("无法连接到任何 Ollama 实例")
 
 
-client_ollama = _pick_ollama_client(prefer_local=True)  # embedding 优先本地
+client_ollama = _pick_ollama_client(prefer_local=False)  # embedding 优先远程
 
 
 def search(query: str, top: int = 5):
-    client = chromadb.PersistentClient(path=str(DB_PATH))
+    client = chromadb.HttpClient(host="127.0.0.1", port=8000)
     try:
-        col = client.get_collection(COLLECTION)
+        col = client.get_collection(COLLECTION, embedding_function=None)
     except Exception:
         print("索引不存在，请先运行 vault_index.py", file=sys.stderr)
         sys.exit(1)
@@ -50,10 +79,14 @@ def search(query: str, top: int = 5):
     docs = results["documents"][0]
     metas = results["metadatas"][0]
     distances = results["distances"][0]
+    # 将 L2 距离转为相对相关度（排名内归一化）
+    max_dist = max(distances) if distances else 1
+    min_dist = min(distances) if distances else 0
+    drange = max_dist - min_dist or 1
 
     for i, (doc, meta, dist) in enumerate(zip(docs, metas, distances)):
-        score = round((1 - dist) * 100, 1)
-        path = meta["path"]
+        score = round((1 - (dist - min_dist) / drange) * 100, 1)
+        path = meta["file"]
         # 取前 300 字作为摘要
         excerpt = doc[:300].replace("\n", " ").strip()
         print(f"\n[{i+1}] {path} (相关度 {score}%)")
@@ -65,4 +98,5 @@ if __name__ == "__main__":
     parser.add_argument("query", help="搜索关键词")
     parser.add_argument("--top", type=int, default=5, help="返回结果数量")
     args = parser.parse_args()
+    ensure_chroma_server()
     search(args.query, args.top)

@@ -12,15 +12,17 @@ import time
 import urllib.request
 from pathlib import Path
 
+import re
 import chromadb
 import ollama
 from ollama import Client as OllamaClient
+from rank_bm25 import BM25Okapi
 
 VAULT = Path(os.path.realpath(Path.home() / "Documents/second-brain"))
 DB_PATH = Path.home() / ".openclaw/workspace/.vault_chroma"
 COLLECTION = "vault"
 EMBED_MODEL = "bge-m3"
-REMOTE_HOST = "http://192.168.1.100:11434"
+REMOTE_HOST = "http://192.168.1.11:11434"
 LOCAL_HOST = "http://localhost:11434"
 CHROMA_PORT = 8000
 
@@ -65,7 +67,13 @@ def _pick_ollama_client(prefer_local: bool = True) -> OllamaClient:
 client_ollama = None  # 延迟初始化
 
 
-def search(query: str, top: int = 5, limit: int = 0):
+def tokenize(text: str) -> list[str]:
+    """简单中英文分词：中文按字，英文/数字按词"""
+    tokens = re.findall(r'[a-zA-Z0-9]+(?:\.[0-9]+)?|[\u4e00-\u9fff]', text.lower())
+    return tokens
+
+
+def search(query: str, top: int = 5, limit: int = 0, bm25_weight: float = 0.3):
     client = chromadb.HttpClient(host="127.0.0.1", port=8000)
     try:
         col = client.get_collection(COLLECTION, embedding_function=None)
@@ -73,22 +81,49 @@ def search(query: str, top: int = 5, limit: int = 0):
         print("索引不存在，请先运行 vault_index.py", file=sys.stderr)
         sys.exit(1)
 
+    # 向量搜索：取 top*3 候选
+    n_candidates = min(top * 3, col.count())
     embedding = client_ollama.embeddings(model=EMBED_MODEL, prompt=query)["embedding"]
-    results = col.query(query_embeddings=[embedding], n_results=top)
+    vec_results = col.query(query_embeddings=[embedding], n_results=n_candidates)
 
-    docs = results["documents"][0]
-    metas = results["metadatas"][0]
-    distances = results["distances"][0]
-    # 将 L2 距离转为相对相关度（排名内归一化）
-    max_dist = max(distances) if distances else 1
-    min_dist = min(distances) if distances else 0
+    vec_docs = vec_results["documents"][0]
+    vec_metas = vec_results["metadatas"][0]
+    vec_distances = vec_results["distances"][0]
+    vec_ids = vec_results["ids"][0]
+
+    # BM25 搜索：在候选集上计算
+    corpus = [tokenize(doc) for doc in vec_docs]
+    query_tokens = tokenize(query)
+    bm25 = BM25Okapi(corpus)
+    bm25_scores = bm25.get_scores(query_tokens)
+
+    # 归一化两组分数到 [0, 1]
+    # 向量：L2 距离越小越好，转为相似度
+    max_dist = max(vec_distances) if vec_distances else 1
+    min_dist = min(vec_distances) if vec_distances else 0
     drange = max_dist - min_dist or 1
+    vec_norm = [(1 - (d - min_dist) / drange) for d in vec_distances]
 
-    for i, (doc, meta, dist) in enumerate(zip(docs, metas, distances)):
-        score = round((1 - (dist - min_dist) / drange) * 100, 1)
+    # BM25：分数越高越好
+    bm25_max = max(bm25_scores) if max(bm25_scores) > 0 else 1
+    bm25_norm = [s / bm25_max for s in bm25_scores]
+
+    # 混合分数
+    alpha = 1 - bm25_weight  # 向量权重
+    combined = []
+    for i in range(len(vec_docs)):
+        score = alpha * vec_norm[i] + bm25_weight * bm25_norm[i]
+        combined.append((score, i))
+
+    combined.sort(reverse=True)
+
+    for rank, (score, i) in enumerate(combined[:top]):
+        doc = vec_docs[i]
+        meta = vec_metas[i]
         path = meta["file"]
+        display_score = round(score * 100, 1)
         excerpt = doc[:limit].replace("\n", " ").strip() + "..." if limit > 0 else doc
-        print(f"\n[{i+1}] {path} (相关度 {score}%)")
+        print(f"\n[{rank+1}] {path} (相关度 {display_score}%)")
         print(f"    {excerpt}")
         images = meta.get("images", "")
         if images:
@@ -101,10 +136,11 @@ def main():
     parser.add_argument("query", help="搜索关键词")
     parser.add_argument("--top", type=int, default=5, help="返回结果数量")
     parser.add_argument("--limit", type=int, default=0, help="截断每条结果的字符数（默认0=完整输出）")
+    parser.add_argument("--bm25-weight", type=float, default=0.3, help="BM25 权重（0=纯向量，1=纯BM25，默认0.3）")
     args = parser.parse_args()
-    client_ollama = _pick_ollama_client(prefer_local=True)
+    client_ollama = _pick_ollama_client(prefer_local=False)
     ensure_chroma_server()
-    search(args.query, args.top, args.limit)
+    search(args.query, args.top, args.limit, args.bm25_weight)
 
 if __name__ == "__main__":
     main()

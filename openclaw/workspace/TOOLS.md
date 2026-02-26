@@ -17,6 +17,7 @@
 
 | Skill | 触发方式 | 用途 |
 |---|---|---|
+| obsidian-capture | `/obsidian_capture` | 对话话题 → vault 笔记（含去重/合并/MOC 更新）|
 | obsidian-summary | `/obsidian_summary` | 文档摘要 → vault 五阶段工作流 |
 | obsidian-search | `/obsidian_search` | vault 搜索 + 知识问答 |
 | obsidian-research | `/obsidian_research` | 深度研究 + 头脑风暴 |

@@ -172,6 +172,8 @@ def analyze_image_with_claude(image_path: Path, client: dict, max_retries: int =
                                 "- 界面截图：每个功能区域为一个单元\n"
                                 "- 架构图/流程图：每个组件或阶段为一个单元\n"
                                 "- 最后的总结/观察也作为独立单元\n\n"
+                                "**每个单元必须自包含关键上下文**（如系统名称、时间范围、集群规模等），"
+                                "使其脱离其他单元也能被独立理解。不要依赖前文提供的背景信息。\n\n"
                                 "用中文回答。"
                             )}
                         ]
@@ -238,7 +240,7 @@ def enrich_text_with_images(text: str, image_cache: dict, vision_client: dict | 
                 print(f"    [vision] 解析失败: {img_name} → {e}")
                 return match.group(0)
         else:
-            print(f"\n    [vision] ⊘ 无缓存且无 vision client，跳过: {img_name}")
+            # 无缓存且无 vision client，静默跳过
             return match.group(0)
 
     enriched = re.sub(

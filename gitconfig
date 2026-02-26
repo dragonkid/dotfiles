@@ -26,10 +26,12 @@
     diffFilter = delta --color-only
 
 [delta]
-    navigate = true    # use n and N to move between diff sections
-    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-#    side-by-side = true
+    navigate = true
+    light = false
     line-numbers = true
+    wrap-max-lines = unlimited
+    syntax-theme = Monokai Extended
+    pager = less -RFX -+S
 
 [color "status"]
     added = green
@@ -52,8 +54,8 @@
 [difftool]
     prompt = false
 [pager]
-    diff = diff-so-fancy | less --tabs=1,5 -RFX
-    show = diff-so-fancy | less --tabs=1,5 -RFX
+    diff = delta
+    show = delta
 [diff "daff-csv"]
 	command = daff diff --git --output-format html --output /tmp/diff.html
 [merge "daff-csv"]

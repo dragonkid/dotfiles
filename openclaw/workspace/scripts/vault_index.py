@@ -62,9 +62,10 @@ def ensure_chroma_server():
     raise RuntimeError("ChromaDB server 启动超时")
 
 
-def _pick_ollama_client(prefer_local: bool = False) -> OllamaClient:
+def _pick_ollama_client(prefer_local: bool = False, remote_host: str = None) -> OllamaClient:
     """prefer_local=True 时优先本地，否则优先远程"""
-    hosts = [LOCAL_HOST, REMOTE_HOST] if prefer_local else [REMOTE_HOST, LOCAL_HOST]
+    remote = remote_host or REMOTE_HOST
+    hosts = [LOCAL_HOST, remote] if prefer_local else [remote, LOCAL_HOST]
     for host in hosts:
         try:
             c = OllamaClient(host=host)
@@ -132,7 +133,7 @@ def get_vision_client() -> dict | None:
     return None
 
 
-def analyze_image_with_claude(image_path: Path, client: dict) -> str:
+def analyze_image_with_claude(image_path: Path, client: dict, max_retries: int = 3, retry_delay: float = 5.0) -> str:
     """调用 Anthropic Messages API 分析图片（使用 requests 库）"""
     if image_path.stat().st_size > IMAGE_MAX_BYTES:
         return "[图片过大，跳过分析]"
@@ -142,27 +143,38 @@ def analyze_image_with_claude(image_path: Path, client: dict) -> str:
     media_type = media_map.get(suffix, "image/png")
     image_data = base64.standard_b64encode(image_path.read_bytes()).decode()
     import requests as _requests
-    resp = _requests.post(
-        f"{client['base_url']}/v1/messages",
-        json={
-            "model": client["model"],
-            "max_tokens": 1024,
-            "messages": [{
-                "role": "user",
-                "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                    {"type": "text", "text": "请详细描述这张图片的内容，包括所有可见的文字、数字、图表数据、监控指标等。用中文回答。"}
-                ]
-            }]
-        },
-        headers={
-            "Authorization": f"Bearer {client['api_key']}",
-            "anthropic-version": "2023-06-01",
-        },
-        timeout=60
-    )
-    resp.raise_for_status()
-    return resp.json()["content"][0]["text"]
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = _requests.post(
+                f"{client['base_url']}/v1/messages",
+                json={
+                    "model": client["model"],
+                    "max_tokens": 1024,
+                    "messages": [{
+                        "role": "user",
+                        "content": [
+                            {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
+                            {"type": "text", "text": "请详细分析这张图片，提取所有可见信息：\n1. 如果是监控/图表类图片：图表标题（title）、每个 Legend 项的名称及对应数值（均值/峰值/当前值等）、坐标轴单位、时间范围。\n2. 如果是截图/界面类图片：所有可见文字、按钮、菜单项、状态信息。\n3. 如果是文档/表格类图片：标题、所有行列数据、关键结论。\n4. 如果是代码/命令类图片：完整代码或命令内容。\n5. 通用：任何数字、错误信息、高亮内容都不要遗漏。\n用中文回答。"}
+                        ]
+                    }]
+                },
+                headers={
+                    "Authorization": f"Bearer {client['api_key']}",
+                    "anthropic-version": "2023-06-01",
+                },
+                timeout=60
+            )
+            resp.raise_for_status()
+            return resp.json()["content"][0]["text"]
+        except Exception as e:
+            last_err = e
+            if attempt < max_retries:
+                print(f"    [vision] 第{attempt}次失败: {e}，{retry_delay}s 后重试...")
+                time.sleep(retry_delay)
+            else:
+                print(f"    [vision] 已重试 {max_retries} 次，放弃")
+    raise last_err
 
 
 def find_image_file(image_name: str) -> Path | None:
@@ -193,18 +205,19 @@ def enrich_text_with_images(text: str, image_cache: dict, vision_client: dict | 
         img_hash = file_hash(img_file)
         size_kb = img_file.stat().st_size // 1024
         if img_hash in image_cache:
-            print(f"\n    [vision] ✓ 缓存命中: {img_name} ({size_kb}KB)")
             analysis = image_cache[img_hash]
+            print(f"\n    [vision] ✓ 缓存命中: {img_name} ({size_kb}KB)")
+            print(f"    [vision] 结果:\n{analysis}")
         else:
-            print(f"\n    [vision] → 分析中: {img_name} ({size_kb}KB) ...", end="", flush=True)
+            print(f"\n    [vision] → 触发解析: {img_name} ({size_kb}KB) ...", flush=True)
             try:
                 analysis = analyze_image_with_claude(img_file, vision_client)
                 image_cache[img_hash] = analysis
                 save_image_cache(image_cache)
-                preview = analysis[:80].replace("\n", " ")
-                print(f" 完成\n    [vision]   {preview}...")
+                print(f"    [vision] 解析完成: {img_name}")
+                print(f"    [vision] 结果:\n{analysis}")
             except Exception as e:
-                print(f" 失败: {e}")
+                print(f"    [vision] 解析失败: {img_name} → {e}")
                 analysis = f"[图片分析失败: {e}]"
         return f"[图片: {img_name}]\n{analysis}"
 
@@ -374,7 +387,7 @@ def file_hash(path: Path) -> str:
         return ""
 
 
-def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None, no_vision: bool = False):
+def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None, no_vision: bool = False, reset_image_cache: bool = False):
     client = chromadb.HttpClient(host="127.0.0.1", port=8000)
 
     # 视觉模型客户端
@@ -389,6 +402,10 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
             print("已清空旧索引")
         except Exception:
             pass
+    if reset_image_cache:
+        if IMAGE_CACHE_PATH.exists():
+            IMAGE_CACHE_PATH.unlink()
+            print("已清空图片分析缓存")
 
     col = client.get_or_create_collection(COLLECTION, embedding_function=None)
 
@@ -502,10 +519,14 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reset", action="store_true", help="清空重建索引")
+    parser.add_argument("--reset-image-cache", action="store_true", help="清空图片分析缓存（改了 prompt 后用）")
     parser.add_argument("--dry-run", action="store_true", help="只显示分块结果，不写入")
     parser.add_argument("--file", type=str, default=None, help="只索引指定文件（相对 vault 路径）")
     parser.add_argument("--no-vision", action="store_true", help="跳过图片分析")
+    parser.add_argument("--remote", type=str, default=None, help="Ollama remote host，如 http://192.168.1.200:11434")
     args = parser.parse_args()
+    if args.remote:
+        embed_client = _pick_ollama_client(prefer_local=False, remote_host=args.remote)
     if not args.dry_run:
         ensure_chroma_server()
-    index_vault(reset=args.reset, dry_run=args.dry_run, single_file=args.file, no_vision=args.no_vision)
+    index_vault(reset=args.reset, dry_run=args.dry_run, single_file=args.file, no_vision=args.no_vision, reset_image_cache=args.reset_image_cache)

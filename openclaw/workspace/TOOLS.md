@@ -11,6 +11,7 @@
 - 路径：`~/Documents/second-brain`（symlink → Google Drive）
 - Git：`/usr/local/data/second-brain.git`
 - 约定：见 `~/Documents/second-brain/CLAUDE.md`
+- **发送 vault 图片**：用 `~/.openclaw/workspace/vault-attachments/图片名.png`（软链接到 Attachments/，无需复制）
 
 ## Skills（位于 `~/.openclaw/workspace/skills/`）
 

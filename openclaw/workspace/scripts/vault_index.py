@@ -13,6 +13,8 @@ import subprocess
 import urllib.request
 import warnings
 import logging
+import json
+import base64
 warnings.filterwarnings("ignore")
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 from pathlib import Path
@@ -85,6 +87,132 @@ SKIP_DIRS = {".obsidian", ".claude", ".git", ".trash", "Attachments"}
 SKIP_SUFFIXES = {".excalidraw.md"}
 SUPPORTED_EXTS = {".md", ".pdf"}
 PDF_MAX_PAGES = 15  # PDF 最多读取有效页数（跳过的不计入）
+
+IMAGE_CACHE_PATH = Path.home() / ".openclaw/workspace/.image_analysis_cache.json"
+IMAGE_MAX_BYTES = 5 * 1024 * 1024  # 5MB，超过跳过
+OPENCLAW_CONFIG = Path.home() / ".openclaw/openclaw.json"
+
+
+# ── 图片分析 ──────────────────────────────────────────────────────────────────
+
+def load_image_cache() -> dict:
+    if IMAGE_CACHE_PATH.exists():
+        try:
+            return json.loads(IMAGE_CACHE_PATH.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def save_image_cache(cache: dict):
+    try:
+        IMAGE_CACHE_PATH.write_text(json.dumps(cache, ensure_ascii=False, indent=2))
+    except Exception:
+        pass
+
+
+def get_vision_client() -> dict | None:
+    """从 OpenClaw 配置读取默认供应商的 API 信息"""
+    try:
+        config = json.loads(OPENCLAW_CONFIG.read_text())
+        primary = config.get("agents", {}).get("defaults", {}).get("model", {}).get("primary", "")
+        if "/" not in primary:
+            return None
+        provider_name, model_id = primary.split("/", 1)
+        p = config.get("models", {}).get("providers", {}).get(provider_name)
+        if not p:
+            return None
+        return {
+            "base_url": p["baseUrl"],
+            "api_key": p["apiKey"],
+            "model": model_id,
+        }
+    except Exception as e:
+        print(f"[vision] 读取配置失败: {e}")
+    return None
+
+
+def analyze_image_with_claude(image_path: Path, client: dict) -> str:
+    """调用 Anthropic Messages API 分析图片（使用 requests 库）"""
+    if image_path.stat().st_size > IMAGE_MAX_BYTES:
+        return "[图片过大，跳过分析]"
+    suffix = image_path.suffix.lower()
+    media_map = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+                 ".gif": "image/gif", ".webp": "image/webp"}
+    media_type = media_map.get(suffix, "image/png")
+    image_data = base64.standard_b64encode(image_path.read_bytes()).decode()
+    import requests as _requests
+    resp = _requests.post(
+        f"{client['base_url']}/v1/messages",
+        json={
+            "model": client["model"],
+            "max_tokens": 1024,
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
+                    {"type": "text", "text": "请详细描述这张图片的内容，包括所有可见的文字、数字、图表数据、监控指标等。用中文回答。"}
+                ]
+            }]
+        },
+        headers={
+            "Authorization": f"Bearer {client['api_key']}",
+            "anthropic-version": "2023-06-01",
+        },
+        timeout=60
+    )
+    resp.raise_for_status()
+    return resp.json()["content"][0]["text"]
+
+
+def find_image_file(image_name: str) -> Path | None:
+    """在 vault 中查找图片，优先 Attachments/"""
+    p = VAULT / "Attachments" / image_name
+    if p.exists():
+        return p
+    for f in VAULT.rglob(image_name):
+        return f
+    return None
+
+
+def enrich_text_with_images(text: str, image_cache: dict, vision_client: dict | None) -> tuple[str, list[str]]:
+    """将 ![[img]] 替换为 Claude 分析结果，返回 (enriched_text, [rel_image_paths])"""
+    if vision_client is None:
+        return text, []
+    image_paths: list[str] = []
+
+    def replace_image(match):
+        img_name = match.group(1)
+        img_file = find_image_file(img_name)
+        if img_file is None:
+            print(f"\n    [vision] ⚠ 找不到图片: {img_name}")
+            return match.group(0)
+        rel = str(img_file.relative_to(VAULT))
+        if rel not in image_paths:
+            image_paths.append(rel)
+        img_hash = file_hash(img_file)
+        size_kb = img_file.stat().st_size // 1024
+        if img_hash in image_cache:
+            print(f"\n    [vision] ✓ 缓存命中: {img_name} ({size_kb}KB)")
+            analysis = image_cache[img_hash]
+        else:
+            print(f"\n    [vision] → 分析中: {img_name} ({size_kb}KB) ...", end="", flush=True)
+            try:
+                analysis = analyze_image_with_claude(img_file, vision_client)
+                image_cache[img_hash] = analysis
+                save_image_cache(image_cache)
+                preview = analysis[:80].replace("\n", " ")
+                print(f" 完成\n    [vision]   {preview}...")
+            except Exception as e:
+                print(f" 失败: {e}")
+                analysis = f"[图片分析失败: {e}]"
+        return f"[图片: {img_name}]\n{analysis}"
+
+    enriched = re.sub(
+        r'!\[\[([^\]]+\.(?:png|jpg|jpeg|gif|webp))\]\]',
+        replace_image, text, flags=re.IGNORECASE
+    )
+    return enriched, image_paths
 
 
 # ── 分块 ──────────────────────────────────────────────────────────────────────
@@ -197,19 +325,20 @@ def merge_short_chunks(chunks: list[dict], min_size: int = MIN_CHUNK_SIZE) -> li
     return merged
 
 
-def make_chunks(file_path: str, text: str) -> list[dict]:
-    """生成所有 chunks，每个 chunk 包含 heading_path 和 content"""
+def make_chunks(file_path: str, text: str, images: list[str] | None = None) -> list[dict]:
+    """生成所有 chunks，每个 chunk 包含 heading_path、content 和 images"""
+    images_str = ",".join(images) if images else ""
     heading_chunks = split_by_headings(text)
     result = []
     for heading_path, content in heading_chunks:
         if len(content) <= CHUNK_SIZE:
-            result.append({"file": file_path, "heading": heading_path, "content": content})
+            result.append({"file": file_path, "heading": heading_path, "content": content, "images": images_str})
         else:
             for sub in split_fixed(content):
-                result.append({"file": file_path, "heading": heading_path, "content": sub})
+                result.append({"file": file_path, "heading": heading_path, "content": sub, "images": images_str})
     if not result:
         for sub in split_fixed(text):
-            result.append({"file": file_path, "heading": "", "content": sub})
+            result.append({"file": file_path, "heading": "", "content": sub, "images": images_str})
     return merge_short_chunks(result)
 
 
@@ -245,8 +374,14 @@ def file_hash(path: Path) -> str:
         return ""
 
 
-def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None):
+def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None, no_vision: bool = False):
     client = chromadb.HttpClient(host="127.0.0.1", port=8000)
+
+    # 视觉模型客户端
+    vision_client = None if no_vision else get_vision_client()
+    if vision_client:
+        print(f"视觉分析: {vision_client['base_url']} / {vision_client['model']}")
+    image_cache = load_image_cache()
 
     if reset:
         try:
@@ -305,7 +440,11 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
             skipped += 1
             continue
 
-        chunks = make_chunks(rel, text)
+        # 图片分析：将 ![[img]] 替换为 Claude 描述，Clippings 目录跳过
+        vc = None if rel.startswith("Clippings/") else vision_client
+        text, img_paths = enrich_text_with_images(text, image_cache, vc)
+
+        chunks = make_chunks(rel, text, images=img_paths)
         if dry_run:
             print(f"  {rel}: {len(chunks)} chunks")
             continue
@@ -327,6 +466,7 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
                 "heading": chunk["heading"],
                 "hash": fhash,
                 "chunk_index": i,
+                "images": chunk.get("images", ""),
             }
 
         # 并发处理 chunks，批量写入
@@ -364,7 +504,8 @@ if __name__ == "__main__":
     parser.add_argument("--reset", action="store_true", help="清空重建索引")
     parser.add_argument("--dry-run", action="store_true", help="只显示分块结果，不写入")
     parser.add_argument("--file", type=str, default=None, help="只索引指定文件（相对 vault 路径）")
+    parser.add_argument("--no-vision", action="store_true", help="跳过图片分析")
     args = parser.parse_args()
     if not args.dry_run:
         ensure_chroma_server()
-    index_vault(reset=args.reset, dry_run=args.dry_run, single_file=args.file)
+    index_vault(reset=args.reset, dry_run=args.dry_run, single_file=args.file, no_vision=args.no_vision)

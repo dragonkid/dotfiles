@@ -91,6 +91,9 @@ def search(query: str, top: int = 5):
         excerpt = doc[:300].replace("\n", " ").strip()
         print(f"\n[{i+1}] {path} (相关度 {score}%)")
         print(f"    {excerpt}...")
+        images = meta.get("images", "")
+        if images:
+            print(f"    [images: {images}]")
 
 
 if __name__ == "__main__":

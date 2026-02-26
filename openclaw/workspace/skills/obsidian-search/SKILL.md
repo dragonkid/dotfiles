@@ -24,6 +24,7 @@ Read `references/vault-rules.md` for vault conventions.
 3. For each match, show:
    - File path (relative to vault root)
    - Key relevant excerpt (2-3 lines)
+   - If the result contains `[images: ...]`, read each image path (prefixed with vault root `~/Documents/second-brain/`) using the `read` tool and send them to the user
 
 4. Synthesize a comprehensive answer citing notes with `[[wikilinks]]`
 

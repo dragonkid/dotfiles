@@ -150,12 +150,30 @@ def analyze_image_with_claude(image_path: Path, client: dict, max_retries: int =
                 f"{client['base_url']}/v1/messages",
                 json={
                     "model": client["model"],
-                    "max_tokens": 1024,
+                    "max_tokens": 4096,
                     "messages": [{
                         "role": "user",
                         "content": [
                             {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                            {"type": "text", "text": "请详细分析这张图片，提取所有可见信息，**不要伪造图片中不存在的信息**：\n1. 如果是监控/图表类图片：图表标题（title）、每个 Legend 项的名称及对应数值（均值/峰值/当前值等）、坐标轴单位、时间范围。\n2. 如果是截图/界面类图片：所有可见文字、按钮、菜单项、状态信息。\n3. 如果是文档/表格类图片：标题、所有行列数据、关键结论。\n4. 如果是代码/命令类图片：完整代码或命令内容。\n5. 通用：任何数字、错误信息、高亮内容都不要遗漏。\n用中文回答。"}
+                            {"type": "text", "text": (
+                                "请详细分析这张图片，提取所有可见信息，**不要伪造图片中不存在的信息**：\n"
+                                "1. 如果是监控/图表类图片：图表标题（title）、每个 Legend 项的名称及对应数值（均值/峰值/当前值等）、坐标轴单位、时间范围。\n"
+                                "2. 如果是截图/界面类图片：所有可见文字、按钮、菜单项、状态信息。\n"
+                                "3. 如果是文档/表格类图片：标题、所有行列数据、关键结论。\n"
+                                "4. 如果是代码/命令类图片：完整代码或命令内容。\n"
+                                "5. 通用：任何数字、错误信息、高亮内容都不要遗漏。\n\n"
+                                "**重要格式要求：**\n"
+                                "在每个独立的信息单元之间插入分隔标记 `<!-- SPLIT -->`，每个单元用 `## 标题` 开头。\n"
+                                "根据图片类型选择合适的拆分粒度：\n"
+                                "- 监控面板/仪表盘：每个图表/面板为一个单元\n"
+                                "- 代码/命令截图：每个函数或功能模块为一个单元\n"
+                                "- 文档/文章截图：每个章节或段落为一个单元\n"
+                                "- 表格截图：每个逻辑分组为一个单元\n"
+                                "- 界面截图：每个功能区域为一个单元\n"
+                                "- 架构图/流程图：每个组件或阶段为一个单元\n"
+                                "- 最后的总结/观察也作为独立单元\n\n"
+                                "用中文回答。"
+                            )}
                         ]
                     }]
                 },
@@ -163,7 +181,7 @@ def analyze_image_with_claude(image_path: Path, client: dict, max_retries: int =
                     "Authorization": f"Bearer {client['api_key']}",
                     "anthropic-version": "2023-06-01",
                 },
-                timeout=60
+                timeout=120
             )
             resp.raise_for_status()
             return resp.json()["content"][0]["text"]
@@ -188,9 +206,9 @@ def find_image_file(image_name: str) -> Path | None:
 
 
 def enrich_text_with_images(text: str, image_cache: dict, vision_client: dict | None) -> tuple[str, list[str]]:
-    """将 ![[img]] 替换为 Claude 分析结果，返回 (enriched_text, [rel_image_paths])"""
-    if vision_client is None:
-        return text, []
+    """将 ![[img]] 替换为 Claude 分析结果，返回 (enriched_text, [rel_image_paths])
+    vision_client=None 时仍查 cache，只是不触发新的分析。
+    """
     image_paths: list[str] = []
 
     def replace_image(match):
@@ -207,19 +225,21 @@ def enrich_text_with_images(text: str, image_cache: dict, vision_client: dict | 
         if img_hash in image_cache:
             analysis = image_cache[img_hash]
             print(f"\n    [vision] ✓ 缓存命中: {img_name} ({size_kb}KB)")
-            print(f"    [vision] 结果:\n{analysis}")
-        else:
+            return f"[图片: {img_name}]\n{analysis}"
+        elif vision_client is not None:
             print(f"\n    [vision] → 触发解析: {img_name} ({size_kb}KB) ...", flush=True)
             try:
                 analysis = analyze_image_with_claude(img_file, vision_client)
                 image_cache[img_hash] = analysis
                 save_image_cache(image_cache)
                 print(f"    [vision] 解析完成: {img_name}")
-                print(f"    [vision] 结果:\n{analysis}")
+                return f"[图片: {img_name}]\n{analysis}"
             except Exception as e:
                 print(f"    [vision] 解析失败: {img_name} → {e}")
-                analysis = f"[图片分析失败: {e}]"
-        return f"[图片: {img_name}]\n{analysis}"
+                return match.group(0)
+        else:
+            print(f"\n    [vision] ⊘ 无缓存且无 vision client，跳过: {img_name}")
+            return match.group(0)
 
     enriched = re.sub(
         r'!\[\[([^\]]+\.(?:png|jpg|jpeg|gif|webp))\]\]',
@@ -375,7 +395,47 @@ def make_chunks(file_path: str, text: str, images: list[str] | None = None) -> l
         for sub in split_fixed(clean_text):
             result.append({"file": file_path, "heading": "", "content": sub, "images": images_str})
 
-    return merge_short_chunks(result) + image_chunks
+    # 对图片分析 chunk 按 <!-- SPLIT --> 标记拆分为独立单元
+    split_image_chunks = []
+    for ic in image_chunks:
+        content = ic["content"]
+        sections = [s.strip() for s in content.split('<!-- SPLIT -->') if s.strip()] \
+            if '<!-- SPLIT -->' in content else [content]
+
+        if len(sections) <= 1 and len(content) <= CHUNK_SIZE:
+            split_image_chunks.append(ic)
+        elif len(sections) <= 1:
+            # 无标记且超长，按 CHUNK_SIZE 硬切
+            for sub in split_fixed(content):
+                split_image_chunks.append({
+                    "file": ic["file"],
+                    "heading": ic["heading"],
+                    "content": sub,
+                    "images": ic["images"],
+                })
+        else:
+            for sec in sections:
+                if not sec:
+                    continue
+                first_line = sec.split('\n', 1)[0].lstrip('#').strip()
+                sub_heading = f"{ic['heading']} > {first_line}" if first_line else ic['heading']
+                if len(sec) <= CHUNK_SIZE:
+                    split_image_chunks.append({
+                        "file": ic["file"],
+                        "heading": sub_heading,
+                        "content": sec,
+                        "images": ic["images"],
+                    })
+                else:
+                    for sub in split_fixed(sec):
+                        split_image_chunks.append({
+                            "file": ic["file"],
+                            "heading": sub_heading,
+                            "content": sub,
+                            "images": ic["images"],
+                        })
+
+    return merge_short_chunks(result) + split_image_chunks
 
 
 # ── Embedding ─────────────────────────────────────────────────────────────────

@@ -77,7 +77,7 @@ def _pick_ollama_client(prefer_local: bool = False, remote_host: str = None) -> 
     raise RuntimeError("无法连接到任何 Ollama 实例（远程或本地）")
 
 
-embed_client = _pick_ollama_client(prefer_local=False)  # embedding 优先远程
+embed_client = None  # 延迟初始化，在 main 或首次使用时设置
 
 CHUNK_SIZE = 1800
 CHUNK_OVERLAP = 200
@@ -155,7 +155,7 @@ def analyze_image_with_claude(image_path: Path, client: dict, max_retries: int =
                         "role": "user",
                         "content": [
                             {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                            {"type": "text", "text": "请详细分析这张图片，提取所有可见信息：\n1. 如果是监控/图表类图片：图表标题（title）、每个 Legend 项的名称及对应数值（均值/峰值/当前值等）、坐标轴单位、时间范围。\n2. 如果是截图/界面类图片：所有可见文字、按钮、菜单项、状态信息。\n3. 如果是文档/表格类图片：标题、所有行列数据、关键结论。\n4. 如果是代码/命令类图片：完整代码或命令内容。\n5. 通用：任何数字、错误信息、高亮内容都不要遗漏。\n用中文回答。"}
+                            {"type": "text", "text": "请详细分析这张图片，提取所有可见信息，**不要伪造图片中不存在的信息**：\n1. 如果是监控/图表类图片：图表标题（title）、每个 Legend 项的名称及对应数值（均值/峰值/当前值等）、坐标轴单位、时间范围。\n2. 如果是截图/界面类图片：所有可见文字、按钮、菜单项、状态信息。\n3. 如果是文档/表格类图片：标题、所有行列数据、关键结论。\n4. 如果是代码/命令类图片：完整代码或命令内容。\n5. 通用：任何数字、错误信息、高亮内容都不要遗漏。\n用中文回答。"}
                         ]
                     }]
                 },
@@ -339,9 +339,31 @@ def merge_short_chunks(chunks: list[dict], min_size: int = MIN_CHUNK_SIZE) -> li
 
 
 def make_chunks(file_path: str, text: str, images: list[str] | None = None) -> list[dict]:
-    """生成所有 chunks，每个 chunk 包含 heading_path、content 和 images"""
+    """生成所有 chunks，每个 chunk 包含 heading_path、content 和 images。
+    图片分析内容单独作为完整 chunk，不参与普通分块。
+    """
     images_str = ",".join(images) if images else ""
-    heading_chunks = split_by_headings(text)
+
+    # 先把图片分析块提取出来，替换为占位符
+    image_chunks = []
+    image_pattern = re.compile(r'\[图片: ([^\]]+)\]\n(.*?)(?=\n\[图片: |\Z)', re.DOTALL)
+
+    def extract_image(m):
+        img_name = m.group(1)
+        analysis = m.group(2).strip()
+        if analysis:
+            image_chunks.append({
+                "file": file_path,
+                "heading": f"图片分析: {img_name}",
+                "content": f"[图片: {img_name}]\n{analysis}",
+                "images": img_name,
+            })
+        return ""  # 从主文本中移除
+
+    clean_text = image_pattern.sub(extract_image, text)
+
+    # 对剩余文本正常分块
+    heading_chunks = split_by_headings(clean_text)
     result = []
     for heading_path, content in heading_chunks:
         if len(content) <= CHUNK_SIZE:
@@ -350,9 +372,10 @@ def make_chunks(file_path: str, text: str, images: list[str] | None = None) -> l
             for sub in split_fixed(content):
                 result.append({"file": file_path, "heading": heading_path, "content": sub, "images": images_str})
     if not result:
-        for sub in split_fixed(text):
+        for sub in split_fixed(clean_text):
             result.append({"file": file_path, "heading": "", "content": sub, "images": images_str})
-    return merge_short_chunks(result)
+
+    return merge_short_chunks(result) + image_chunks
 
 
 # ── Embedding ─────────────────────────────────────────────────────────────────
@@ -366,10 +389,11 @@ def build_doc_text(chunk: dict) -> str:
     parts.append(chunk["content"])
     return "\n".join(parts)
 
-def get_embedding(text: str) -> list[float]:
+def get_embedding(text: str, client=None) -> list[float]:
+    c = client or embed_client
     for attempt in range(3):
         try:
-            resp = embed_client.embeddings(model=EMBED_MODEL, prompt=text[:4000])
+            resp = c.embeddings(model=EMBED_MODEL, prompt=text[:4000])
             return resp["embedding"]
         except Exception:
             if attempt == 2:
@@ -387,14 +411,13 @@ def file_hash(path: Path) -> str:
         return ""
 
 
-def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None, no_vision: bool = False, reset_image_cache: bool = False):
+def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = None, no_vision: bool = False, reset_image_cache: bool = False, ollama_client=None):
     client = chromadb.HttpClient(host="127.0.0.1", port=8000)
 
     # 视觉模型客户端
     vision_client = None if no_vision else get_vision_client()
     if vision_client:
         print(f"视觉分析: {vision_client['base_url']} / {vision_client['model']}")
-    image_cache = load_image_cache()
 
     if reset:
         try:
@@ -406,6 +429,8 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
         if IMAGE_CACHE_PATH.exists():
             IMAGE_CACHE_PATH.unlink()
             print("已清空图片分析缓存")
+
+    image_cache = load_image_cache()  # 清空后再加载
 
     col = client.get_or_create_collection(COLLECTION, embedding_function=None)
 
@@ -516,7 +541,8 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
     print(f"\n完成：处理 {added} 个文件，跳过 {skipped}，chunk 错误 {errors}")
 
 
-if __name__ == "__main__":
+def main():
+    global embed_client
     parser = argparse.ArgumentParser()
     parser.add_argument("--reset", action="store_true", help="清空重建索引")
     parser.add_argument("--reset-image-cache", action="store_true", help="清空图片分析缓存（改了 prompt 后用）")
@@ -527,6 +553,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.remote:
         embed_client = _pick_ollama_client(prefer_local=False, remote_host=args.remote)
+    else:
+        embed_client = _pick_ollama_client(prefer_local=False)
     if not args.dry_run:
         ensure_chroma_server()
     index_vault(reset=args.reset, dry_run=args.dry_run, single_file=args.file, no_vision=args.no_vision, reset_image_cache=args.reset_image_cache)
+
+if __name__ == "__main__":
+    main()

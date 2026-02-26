@@ -50,11 +50,11 @@ def ensure_chroma_server():
     raise RuntimeError("ChromaDB server 启动超时")
 
 
-def _pick_ollama_client(prefer_local: bool = False) -> OllamaClient:
+def _pick_ollama_client(prefer_local: bool = True) -> OllamaClient:
     hosts = [LOCAL_HOST, REMOTE_HOST] if prefer_local else [REMOTE_HOST, LOCAL_HOST]
     for host in hosts:
         try:
-            c = OllamaClient(host=host)
+            c = OllamaClient(host=host, timeout=5.0)
             c.list()
             return c
         except Exception:
@@ -62,10 +62,10 @@ def _pick_ollama_client(prefer_local: bool = False) -> OllamaClient:
     raise RuntimeError("无法连接到任何 Ollama 实例")
 
 
-client_ollama = _pick_ollama_client(prefer_local=False)  # embedding 优先远程
+client_ollama = None  # 延迟初始化
 
 
-def search(query: str, top: int = 5):
+def search(query: str, top: int = 5, limit: int = 0):
     client = chromadb.HttpClient(host="127.0.0.1", port=8000)
     try:
         col = client.get_collection(COLLECTION, embedding_function=None)
@@ -87,19 +87,24 @@ def search(query: str, top: int = 5):
     for i, (doc, meta, dist) in enumerate(zip(docs, metas, distances)):
         score = round((1 - (dist - min_dist) / drange) * 100, 1)
         path = meta["file"]
-        # 取前 300 字作为摘要
-        excerpt = doc[:300].replace("\n", " ").strip()
+        excerpt = doc[:limit].replace("\n", " ").strip() + "..." if limit > 0 else doc
         print(f"\n[{i+1}] {path} (相关度 {score}%)")
-        print(f"    {excerpt}...")
+        print(f"    {excerpt}")
         images = meta.get("images", "")
         if images:
             print(f"    [images: {images}]")
 
 
-if __name__ == "__main__":
+def main():
+    global client_ollama
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="搜索关键词")
     parser.add_argument("--top", type=int, default=5, help="返回结果数量")
+    parser.add_argument("--limit", type=int, default=0, help="截断每条结果的字符数（默认0=完整输出）")
     args = parser.parse_args()
+    client_ollama = _pick_ollama_client(prefer_local=True)
     ensure_chroma_server()
-    search(args.query, args.top)
+    search(args.query, args.top, args.limit)
+
+if __name__ == "__main__":
+    main()

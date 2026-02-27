@@ -8,9 +8,15 @@ user-invocable: true
 
 Summarize a conversation topic into a structured Obsidian note at `~/Documents/second-brain`.
 
-Read `references/vault-structure.md` for directory mapping and conventions.
+Read `~/Documents/second-brain/CLAUDE.md` for vault conventions.
 
 ## Workflow
+
+### ⚠️ Vault 文件写入规则
+所有 vault 文件的创建和编辑必须通过 staging 目录中转（`~/.openclaw/workspace/.vault-staging/`）：
+1. 编辑已有文件：先 `cp` 到 staging，编辑完再 `cp` 回 vault
+2. 创建新文件：先在 staging 写好完整内容，再一次性 `cp` 到 vault
+3. 禁止直接在 vault 目录内多次写入同一文件
 
 ### 1. Extract & Draft
 
@@ -19,7 +25,7 @@ Read `references/vault-structure.md` for directory mapping and conventions.
   - Frontmatter: `date`, `tags`, `aliases`
   - Body: concise summary with key points, code examples if relevant
   - `## Related` section with wikilinks to known related concepts
-- Determine target directory from `references/vault-structure.md` mapping
+- Determine target directory from `CLAUDE.md` mapping
 - Show the user: proposed title, target path, and brief outline
 - Wait for confirmation before proceeding
 
@@ -56,7 +62,7 @@ If no related notes found, skip to step 3.
 ### 4. Update Links
 
 - For notes user chose "互链": add `[[new-note]]` to their `## Related` section (create section if missing), and add `[[existing-note]]` to the new note's Related
-- Find the matching MOC file from `references/vault-structure.md`
+- Find the matching MOC file from `CLAUDE.md`
 - Append the new note entry to the appropriate section in the MOC
 - If no matching MOC exists, skip MOC update
 

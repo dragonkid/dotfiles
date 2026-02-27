@@ -8,9 +8,15 @@ user-invocable: true
 
 Summarize external content and save structured notes to `~/Documents/second-brain`.
 
-Read `references/vault-rules.md` before writing any notes.
+Read `~/Documents/second-brain/CLAUDE.md` for vault conventions.
 
 ## Workflow
+
+### ⚠️ Vault 文件写入规则
+所有 vault 文件的创建和编辑必须通过 staging 目录中转（`~/.openclaw/workspace/.vault-staging/`）：
+1. 编辑已有文件：先 `cp` 到 staging，编辑完再 `cp` 回 vault
+2. 创建新文件：先在 staging 写好完整内容，再一次性 `cp` 到 vault
+3. 禁止直接在 vault 目录内多次写入同一文件
 
 ### Phase 1: Quick Preview
 

@@ -8,7 +8,7 @@ user-invocable: true
 
 Staged research with brainstorming dialogue, saving results to `~/Documents/second-brain`.
 
-Read `references/vault-rules.md` for vault conventions.
+Read `~/Documents/second-brain/CLAUDE.md` for vault conventions.
 
 ## Phase 1: Scope Definition
 
@@ -43,6 +43,12 @@ Read `references/vault-rules.md` for vault conventions.
 **STOP**: Present analysis, wait for approval.
 
 ## Phase 4: Consolidate + Save
+
+### ⚠️ Vault 文件写入规则
+所有 vault 文件的创建和编辑必须通过 staging 目录中转（`~/.openclaw/workspace/.vault-staging/`）：
+1. 编辑已有文件：先 `cp` 到 staging，编辑完再 `cp` 回 vault
+2. 创建新文件：先在 staging 写好完整内容，再一次性 `cp` 到 vault
+3. 禁止直接在 vault 目录内多次写入同一文件
 
 ### Step 4a: Handle existing related notes
 

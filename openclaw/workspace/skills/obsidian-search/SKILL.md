@@ -30,7 +30,7 @@ Search and answer from the Obsidian vault at `~/Documents/second-brain`.
 3. **综合回答**：基于搜索结果回答，引用笔记用 `[[wikilinks]]`
 
 4. **发送图片**：如果回答的信息来源于图片分析结果，必须同时发送原始图片：
-   - `cp` 图片到 `~/.openclaw/workspace/.vault-attachments/<name>.png`（文件名空格替换为下划线）
+   - `cp` 图片到 `~/.openclaw/workspace/.vault-staging/<name>.png`（文件名空格替换为下划线）
    - 用 message 工具发送，**`threadId` 从 `conversation_label` 中提取**（如 `topic:7` → `threadId=7`，无 topic 则不传）
 
 ## Command

@@ -494,7 +494,11 @@ def index_vault(reset: bool = False, dry_run: bool = False, single_file: str = N
 
     image_cache = load_image_cache()  # 清空后再加载
 
-    col = client.get_or_create_collection(COLLECTION, embedding_function=None)
+    col = client.get_or_create_collection(
+        COLLECTION,
+        embedding_function=None,
+        metadata={"hnsw:space": "cosine"},
+    )
 
     if single_file:
         # 只索引单个文件

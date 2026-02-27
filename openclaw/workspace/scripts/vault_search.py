@@ -91,28 +91,26 @@ def search(query: str, top: int = 5, limit: int = 0, bm25_weight: float = 0.3):
     vec_distances = vec_results["distances"][0]
     vec_ids = vec_results["ids"][0]
 
+    # cosine distance → cosine similarity: sim = 1 - distance
+    # 范围 [0, 1]，越高越相关
+    COSINE_DIST_THRESHOLD = 0.5  # cosine distance > 0.5 视为低置信度
+    vec_sims = [1 - d for d in vec_distances]
+
     # BM25 搜索：在候选集上计算
     corpus = [tokenize(doc) for doc in vec_docs]
     query_tokens = tokenize(query)
     bm25 = BM25Okapi(corpus)
     bm25_scores = bm25.get_scores(query_tokens)
 
-    # 归一化两组分数到 [0, 1]
-    # 向量：L2 距离越小越好，转为相似度
-    max_dist = max(vec_distances) if vec_distances else 1
-    min_dist = min(vec_distances) if vec_distances else 0
-    drange = max_dist - min_dist or 1
-    vec_norm = [(1 - (d - min_dist) / drange) for d in vec_distances]
-
-    # BM25：分数越高越好
+    # BM25 归一化到 [0, 1]
     bm25_max = max(bm25_scores) if max(bm25_scores) > 0 else 1
     bm25_norm = [s / bm25_max for s in bm25_scores]
 
-    # 混合分数
+    # 混合分数：向量用绝对 cosine similarity，BM25 用归一化分数
     alpha = 1 - bm25_weight  # 向量权重
     combined = []
     for i in range(len(vec_docs)):
-        score = alpha * vec_norm[i] + bm25_weight * bm25_norm[i]
+        score = alpha * vec_sims[i] + bm25_weight * bm25_norm[i]
         combined.append((score, i))
 
     combined.sort(reverse=True)
@@ -121,9 +119,12 @@ def search(query: str, top: int = 5, limit: int = 0, bm25_weight: float = 0.3):
         doc = vec_docs[i]
         meta = vec_metas[i]
         path = meta["file"]
+        cosine_dist = vec_distances[i]
         display_score = round(score * 100, 1)
+        low_confidence = cosine_dist > COSINE_DIST_THRESHOLD
+        tag = " ⚠️ 低置信度" if low_confidence else ""
         excerpt = doc[:limit].replace("\n", " ").strip() + "..." if limit > 0 else doc
-        print(f"\n[{rank+1}] {path} (相关度 {display_score}%)")
+        print(f"\n[{rank+1}] {path} (相关度 {display_score}%{tag})")
         print(f"    {excerpt}")
         images = meta.get("images", "")
         if images:

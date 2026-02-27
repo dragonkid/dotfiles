@@ -11,7 +11,7 @@
 - 路径：`~/Documents/second-brain`（symlink → Google Drive）
 - Git：`/usr/local/data/second-brain.git`
 - 约定：见 `~/Documents/second-brain/CLAUDE.md`
-- **发送 vault 图片**：用 `~/.openclaw/workspace/vault-attachments/图片名.png`（软链接到 Attachments/，无需复制）
+- **发送 vault 图片**：用 `~/.openclaw/workspace/.vault-staging/图片名.png`（cp 图片到此目录后通过 message 工具发送）
 
 ## Skills（位于 `~/.openclaw/workspace/skills/`）
 
@@ -38,6 +38,7 @@
 
 ## 重要教训
 
+- **编辑 vault 文件时**：先 `cp` 到 `~/.openclaw/workspace/.vault-staging/`，所有编辑完成后再 `cp` 回 vault。避免在 Google Drive FileProvider 目录内多次写入触发递归冲突副本。创建新文件同理：先在 staging 写好，再一次性 cp 到 vault。
 - `trash` > `rm`，但 Google Drive 文件用 `rm` 更可靠
 - `openclaw configure` wizard 有时不能正确保存配置，用 `gateway config.patch` 更可靠
 - clawhub install 默认装到 `~/.openclaw/workspace/skills/`

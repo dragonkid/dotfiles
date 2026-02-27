@@ -8,9 +8,13 @@ user-invocable: true
 
 Analyze a note and suggest `[[wikilinks]]` to related notes in `~/Documents/second-brain`.
 
-Read `references/vault-rules.md` for linking conventions.
+Read `~/Documents/second-brain/CLAUDE.md` for linking conventions.
 
 ## Workflow
+
+### ⚠️ Vault 文件写入规则
+编辑 vault 文件必须通过 staging 目录中转（`~/.openclaw/workspace/.vault-staging/`）：
+先 `cp` 到 staging，编辑完再 `cp` 回 vault。禁止直接在 vault 目录内多次写入同一文件。
 
 1. Read the target note
 2. Extract key topics, terms, and concepts

@@ -19,6 +19,13 @@ Image folder: `Attachments/<article-title>/`
 
 ## Workflow
 
+### ⚠️ Vault 文件写入规则
+所有 vault 文件的创建和编辑必须通过 staging 目录中转（`~/.openclaw/workspace/.vault-staging/`）：
+1. 编辑已有文件：先 `cp` 到 staging，编辑完再 `cp` 回 vault
+2. 创建新文件：先在 staging 写好完整内容，再一次性 `cp` 到 vault
+3. 禁止直接在 vault 目录内多次写入同一文件
+4. 图片文件同理：先下载到 staging，再 `cp -r` 到 `Attachments/`
+
 ### 1. Fetch article content
 
 Use browser tool (profile=openclaw) for best results — handles lazy-loaded images and JS-rendered content:

@@ -14,5 +14,5 @@ user-invocable: true
 读完后输出简短确认，列出已重新激活的关键规则，例如：
 - 回复语言（中文）
 - 选择题用 inline buttons
-- 图片发送规则（cp → .vault-attachments → message 工具，带 threadId）
+- 图片发送规则（cp → .vault-staging → message 工具，带 threadId）
 - 其他 SOUL.md 中的核心行为规则

@@ -77,7 +77,12 @@ If topic hint provided, use it to focus extraction. Otherwise infer from recent 
 ## Rules
 
 - Never modify existing notes without explicit user approval
-- Keep notes concise — one idea per note, not a conversation dump
 - Use the same language as the conversation (typically Chinese)
 - Preserve existing note structure when merging
 - Avoid duplicate entries in MOC and Related sections
+- **上下文完整性**：笔记的目标读者是"未来忘记了上下文的自己"。每个技术决策必须包含：
+  - 问题是什么（现象 + 为什么是问题）
+  - 考虑过哪些方案（简述各自优劣）
+  - 最终选了什么、为什么
+  - 关键参数/数据的来源和含义（不要出现没有上下文的裸数字）
+- **避免过度精简**：宁可多写两句解释"为什么"，也不要只写结论。如果一段话删掉背景后读不懂，就需要补充背景。

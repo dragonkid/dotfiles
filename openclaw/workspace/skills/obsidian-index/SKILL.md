@@ -1,6 +1,6 @@
 ---
 name: obsidian-index
-description: 手动触发 Obsidian vault 语义索引更新。触发命令：/obsidian_index
+description: Use when user wants to manually trigger a semantic index update for the Obsidian vault. Triggers on /obsidian_index.
 user-invocable: true
 ---
 

@@ -66,6 +66,7 @@ launchctl load ~/Library/LaunchAgents/com.dk.vault-index.plist    # 重新注册
 | weekly-self-improvement | 8bf068d4 | 每周一 09:00 (Asia/Shanghai) | 自我分析 → 提案给用户审核 |
 | daily-todo-reminder | adf8f141 | 每天 10:00 (Asia/Shanghai) | 读取 TODO.md 发提醒到 topic:1 |
 | healthcheck:security-audit | b86dcc27 | 每周三 09:00 (Asia/Shanghai) | 安全审计 + 版本检查 → topic:7 |
+| discord-thread-inactive-check | 95592f9c | 每周一 09:00 (Asia/Shanghai) | 检查 #general 超过 7 天不活跃的 thread，有则提示 /discord_thread_cleanup |
 
 ## Telegram Cron Delivery 格式
 

@@ -1,7 +1,6 @@
 ---
 name: todo
 description: Use when user wants to manage TODO items - adding tasks, listing pending items, marking done, removing, or searching. Triggers on /todo command or TODO-related requests.
-command-dispatch: tool
 user-invocable: true
 ---
 

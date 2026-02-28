@@ -1,6 +1,6 @@
 ---
 name: obsidian-capture
-description: Capture conversation topics as structured Obsidian notes. Triggers on /capture command, or when user says "记录到 obsidian", "总结到笔记", "保存到笔记", "capture this". Extracts the current discussion topic, creates a note with frontmatter and Related links, checks for existing related notes to merge or cross-link, and updates relevant MOC files.
+description: Use when user wants to save the current conversation topic to Obsidian vault. Triggers on /capture, or when user says "记录到 obsidian", "总结到笔记", "保存到笔记", "capture this".
 user-invocable: true
 ---
 

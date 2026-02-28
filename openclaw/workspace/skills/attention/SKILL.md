@@ -1,6 +1,6 @@
 ---
 name: attention
-description: 重新加载 agent 核心规则文件，刷新当前会话的行为规则记忆。触发命令：/attention
+description: Use when agent behavior seems off or rules need refreshing. Triggers on /attention.
 user-invocable: true
 ---
 

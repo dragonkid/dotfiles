@@ -1,7 +1,6 @@
 ---
 name: self-improve
 description: 手动触发自我改进与记忆维护。分析近期 memory 文件，维护工作区文件，提出改进提案。触发方式：/self_improve 或用户说"自我改进"、"self improve"。
-command-dispatch: tool
 user-invocable: true
 ---
 

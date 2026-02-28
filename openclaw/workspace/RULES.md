@@ -62,6 +62,6 @@
 
 ## UI 交互规则 (2026-02-22)
 
-1. **选择题用 inline buttons** - 使用 Telegram inline buttons，不让用户打字回复
+1. **选择题用交互组件** - 用 components (buttons/select menu)，不让用户打字回复
 2. **Button 文字要简短** - 如 "1 选项A"，详细说明放消息正文，避免截断
-3. **发送方式** - inline buttons 用 message 工具（action=send，带 buttons 参数）
+3. **发送方式** - 用 `message` tool 的 `components` param

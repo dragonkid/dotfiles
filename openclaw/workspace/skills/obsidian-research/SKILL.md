@@ -25,7 +25,7 @@ Read `~/Documents/second-brain/CLAUDE.md` for vault conventions.
 
 ## Phase 2: Survey + Exploration
 
-1. Use `web_search` + `web_fetch` for each approved area
+1. Use **`mgrep --web "<query>"`** 搜索每个研究方向，找到相关 URL；用 **`web_fetch`** 获取页面内容
 2. Cross-reference with existing vault notes
 3. Rank areas by relevance
 4. Propose 2-3 approaches/perspectives with trade-offs

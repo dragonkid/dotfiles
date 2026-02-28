@@ -20,7 +20,11 @@ Read `~/Documents/second-brain/CLAUDE.md` for vault conventions.
 
 ### Phase 1: Quick Preview
 
-1. Fetch content from URL (`web_fetch`) or read provided text / existing Clipping
+1. Fetch content:
+   - 用户提供 URL（普通网页）→ 优先 `web_fetch`，失败再用 browser（profile=openclaw）
+   - 用户提供 URL（微信/X/JS 渲染页面）→ 直接用 browser
+   - 需要搜索相关文章 → 先用 `mgrep --web "<query>"` 找到相关 URL，再用 `web_fetch` 获取内容
+   - 用户提供文本 / 已有 Clipping → 直接读取
 2. Present a detailed preview including:
    - Source link (original URL from frontmatter)
    - Content structure overview (major sections/chapters)

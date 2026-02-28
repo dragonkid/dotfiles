@@ -28,13 +28,15 @@ Image folder: `Attachments/<article-title>/`
 
 ### 1. Fetch article content
 
-**始终优先使用 browser tool（profile=openclaw）**，不要先尝试 `web_fetch`。浏览器能处理懒加载图片、JS 渲染内容、需要登录的页面（X/Twitter、微信等）。
+根据页面类型选择获取方式：
 
+- **普通网页** → 优先 `web_fetch`，失败或内容不完整再用 browser
+- **微信文章、X/Twitter、JS 渲染页面** → 直接用 browser（profile=openclaw）
+
+browser 流程：
 ```
 browser open → wait for load → scroll to bottom (trigger lazy load) → wait 3s → snapshot
 ```
-
-仅在 browser tool 完全不可用时才 fall back 到 `web_fetch`。
 
 For long articles, snapshot may truncate. Use JS evaluate to get remaining text:
 
@@ -147,8 +149,7 @@ N 张图 · 索引完成（N chunks）
 
 ### General Web Pages
 
-- Try `web_fetch` first for simple pages
-- Fall back to browser for JS-rendered content
+- 优先 `web_fetch`，内容不完整或 JS 渲染失败再用 browser
 - Look for `article`, `main`, `.post-content`, `.entry-content` selectors
 
 ### 5. 清理

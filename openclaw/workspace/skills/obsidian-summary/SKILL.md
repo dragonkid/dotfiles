@@ -123,7 +123,7 @@ After each file is processed (saved, skipped, or deleted), present inline button
 
 ## Auto-trigger
 
-In the "AI 工作台" topic 3 chat, if the user sends a message containing only a URL (no other text), automatically trigger Phase 1 (fetch + quick preview) without requiring `/summary`.
+In the Discord #obsidian-vault channel, if the user sends a message containing only a URL (no other text), automatically trigger Phase 1 (fetch + quick preview) without requiring `/summary`.
 
 ## Command
 

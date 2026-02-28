@@ -167,7 +167,7 @@ browser(action=close, profile=openclaw, targetId=<targetId>)
 
 ## PDF 处理流程
 
-当用户在 topic:3 发送 PDF 附件时（消息中包含文件路径或 Telegram file_id），触发此流程。
+当用户在 Discord #obsidian-vault channel 发送 PDF 附件时（消息中包含本地文件路径），触发此流程。
 
 ### 1. 获取文件
 

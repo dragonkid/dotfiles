@@ -31,7 +31,7 @@ Search and answer from the Obsidian vault at `~/Documents/second-brain`.
 
 4. **发送图片**：如果回答的信息来源于图片分析结果，必须同时发送原始图片：
    - `cp` 图片到 `~/.openclaw/workspace/.vault-staging/<name>.png`（文件名空格替换为下划线）
-   - 用 message 工具发送，**`threadId` 从 `conversation_label` 中提取**（如 `topic:7` → `threadId=7`，无 topic 则不传）
+   - 用 message 工具发送，`channel=discord`，`target` 从 inbound metadata 的 `chat_id` 中提取（格式 `channel:<id>`，取冒号后的 id）
 
 ## Command
 

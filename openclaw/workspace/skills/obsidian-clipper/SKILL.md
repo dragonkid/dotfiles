@@ -28,13 +28,13 @@ Image folder: `Attachments/<article-title>/`
 
 ### 1. Fetch article content
 
-Use browser tool (profile=openclaw) for best results — handles lazy-loaded images and JS-rendered content:
+**始终优先使用 browser tool（profile=openclaw）**，不要先尝试 `web_fetch`。浏览器能处理懒加载图片、JS 渲染内容、需要登录的页面（X/Twitter、微信等）。
 
 ```
 browser open → wait for load → scroll to bottom (trigger lazy load) → wait 3s → snapshot
 ```
 
-Fall back to `web_fetch` if browser is unavailable.
+仅在 browser tool 完全不可用时才 fall back 到 `web_fetch`。
 
 For long articles, snapshot may truncate. Use JS evaluate to get remaining text:
 

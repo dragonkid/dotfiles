@@ -1,6 +1,6 @@
 ---
 name: obsidian-clipper
-description: Clip web articles to Obsidian vault with full content and images. Use when user sends a URL and wants to save it to Obsidian, or says "clip this", "save to Obsidian", "保存到 Obsidian", "clip 到 vault" etc. Also auto-triggers in "AI 工作台" topic 3 when user sends a message containing only a URL or a PDF file attachment. Handles WeChat articles, X/Twitter articles, general web pages, and PDF files. Saves to Clippings/ folder by default.
+description: Clip web articles to Obsidian vault with full content and images. Use when user sends a URL and wants to save it to Obsidian, or says "clip this", "save to Obsidian", "保存到 Obsidian", "clip 到 vault" etc. Also auto-triggers in Discord channel #obsidian-vault (id:1477264581674926214) when user sends a message containing only a URL or a PDF file attachment. Handles WeChat articles, X/Twitter articles, general web pages, and PDF files. Saves to Clippings/ folder by default.
 user-invocable: true
 ---
 

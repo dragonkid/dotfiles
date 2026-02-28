@@ -22,10 +22,10 @@ fi
 
 # Suggest compact after threshold Edit/Write calls
 if [ "$count" -eq "$THRESHOLD" ]; then
-  echo "[StrategicCompact] $THRESHOLD Edit/Write calls reached - consider /compact if transitioning phases"
+  echo "[StrategicCompact] (SKIPPABLE - user may dismiss) $THRESHOLD Edit/Write calls reached - consider /compact if transitioning phases. Ask user before compacting."
 fi
 
 # Suggest at regular intervals after threshold
 if [ "$count" -gt "$THRESHOLD" ] && [ $((count % 25)) -eq 0 ]; then
-  echo "[StrategicCompact] $count Edit/Write calls - good checkpoint for /compact if context is stale"
+  echo "[StrategicCompact] (SKIPPABLE - user may dismiss) $count Edit/Write calls - good checkpoint for /compact if context is stale. Ask user before compacting."
 fi

@@ -321,15 +321,6 @@ Follow the skill exactly — dispatch the code-reviewer subagent to review the r
 
 Fix any Critical or Important issues found.
 
-### Gate
-
-Use AskUserQuestion to confirm:
-- Question: "Verification, security review, and code review complete. Ship this refactor?"
-- Options: "Continue to ship", "Fix issues first", "Stop workflow"
-
-If "Fix issues first": address remaining issues, then re-run the failing verification steps.
-If "Stop workflow": end here.
-
 ### Step 4: Update Project Docs
 
 Check if the following files need updates based on the changes made:
@@ -340,6 +331,24 @@ Check if the following files need updates based on the changes made:
 - **Other project docs**: CHANGELOG, API docs, deployment guides, docker-compose, etc.
 
 For each file: read current content, compare against actual changes, update only what is factually outdated or missing. Do not rewrite unchanged sections.
+
+### Gate
+
+Use AskUserQuestion to confirm:
+- Question: "Verification, security review, code review, and doc updates complete. Ship this refactor?"
+- Options: "Continue to ship", "Fix issues first", "Stop workflow"
+
+If "Fix issues first": address remaining issues, then re-run the failing verification steps.
+If "Stop workflow": end here.
+
+### CHECKPOINT — Do NOT announce phase complete until ALL items are confirmed:
+- [ ] Step 1: Verification Loop — ran and produced report
+- [ ] Step 2: Security Review — ran or confirmed N/A for this change
+- [ ] Step 3: Code Review — ran or confirmed N/A for this change
+- [ ] Step 4: Update Project Docs — checked CLAUDE.md, README, Makefile, .env.example, etc.
+- [ ] Gate: User confirmed to ship
+
+If any item is unchecked, go back and complete it now.
 
 Announce: **"Phase 6 complete — verified and reviewed. Moving to Phase 7."**
 

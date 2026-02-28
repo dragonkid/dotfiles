@@ -62,6 +62,7 @@
 
 ## UI 交互规则 (2026-02-22)
 
-1. **选择题用交互组件** - 用 components (buttons/select menu)，不让用户打字回复
-2. **Button 文字要简短** - 如 "1 选项A"，详细说明放消息正文，避免截断
-3. **发送方式** - 用 `message` tool 的 `components` param
+1. **需要用户决策时必须用组件** - 凡是选择、确认、方案选择，用 `message` tool 的 `components` param 发送，不能只列文字等用户打字回复
+2. **选择类型** - 固定动作（确认/跳过/继续等）用 buttons；动态数据列表（model/文件/provider 等）用 select menu
+3. **Button 文字要简短** - 详细说明放消息正文，避免截断
+4. **多问题合并** - 需要问多个问题时，合并成一条消息 + 一组 components，不连续追问

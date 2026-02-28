@@ -32,15 +32,6 @@
         ]
       },
       {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/suggest-compact.sh"
-          }
-        ]
-      },
-      {
         "matcher": "WebSearch",
         "hooks": [
           {

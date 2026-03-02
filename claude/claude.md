@@ -74,6 +74,11 @@ Which do you prefer?
 
 RIGHT: call `AskUserQuestion` with the options as structured choices
 
+## Notification (CRITICAL)
+- When needing user input (decisions, approvals, task completion), ALWAYS send macOS notification:
+  `osascript -e 'display notification "需要你的输入" with title "Claude Code" sound name "Glass"'`
+- VS Code terminal bell 不生效，必须用 osascript
+
 ## Response Style
 - Concise: omit filler and unnecessary explanation
 - Factual: prioritize accuracy over agreement

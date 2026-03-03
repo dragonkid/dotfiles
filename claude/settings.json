@@ -16,7 +16,11 @@
       "WebFetch(domain:api.github.com)",
       "Bash(git fetch:*)",
       "Bash(git merge:*)",
-      "Bash(ln:*)"
+      "Bash(ln:*)",
+      "Bash(git config:*)",
+      "Bash(gh repo:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git:*)"
     ],
     "defaultMode": "default"
   },

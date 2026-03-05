@@ -75,6 +75,16 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.message' | xargs -I{} osascript -e 'display notification \"{}\" with title \"Claude Code\" sound name \"Glass\"'"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

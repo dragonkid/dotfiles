@@ -81,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.message' | xargs -I{} osascript -e 'display notification \"{}\" with title \"Claude Code\" sound name \"Glass\"'"
+            "command": "jq -r '[.message, .cwd] | @tsv' | { IFS=$'\\t' read -r msg dir; osascript -e \"display notification \\\"$msg\\\" with title \\\"Claude Code\\\" subtitle \\\"$dir\\\" sound name \\\"Glass\\\"\"; }"
           }
         ]
       }

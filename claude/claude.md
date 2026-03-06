@@ -83,3 +83,4 @@ RIGHT: call `AskUserQuestion` with the options as structured choices
 - Concise: omit filler and unnecessary explanation
 - Factual: prioritize accuracy over agreement
 - Plain text: omit emojis unless requested
+- ASCII diagrams: always use English text to ensure proper alignment

@@ -44,6 +44,10 @@ This means `model` and `fastMode` exist in the working copy but are never commit
 
 `~/.gitconfig.local` (created by install scripts, not tracked) holds user email, signing keys, and credential helpers. Included via `[include]` in `gitconfig`.
 
+## Preferences
+
+- Diagrams: prefer Mermaid in documentation files; use ASCII art (English text for alignment) elsewhere
+
 ## Editing Guidelines
 
 - After modifying configs, verify `install.sh` still handles symlinks correctly

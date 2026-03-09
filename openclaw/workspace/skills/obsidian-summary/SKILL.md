@@ -93,9 +93,12 @@ tags: [clippings]
 
 Add domain note to relevant MOC's `## Unsorted` section. Create a new heading if a clear category exists.
 
-### Phase 5: Confirm
+### Phase 5: Confirm and Cleanup
 
-Report file paths and MOC update. Keep it brief.
+1. Report file paths and MOC update. Keep it brief.
+2. If source was a Clipping file, ask user: "是否删除原始 Clipping 文件？"
+   - **删除** → remove the Clipping file
+   - **保留** → keep the Clipping file
 
 ## Folder Mapping
 

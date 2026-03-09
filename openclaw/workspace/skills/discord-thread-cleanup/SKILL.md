@@ -12,8 +12,12 @@ user-invocable: true
 
 1. 从对话上下文获取目标 guild 和 channelId，缺失时询问用户
 2. 用 `thread-list`（含 `includeArchived: true`）列出所有子区
-3. 展示列表，询问用户：删除全部、按编号选择、还是取消
-4. 得到确认后用 `channel-delete` 逐条删除，报告进度
+3. **过滤排除列表**：移除名称包含以下关键词的子区（不区分大小写）：
+   - "claude-code"
+   - "codex"
+   - 其他需要保护的频道名称
+4. 展示过滤后的列表，询问用户：删除全部、按编号选择、还是取消
+5. 得到确认后用 `channel-delete` 逐条删除，报告进度
 
 ## 关键参数
 

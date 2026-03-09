@@ -193,3 +193,6 @@ export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
 export MAX_THINKING_TOKENS=10000
 
 [ -f ~/.zshrc_private ] && source ~/.zshrc_private
+
+# OpenClaw hash baseline update
+alias update-oc-baseline="shasum -a 256 ~/.openclaw/openclaw.json > ~/.openclaw/.config-baseline.sha256 && echo \"✅ Hash baseline updated\""

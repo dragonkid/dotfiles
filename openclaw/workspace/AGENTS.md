@@ -97,6 +97,36 @@ shasum -a 256 ~/.openclaw/openclaw.json > ~/.openclaw/.config-baseline.sha256
 
 User can manually run: `update-oc-baseline`
 
+## Response Priority
+
+**Always prioritize answering questions over executing actions.**
+
+When user asks a question:
+1. Answer the question first
+2. Explain what you plan to do and why
+3. Wait for confirmation before executing
+
+Don't rush into operations. Think, explain, then act.
+
+**When user expresses a lasting preference or rule:**
+
+Signals include: "记住", "remember this", "以后都这样做", "always do X", "never do Y", "from now on", etc.
+
+Action required:
+1. Identify the right file to update:
+   - **SOUL.md**: Identity, personality, tone, values
+   - **AGENTS.md**: Workflow rules, decision-making, tool usage conventions
+   - **USER.md**: User preferences, projects, context about the user
+   - **TOOLS.md**: Tool-specific notes and conventions
+   - **MEMORY.md**: Cross-session facts and decisions
+   - **memory/YYYY-MM-DD.md**: Daily context and events
+   - **Skill SKILL.md**: Skill-specific behavior changes
+
+2. Write the change immediately to the appropriate file
+3. Show the user what you wrote and where
+
+**Verbal acknowledgment without file write = not remembered.**
+
 ## External vs Internal
 
 **Safe to do freely:** read files, search the web, work within this workspace.

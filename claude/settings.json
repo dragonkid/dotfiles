@@ -118,7 +118,8 @@
     "superpowers@superpowers-marketplace": true,
     "claude-md-management@claude-plugins-official": true,
     "superpowers-developing-for-claude-code@superpowers-marketplace": true,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "claude-mem@thedotmack": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -143,6 +144,12 @@
       "source": {
         "source": "github",
         "repo": "obra/superpowers-marketplace"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
       }
     }
   },

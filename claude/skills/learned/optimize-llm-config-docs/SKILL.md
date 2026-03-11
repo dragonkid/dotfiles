@@ -175,11 +175,3 @@ Ask: "Can an LLM execute this directly?"
 **Mistake**: Splitting large skill into multiple independent skills (e.g., `/react-patterns`, `/vue-patterns`, `/svelte-patterns`)
 **Fix**: Use progressive disclosure pattern - one skill with subdocuments (e.g., `/frontend-patterns` reads `react.md`, `vue.md`, `svelte.md` on demand)
 
-## Real-World Impact
-
-Typical reduction: 25-40% content size while preserving all actionable information.
-
-This session results:
-- workflow.md: -31% (193 → 133 lines)
-- plugins.md: -46% (271 → 145 lines)
-- database-mcp.md: -27% (333 → 242 lines)

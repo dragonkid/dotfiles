@@ -40,6 +40,12 @@ Local wrapper is a temporary shim. Track removal:
 - Plugin skill exists but has no frontmatter
 - Need to invoke it via Skill tool in commands or workflows
 
+## Plugin Cache Location
+
+Plugin skills are cached at: `~/.claude/plugins/cache/<plugin-name>/<hash>/skills/`
+
+Inspect this path to find the original skill content when creating wrappers.
+
 ## When NOT to Use
 
 - Skill already has frontmatter — invoke directly

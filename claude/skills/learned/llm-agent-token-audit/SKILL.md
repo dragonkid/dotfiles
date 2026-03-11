@@ -14,7 +14,7 @@ frameworks that inject workspace files into system prompts.
 ## When to Use
 
 - Per-call token usage feels high or costs are growing
-- Agent framework injects workspace files (OpenClaw, custom setups)
+- Agent framework injects workspace files (Claude Code, custom setups)
 - Setting up new agent and want lean defaults
 - After adding skills/tools, want to check overhead
 

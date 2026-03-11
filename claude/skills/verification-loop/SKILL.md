@@ -176,15 +176,3 @@ Issues to Fix:
 2. ...
 ```
 
-## Continuous Mode
-
-For long sessions, run verification every 15 minutes or after major changes:
-
-- After completing each function
-- After finishing a component
-- Before moving to next task
-
-## Integration with Hooks
-
-This skill complements PostToolUse hooks but provides deeper verification.
-Hooks catch issues immediately; this skill provides comprehensive review.

@@ -30,30 +30,26 @@ Apply this decision pattern when:
 | Tightly coupled changes | Main Session | Coordination complexity |
 | Simple search (<20 files) | Main Session (Grep) | Overhead not worth it |
 
-## Core Pattern
+## Decision Tree
 
-```dot
-digraph task_decision {
-    "Complex Operation" [shape=box];
-    "Exploration phase?" [shape=diamond];
-    "Multiple independent subtasks?" [shape=diamond];
-    "Needs user input during work?" [shape=diamond];
-    "Specialized review needed?" [shape=diamond];
-    "Use Task (Explore)" [shape=box, style=filled, fillcolor=lightgreen];
-    "Use Task (parallel)" [shape=box, style=filled, fillcolor=lightgreen];
-    "Main Session" [shape=box, style=filled, fillcolor=lightblue];
-    "Use Task (specialized)" [shape=box, style=filled, fillcolor=lightgreen];
-
-    "Complex Operation" -> "Exploration phase?";
-    "Exploration phase?" -> "Use Task (Explore)" [label="YES"];
-    "Exploration phase?" -> "Multiple independent subtasks?" [label="NO"];
-    "Multiple independent subtasks?" -> "Use Task (parallel)" [label="YES"];
-    "Multiple independent subtasks?" -> "Needs user input during work?" [label="NO"];
-    "Needs user input during work?" -> "Main Session" [label="YES"];
-    "Needs user input during work?" -> "Specialized review needed?" [label="NO"];
-    "Specialized review needed?" -> "Use Task (specialized)" [label="YES"];
-    "Specialized review needed?" -> "Main Session" [label="NO"];
-}
+```
+Complex Operation
+  |
+  +-- Exploration phase? (>20 files)
+  |     YES --> Use Task (Explore agent)
+  |     NO  --+
+  |            |
+  +-- Multiple independent subtasks?
+  |     YES --> Use Task (parallel)
+  |     NO  --+
+  |            |
+  +-- Needs user input during work?
+  |     YES --> Main Session
+  |     NO  --+
+  |            |
+  +-- Specialized review needed?
+        YES --> Use Task (specialized)
+        NO  --> Main Session
 ```
 
 ## Implementation
@@ -148,21 +144,3 @@ Task(
 **Reality**: Multiple files that must be coordinated together need shared context
 **Fix**: Integrated changes → main session
 
-## Real-World Impact
-
-**Testing Results** (2026-02-07):
-
-**Baseline (without skill)**:
-- Subagent chose "Main Session + Grep" for 500-file search
-- Reasoning: "Grep is faster, simple search"
-- ❌ Missed: Should use Explore agent to save main context
-
-**With skill**:
-- Subagent correctly chose "Task (Explore agent)"
-- Referenced: ">20 files threshold", Quick Reference table, Common Mistake #2
-- ✅ Correct: Applied decision pattern accurately
-
-**This session usage**:
-- ✅ Used Explore agent for understanding claude/ structure
-- ✅ Did optimization in main session with user feedback
-- Demonstrates correct application of decision pattern

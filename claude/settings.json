@@ -119,7 +119,8 @@
     "claude-md-management@claude-plugins-official": true,
     "superpowers-developing-for-claude-code@superpowers-marketplace": true,
     "claude-code-setup@claude-plugins-official": true,
-    "claude-mem@thedotmack": true
+    "claude-mem@thedotmack": true,
+    "skill-creator@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {

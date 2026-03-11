@@ -1,111 +1,188 @@
 ---
 name: skill-creator
-description: Use when creating a new skill or updating an existing skill that extends agent capabilities with specialized workflows, tool integrations, or domain knowledge.
-license: Complete terms in LICENSE.txt
+description: Use when creating a new skill, updating an existing skill, or troubleshooting skill frontmatter, gating, or slash command registration issues in OpenClaw.
 ---
 
 # Skill Creator
 
-## 结构
+## Structure
 
 ```
 skill-name/
-├── SKILL.md          # 必须
-├── scripts/          # 可执行脚本（Python/Bash）
-├── references/       # 参考文档（按需加载）
-└── assets/           # 输出用文件（模板、图片等）
+├── SKILL.md          # Required
+├── scripts/          # Executable scripts (Python/Bash)
+├── references/       # Reference docs (loaded on demand)
+└── assets/           # Output files (templates, images, etc.)
 ```
 
-## 创建流程
+## Creation Workflow
 
-1. **理解需求** — 明确具体使用场景和触发条件
-2. **规划资源** — 确定需要哪些 scripts/references/assets
-3. **初始化** — 运行 `init_skill.py`（新建时）
-4. **编写内容** — 先写资源文件，再写 SKILL.md
-5. **直接安装** — 放到 `~/.openclaw/workspace/skills/` 重启即可
-6. **迭代优化** — 基于实际使用反馈改进
+1. **Understand requirements** — Clarify use cases and trigger conditions
+2. **Plan resources** — Decide which scripts/references/assets are needed
+3. **Initialize** — Run `init_skill.py` (for new skills)
+4. **Write content** — Write resource files first, then SKILL.md
+5. **Install locally** — Place in `~/.openclaw/workspace/skills/` and restart
+6. **Iterate** — Improve based on real usage feedback
 
-> 打包（`package_skill.py`）仅用于分发，本地使用不需要。
-> 注意：打包脚本不允许 `user-invocable`、`command-dispatch` 等 OpenClaw 扩展字段，会报验证错误。
+### Skill Loading Precedence
 
-## Frontmatter 字段（OpenClaw）
+Skills are loaded from three locations (highest to lowest priority):
+
+1. **Workspace skills**: `<workspace>/skills/`
+2. **Managed/local skills**: `~/.openclaw/skills/`
+3. **Bundled skills**: shipped with OpenClaw
+
+Additional directories can be configured via `skills.load.extraDirs` in `openclaw.json`.
+
+## Frontmatter Fields
+
+### Required
 
 ```yaml
 ---
-name: skill-name           # 必须，用连字符分隔
-description: ...           # 必须，见下方规范
-user-invocable: true       # 暴露为 slash command（默认 true）
-command-dispatch: tool     # 直接派发到工具，需同时提供 command-tool
-command-tool: <tool-name>  # command-dispatch: tool 时必填，否则注册被忽略
-disable-model-invocation: true  # 从模型 prompt 中排除（仍可用户调用）
-metadata: { "openclaw": { "requires": { "bins": ["rg"], "config": ["channels.discord"] } } }
+name: skill-name           # Hyphen-case identifier
+description: ...           # Trigger conditions only (see rules below)
 ---
 ```
 
-**⚠️ 常见坑：** `command-dispatch: tool` 缺少 `command-tool` 时，OpenClaw 会静默忽略整个 dispatch，slash command 不会注册（日志报 `Ignoring dispatch`）。
-
-## Description 编写规范
-
-**核心原则：只描述触发条件，绝不总结工作流程。**
-
-原因：description 含工作流摘要时，Claude 会直接按 description 行动，跳过读取 SKILL.md 正文。
+### Optional — Slash Command Control
 
 ```yaml
-# ❌ 错误：包含工作流摘要
-description: 创建 skill 时使用 - 初始化目录、编写 SKILL.md、打包分发
+user-invocable: true            # Expose as slash command (default: true)
+command-dispatch: tool           # Bypass model, dispatch directly to a tool
+command-tool: <tool-name>        # Required when command-dispatch: tool
+command-arg-mode: raw            # Forward raw args without parsing (default: raw)
+disable-model-invocation: true   # Exclude from model prompt (still user-invocable)
+```
 
-# ❌ 错误：太模糊
+### Optional — Other
+
+```yaml
+homepage: https://...      # "Website" link in macOS Skills UI
+version: 1.0.0             # Semver (for distribution)
+license: MIT               # License info (for distribution)
+allowed-tools: [...]       # AgentSkills spec field
+```
+
+### metadata.openclaw
+
+The `metadata` value **must be a single-line JSON object** (parser limitation).
+
+```yaml
+metadata: {"openclaw": {"emoji": "🛠️", "requires": {"bins": ["rg"]}, "install": [{"id": "brew", "kind": "brew", "formula": "ripgrep", "bins": ["rg"]}]}}
+```
+
+Complete sub-fields under `metadata.openclaw`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `always` | boolean | Skip all gates, always load |
+| `emoji` | string | Display emoji in macOS Skills UI |
+| `os` | string[] | Platform filter: `"darwin"`, `"linux"`, `"win32"` |
+| `skillKey` | string | Override config key (instead of `name`) |
+| `primaryEnv` | string | Env var for `skills.entries.<name>.apiKey` |
+| `requires.bins` | string[] | All must exist on PATH |
+| `requires.anyBins` | string[] | At least one must exist |
+| `requires.env` | string[] | Env vars that must be set |
+| `requires.config` | string[] | Dot-paths in openclaw.json that must be truthy |
+| `install` | object[] | Installer specs (see below) |
+
+### Install Specs
+
+Each entry in the `install` array supports `kind`:
+
+| Kind | Key Fields | Notes |
+|------|-----------|-------|
+| `brew` | `formula`, `bins` | Homebrew formula |
+| `node` | `bins` | Honors `skills.install.nodeManager` config |
+| `go` | `bins` | Auto-installs Go via brew if missing |
+| `uv` | `bins` | Python package manager |
+| `download` | `url`, `archive`, `targetDir` | Direct download |
+
+## Parser Limitations
+
+- Frontmatter keys must be **single-line only** (no multi-line values)
+- `metadata` must be a **single-line JSON object**
+- Use `{baseDir}` as a template variable to reference the skill folder path at runtime
+
+## Description Writing Rules
+
+**Core principle: describe trigger conditions only, never summarize the workflow.**
+
+When a description contains workflow steps, the model may act on the summary directly and skip reading SKILL.md.
+
+```yaml
+# WRONG: contains workflow summary
+description: Create skills - initialize directory, write SKILL.md, package for distribution
+
+# WRONG: too vague
 description: A guide for skills
 
-# ✅ 正确：只描述触发条件
-description: Use when creating or updating a skill that extends agent capabilities
+# CORRECT: trigger conditions only
+description: Use when creating or updating a skill, or troubleshooting frontmatter issues
 ```
 
-**编写要点：**
-- 以 `Use when...` 开头
-- 包含具体触发场景、症状、工具名（便于 Claude 搜索匹配）
-- 第三人称
-- 尽量控制在 500 字符以内
-- 不要总结 skill 的执行步骤
+**Guidelines:**
+- Start with `Use when...`
+- Include specific trigger scenarios, symptoms, and tool names
+- Third person
+- Keep under 500 characters
+- Do not summarize execution steps
 
-## Token 效率目标
+## Token Efficiency
 
-| 类型 | 目标 |
-|------|------|
-| 频繁加载的 skill | < 200 词 |
-| 一般 skill | < 500 词 |
-| SKILL.md 总行数 | < 500 行 |
+| Type | Target |
+|------|--------|
+| Frequently loaded skills | < 200 words |
+| General skills | < 500 words |
+| SKILL.md total lines | < 500 |
 
-**技巧：**
-- 大段参考文档移到 `references/` 按需加载
-- 一个好例子胜过多个平庸例子
-- 不要重复 Claude 已知的通用知识
+**Token cost formula:** `195 + Σ(97 + len(name) + len(description) + len(location))` chars per eligible skill. Approximately 4 chars per token.
 
-## SKILL.md 正文结构建议
+**Tips:**
+- Move large reference material to `references/` for on-demand loading
+- One good example beats multiple mediocre ones
+- Don't repeat general knowledge the model already has
+
+## SKILL.md Body Structure
 
 ```markdown
 # Skill Name
 
-## 概述（1-2 句）
+## Overview (1-2 sentences)
 
-## 工作流程 / 步骤
+## Workflow / Steps
 
-## 关键参数 / 配置
+## Key Parameters / Configuration
 
-## 常见错误
+## Common Errors
 ```
 
-详细模式说明见 `references/design-patterns.md`。
+See `references/design-patterns.md` for detailed patterns.
 
-## Discord Slash Command 注意事项
+## Gating / Load-Time Filtering
 
-新增 skill 重启 gateway 后，Discord 客户端有缓存，新命令不会立即出现。
-提醒用户按 `Cmd+R`（Mac）/ `Ctrl+R`（Windows/Linux）强制刷新。
+Skills are filtered at load time based on `metadata.openclaw`:
 
-## 反模式
+1. `always: true` → always included
+2. No `metadata.openclaw` → always eligible (unless disabled in config)
+3. `os` → checked against current platform
+4. `requires.bins` → all must exist on host PATH
+5. `requires.anyBins` → at least one must exist
+6. `requires.env` → must exist in environment or config
+7. `requires.config` → dot-path must be truthy in openclaw.json
+8. `enabled: false` in config → disabled regardless of gates
 
-- **叙事式写法** — "在某次会话中我们发现..." → 改为可复用的模式描述
-- **多语言示例** — 同一模式写 5 种语言 → 选最相关的一种
-- **总结工作流的 description** — 导致 Claude 跳过正文
-- **冗余说明** — 不要解释 Claude 已知的内容
-- **不必要的辅助文件** — 不要创建 README.md、CHANGELOG.md 等
+## Discord Slash Command Notes
+
+After adding a new skill and restarting the gateway, Discord clients cache commands. New commands won't appear immediately — remind users to press `Cmd+R` (Mac) / `Ctrl+R` (Windows/Linux) to force refresh.
+
+## Anti-Patterns
+
+- **Narrative style** — "During a session we discovered..." → Use reusable pattern descriptions
+- **Multi-language examples** — Same pattern in 5 languages → Pick the most relevant one
+- **Workflow summary in description** — Causes the model to skip reading the body
+- **Redundant explanations** — Don't explain what the model already knows
+- **Unnecessary auxiliary files** — Don't create README.md, CHANGELOG.md, etc.
+- **Multi-line metadata JSON** — Parser only supports single-line JSON objects
+- **`command-dispatch: tool` without `command-tool`** — OpenClaw silently ignores the dispatch; the slash command won't register (logs: `Ignoring dispatch`)

@@ -2,23 +2,23 @@
 
 ## Progressive Disclosure
 
-Skills 使用三级加载：
-1. **Metadata**（name + description）— 始终在 context 中
-2. **SKILL.md 正文** — skill 触发后加载
-3. **references/ 文件** — Claude 按需读取
+Skills use a three-level loading system:
+1. **Metadata** (name + description) — Always in context
+2. **SKILL.md body** — Loaded when the skill triggers
+3. **references/ files** — Read by the model on demand
 
-**原则：** SKILL.md 只放核心流程，详细内容放 references/。
+**Principle:** Keep only the core workflow in SKILL.md; move detailed content to references/.
 
-## Pattern 1: 高层指引 + references
+## Pattern 1: High-Level Guide + References
 
 ```markdown
-## 高级功能
+## Advanced Features
 
-- **表单填写**：见 [FORMS.md](FORMS.md)
-- **API 参考**：见 [REFERENCE.md](REFERENCE.md)
+- **Form filling**: See [FORMS.md](FORMS.md)
+- **API reference**: See [REFERENCE.md](REFERENCE.md)
 ```
 
-## Pattern 2: 按领域拆分
+## Pattern 2: Domain-Based Split
 
 ```
 bigquery-skill/
@@ -29,9 +29,9 @@ bigquery-skill/
     └── product.md
 ```
 
-用户问销售数据时，只读 sales.md。
+When the user asks about sales data, only sales.md is read.
 
-## Pattern 3: 按变体拆分
+## Pattern 3: Variant-Based Split
 
 ```
 cloud-deploy/
@@ -42,27 +42,27 @@ cloud-deploy/
     └── azure.md
 ```
 
-## Pattern 4: 条件加载
+## Pattern 4: Conditional Loading
 
 ```markdown
-## 编辑文档
+## Editing Documents
 
-简单编辑直接修改 XML。
+Simple edits: modify the XML directly.
 
-**追踪修改**：见 [REDLINING.md](REDLINING.md)
-**OOXML 细节**：见 [OOXML.md](OOXML.md)
+**Track changes**: See [REDLINING.md](REDLINING.md)
+**OOXML details**: See [OOXML.md](OOXML.md)
 ```
 
-## 自由度设置
+## Flexibility Levels
 
-| 场景 | 自由度 | 形式 |
-|------|--------|------|
-| 多种方案均可 | 高 | 文字说明 |
-| 有偏好模式但可变 | 中 | 伪代码/带参数脚本 |
-| 操作脆弱、顺序关键 | 低 | 具体脚本 |
+| Scenario | Flexibility | Format |
+|----------|------------|--------|
+| Multiple valid approaches | High | Text description |
+| Preferred pattern with variants | Medium | Pseudocode / parameterized script |
+| Fragile operations, order matters | Low | Concrete script |
 
-## references 文件规范
+## references/ File Guidelines
 
-- 超过 100 行的文件，顶部加目录
-- 只从 SKILL.md 直接引用，不要嵌套引用
-- 文件名语义化，如 `discord-api.md`、`schema.md`
+- Files over 100 lines should include a table of contents at the top
+- Only reference from SKILL.md directly — no nested references
+- Use semantic file names, e.g., `discord-api.md`, `schema.md`

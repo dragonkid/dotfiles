@@ -81,6 +81,7 @@ Main config must include:
 1. **Personal/machine-specific** → `.gitconfig.local`
 2. **Generic/shareable** → `gitconfig`
 3. **If uncertain** → put in `.gitconfig.local`
+4. **Credential helpers** → always `.gitconfig.local`, even with `--global` flag. The path to `gh`, `osxkeychain`, or other helpers varies across machines (`/usr/bin/gh` vs `/opt/homebrew/bin/gh`), so these are inherently machine-specific.
 
 ## Verification
 
@@ -108,6 +109,8 @@ file:/Users/yourname/.gitconfig.local	commit.gpgsign=true
 | Committing `.gitconfig.local` | Ensure it's excluded or outside repo |
 | Hardcoding machine paths | Use `.gitconfig.local` for path-specific configs |
 | Mixing personal/shared in one file | Separate using include mechanism |
+| Putting `credential.*.helper` in main gitconfig | Move to `.gitconfig.local` — helper paths differ per machine |
+| Using `git config --global` for credentials | Use `git config --file ~/.gitconfig.local` instead |
 
 ## Example
 

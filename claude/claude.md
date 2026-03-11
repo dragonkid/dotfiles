@@ -57,6 +57,13 @@ Examples:
 - If still uncertain after verification: explicitly state uncertainty and ask the user
 - NEVER make changes based on unverified assumptions
 
+## Problem Solving (CRITICAL)
+- Think from first principles: locate root cause BEFORE proposing solutions
+- Sequence: gather data → reproduce → identify root cause → then design fix
+- NEVER propose fixes based on assumptions — add debug logging, reproduce, analyze actual data first
+- When multiple solutions exist: rank by execution cost, recommend the simplest viable option
+- If a proposed fix is invalidated by new data, discard it entirely and re-analyze from the data
+
 ## Decision Principle (CRITICAL)
 - When presenting multiple options: research best practices first, mark the recommended option, and explain why
 - ALWAYS use `AskUserQuestion` tool when presenting options or asking for decisions, so the user can select directly instead of typing

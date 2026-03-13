@@ -86,6 +86,16 @@
         ]
       }
     ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nohup ~/.claude/hooks/claude-mem-export.sh </dev/null >>~/.claude-mem/export-stderr.log 2>&1 &"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "hooks": [

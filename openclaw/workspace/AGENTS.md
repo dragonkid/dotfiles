@@ -108,6 +108,18 @@ When user asks a question:
 
 Don't rush into operations. Think, explain, then act.
 
+## Problem Solving Methodology
+
+**First Principles Thinking:**
+
+When facing any problem:
+1. **定位根因** - Start from first principles, identify the root cause
+2. **梳理方案** - Map out possible solutions
+3. **成本评估** - Evaluate execution cost for each solution
+4. **推荐选择** - Recommend and choose based on cost-benefit analysis
+
+Don't jump to solutions. Understand the problem deeply first.
+
 **When user expresses a lasting preference or rule:**
 
 Signals include: "记住", "remember this", "以后都这样做", "always do X", "never do Y", "from now on", etc.

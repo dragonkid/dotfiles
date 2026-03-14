@@ -189,14 +189,29 @@ Announce: **"Phase 1 complete — scope analyzed and baseline established. Movin
 
 ---
 
-## Phase 2: Worktree Setup
+## Phase 2: Branch Setup
 
 Use AskUserQuestion to ask:
-- Question: "Create a git worktree for isolated development?"
-- Options: "Skip — work on current branch" (first/default), "Create worktree"
+- Question: "How to isolate this refactoring work?"
+- Options: "Create refactor branch (Recommended)", "Create worktree"
 
-- **If skip:** Continue on the current branch.
-- **If create worktree:** Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+### If refactor branch:
+
+Create and switch to a new branch from the current HEAD:
+
+```bash
+# Derive branch name from refactoring goal (kebab-case, max 50 chars)
+# e.g., "Extract auth logic" → refactor/extract-auth-logic
+git checkout -b refactor/<refactor-slug>
+```
+
+Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 7.
+
+### If worktree:
+
+Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+
+Record `BRANCH_MODE=worktree` for Phase 7.
 
 Announce: **"Phase 2 complete. Moving to Phase 3."**
 
@@ -231,7 +246,7 @@ Remember the user's execution mode choice for Phase 4.
 
 Before suggesting compact, ensure:
 1. Plan file is saved to `.plan/`
-2. TodoWrite records: test baseline, affected files, execution mode choice, current phase
+2. TodoWrite records: test baseline, affected files, BRANCH_MODE (branch/worktree), base branch name, execution mode choice, current phase
 
 Then suggest: **"The scope analysis and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in TodoWrite and .plan/. After compact, I'll recover context by reading those files."**
 
@@ -363,5 +378,7 @@ Follow the skill exactly. It will:
 2. Present 4 options: merge locally / push + PR / keep as-is / discard
 3. Execute the chosen option
 4. Clean up worktree if applicable
+
+**Default recommendation:** When presenting the 4 options, recommend "Push and create a Pull Request" as the default choice — this is the safest integration path since it allows code review before merging.
 
 Announce: **"Refactor workflow complete."**

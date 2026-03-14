@@ -56,14 +56,29 @@ Ask the user for the design document path or description, then proceed directly 
 
 ---
 
-## Phase 2: Worktree Setup
+## Phase 2: Branch Setup
 
 Use AskUserQuestion to ask:
-- Question: "Create a git worktree for isolated development?"
-- Options: "Skip — work on current branch" (first/default), "Create worktree"
+- Question: "How to isolate this feature work?"
+- Options: "Create feature branch (Recommended)", "Create worktree"
 
-- **If skip:** Continue on the current branch.
-- **If create worktree:** Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+### If feature branch:
+
+Create and switch to a new branch from the current HEAD:
+
+```bash
+# Derive branch name from feature request (kebab-case, max 50 chars)
+# e.g., "Add OAuth2 login" → feat/add-oauth2-login
+git checkout -b feat/<feature-slug>
+```
+
+Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 6.
+
+### If worktree:
+
+Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+
+Record `BRANCH_MODE=worktree` for Phase 6.
 
 Announce: **"Phase 2 complete. Moving to Phase 3."**
 
@@ -94,7 +109,7 @@ Remember the user's execution mode choice for Phase 4.
 
 Before suggesting compact, ensure:
 1. Design document and plan file are saved to `.plan/`
-3. TodoWrite records: worktree choice, execution mode choice, current phase
+2. TodoWrite records: BRANCH_MODE (branch/worktree), base branch name, execution mode choice, current phase
 
 Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in .plan/ and TodoWrite. After compact, I'll recover context by reading those files."**
 
@@ -191,5 +206,7 @@ Follow the skill exactly. It will:
 2. Present 4 options: merge locally / push + PR / keep as-is / discard
 3. Execute the chosen option
 4. Clean up worktree if applicable
+
+**Default recommendation:** When presenting the 4 options, recommend "Push and create a Pull Request" as the default choice — this is the safest integration path since it allows code review before merging.
 
 Announce: **"Feature workflow complete."**

@@ -121,7 +121,6 @@
     "code-review@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": false,
     "mgrep@Mixedbread-Grep": true,

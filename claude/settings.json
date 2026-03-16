@@ -163,7 +163,6 @@
       }
     }
   },
-  "language": "中文",
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "mcpServers": {
@@ -174,5 +173,7 @@
         "--extension"
       ]
     }
-  }
+  },
+  "teammateMode": "splite-panes",
+  "compactInstructions": "Focus on code changes and test results"
 }

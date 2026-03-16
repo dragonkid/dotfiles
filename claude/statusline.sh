@@ -34,7 +34,23 @@ fmt_tok() {
   else printf '%d' "$n"; fi
 }
 
-# --- Model badge: [vX.Y Model | Provider] ---
+# --- Output speed (ms precision via perl, computed early for badge) ---
+speed=""
+speed_cache="$HOME/.claude/.statusline-speed"
+now_ms=$(perl -MTime::HiRes=time -e 'printf "%d", time*1000' 2>/dev/null)
+if [ -n "$now_ms" ] && [ -f "$speed_cache" ]; then
+  IFS= read -r prev_tok < "$speed_cache"
+  IFS= read -r prev_ms < <(tail -1 "$speed_cache")
+  if [ -n "$prev_tok" ] && [ -n "$prev_ms" ]; then
+    dt=$(( out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
+    if (( dt > 0 && dm > 0 && dm <= 3000 )); then
+      speed=$(echo "scale=1;$dt*1000/$dm" | bc)
+    fi
+  fi
+fi
+[ -n "$now_ms" ] && printf '%s\n%s\n' "$out_tok" "$now_ms" > "$speed_cache"
+
+# --- Model badge: [vX.Y Model | Provider | speed] ---
 model="${model_name:-${model_id:-Unknown}}"
 provider=""
 case "$model_id" in *anthropic.claude-*) provider="Bedrock" ;; esac
@@ -42,11 +58,10 @@ case "$model_id" in *anthropic.claude-*) provider="Bedrock" ;; esac
 ver_tag=""
 [ -n "$version" ] && ver_tag="${DIM}v${version}${CYN} "
 
-if [ -n "$provider" ]; then
-  badge="${CYN}[${ver_tag}${model} | ${provider}]${RST}"
-else
-  badge="${CYN}[${ver_tag}${model}]${RST}"
-fi
+badge_inner="${ver_tag}${model}"
+[ -n "$provider" ] && badge_inner+=" | ${provider}"
+[ -n "$speed" ] && badge_inner+=" ${DIM}${speed} tok/s${CYN}"
+badge="${CYN}[${badge_inner}]${RST}"
 
 # --- Context bar (10 segments, claude-hud thresholds: <70 green, 70-84 yellow, >=85 red) ---
 if [ "$used_pct" -ge 0 ] 2>/dev/null; then pct=$used_pct
@@ -96,23 +111,6 @@ if [ -n "$dir_raw" ]; then
   fi
 fi
 
-# --- Output speed (ms precision via perl) ---
-speed_display=""
-speed_cache="$HOME/.claude/.statusline-speed"
-now_ms=$(perl -MTime::HiRes=time -e 'printf "%d", time*1000' 2>/dev/null)
-if [ -n "$now_ms" ] && [ -f "$speed_cache" ]; then
-  IFS= read -r prev_tok < "$speed_cache"
-  IFS= read -r prev_ms < <(tail -1 "$speed_cache")
-  if [ -n "$prev_tok" ] && [ -n "$prev_ms" ]; then
-    dt=$(( out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
-    if (( dt > 0 && dm > 0 && dm <= 3000 )); then
-      speed=$(echo "scale=1;$dt*1000/$dm" | bc)
-      speed_display="${DIM}${speed} tok/s${RST}"
-    fi
-  fi
-fi
-[ -n "$now_ms" ] && printf '%s\n%s\n' "$out_tok" "$now_ms" > "$speed_cache"
-
 # --- Tokens ---
 tokens="${DIM}$(fmt_tok "$in_tok") in/$(fmt_tok "$out_tok") out${RST}"
 
@@ -129,7 +127,6 @@ lines=""
 # --- Assemble ---
 parts=("$badge $ctx")
 [ -n "$project_git" ] && parts+=("$project_git")
-[ -n "$speed_display" ] && parts+=("$speed_display")
 parts+=("$tokens")
 parts+=("${DIM}⏱ ${dur}${RST}")
 [ -n "$lines" ] && parts+=("$lines")

@@ -79,12 +79,17 @@ if [ -n "$dir_raw" ]; then
       /^.D|^D/ { d++ }
       END { printf "gm=%d ga=%d gd=%d gu=%d", m+0, a+0, d+0, u+0 }
     ')"
+    ahead=$(git -C "$dir_raw" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
+    behind=$(git -C "$dir_raw" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
+    ab=""
+    (( ahead > 0 )) && ab+=" ↑${ahead}"
+    (( behind > 0 )) && ab+=" ↓${behind}"
     stats=""
     (( gm > 0 )) && stats+=" !${gm}"
     (( ga > 0 )) && stats+=" +${ga}"
     (( gd > 0 )) && stats+=" ✘${gd}"
     (( gu > 0 )) && stats+=" ?${gu}"
-    git_part=" ${MAG}git:(${RST}${CYN}${branch}${dirty}${stats}${RST}${MAG})${RST}"
+    git_part=" ${MAG}git:(${RST}${CYN}${branch}${dirty}${ab}${stats}${RST}${MAG})${RST}"
     project_git="${project}${git_part}"
   else
     project_git="$project"

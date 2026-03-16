@@ -177,29 +177,113 @@ Announce: **"Phase 4 complete — fix implemented. Moving to Phase 5."**
 
 ## Phase 5: Verify & Review
 
-### Step 1: Verification Loop
+### Step 1: Scope Analysis — Determine Review Matrix
 
-Invoke Skill `verification-loop`.
+Before dispatching any reviewers, analyze the change scope to build the full review list.
 
-Follow the skill exactly — run all 6 verification phases (build, types, lint, tests, security, diff) and produce the VERIFICATION REPORT.
+```bash
+# Collect scope signals (run in main session, fast)
+BASE=$(git merge-base HEAD <BASE_BRANCH>)
+CHANGED_DIRS=$(git diff --name-only $BASE..HEAD | cut -d/ -f1-2 | sort -u | wc -l)
+HAS_GO=$(test -f go.mod && echo yes || echo no)
+HAS_PYTHON=$(test -f pyproject.toml -o -f setup.py -o -f requirements.txt && echo yes || echo no)
+TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
+```
 
-If any phase fails, fix issues before proceeding.
+**Replace `<BASE_BRANCH>`** with the actual base branch name recorded in Phase 2.
 
-### Step 2: Security Review
+Build the agent list:
 
-Invoke Skill `everything-claude-code:security-review`.
+| Agent | Condition | Always/Conditional |
+|-------|-----------|-------------------|
+| Verification loop | Always | Always |
+| Security review | Always | Always |
+| Code review | Always | Always |
+| Architecture review | CHANGED_DIRS >= 3 | Conditional |
+| Go review | HAS_GO = yes | Conditional |
+| Python review | HAS_PYTHON = yes | Conditional |
+| Test coverage analysis | TESTS_CHANGED > 0 or no tests exist for changed code | Conditional |
 
-Follow the skill exactly — run through the security checklist relevant to the changes made.
+Announce which agents will be dispatched.
 
-Fix any critical security issues found.
+### Step 2: Dispatch All Reviews in Parallel
 
-### Step 3: Code Review
+Dispatch every agent from the matrix in a **single parallel batch**:
 
-Invoke Skill `superpowers:requesting-code-review`.
+**Always:**
+```
+Agent(description="Run verification loop",
+      subagent_type="general-purpose",
+      prompt="Run the verification loop for this project.
+        Invoke Skill `verification-loop`. Follow it exactly — run all 6 phases
+        (build, types, lint, tests, security, diff). Return the full VERIFICATION REPORT
+        with PASS/FAIL for each phase.")
 
-Follow the skill exactly — dispatch the code-reviewer subagent to review the fix against the root cause diagnosis (and plan, if one was written).
+Agent(description="Run security review",
+      subagent_type="everything-claude-code:security-reviewer",
+      prompt="Security review on this branch's changes.
+        Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` to scope changes.
+        Focus on: hardcoded secrets, input validation, injection, auth/authz, OWASP Top 10.
+        Return structured findings with severity levels.")
 
-Fix any Critical or Important issues found.
+Agent(description="Run code review",
+      subagent_type="superpowers:code-reviewer",
+      prompt="Review the fix on this branch against the root cause diagnosis.
+        Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
+        Read the plan from .plan/ directory and root cause from TodoWrite for context.
+        Evaluate: correctness, root cause addressed, no regressions, code quality.
+        Return findings as Critical / Important / Minor.")
+```
+
+**Conditional (include only if condition met):**
+```
+Agent(description="Run architecture review",
+      subagent_type="everything-claude-code:architect",
+      prompt="Architecture review of this branch's changes.
+        Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
+        Evaluate: module boundaries, coupling direction, dependency hygiene,
+        interface design, separation of concerns.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Go review",
+      subagent_type="everything-claude-code:go-reviewer",
+      prompt="Go-specific review of this branch's changes.
+        Run go vet, staticcheck. Check for: idiomatic Go, concurrency safety,
+        error wrapping, race conditions, goroutine leaks.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Python review",
+      subagent_type="everything-claude-code:python-reviewer",
+      prompt="Python-specific review of this branch's changes.
+        Run ruff, mypy, bandit. Check for: PEP 8, type hints, Pythonic idioms,
+        security, mutable defaults, bare excepts.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run test coverage analysis",
+      subagent_type="pr-review-toolkit:pr-test-analyzer",
+      prompt="Analyze test coverage quality for this branch's changes.
+        Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
+        Focus on: behavioral coverage (not line coverage), critical gaps,
+        test-vs-implementation coupling. Rate criticality 1-10.
+        Return findings with gap descriptions.")
+```
+
+### Step 3: Collect and Act on Findings
+
+When all agents return, consolidate results into a summary table:
+
+```
+| Agent              | Status | Critical | Important | Minor |
+|--------------------|--------|----------|-----------|-------|
+| Verification       | PASS   | 0        | -         | -     |
+| Security           | PASS   | 0        | 1         | 2     |
+| Code Review        | PASS   | 0        | 2         | 3     |
+| ...                |        |          |           |       |
+```
+
+**Fix priority:** Critical (all agents) > Important (all agents) > Minor (skip unless trivial).
+
+If fixes were needed, re-run only the affected agent(s) to confirm.
 
 ### Step 4: Update Project Docs
 
@@ -215,17 +299,17 @@ For each file: read current content, compare against actual changes, update only
 ### Gate
 
 Use AskUserQuestion to confirm:
-- Question: "Verification, security review, code review, and doc updates complete. Ship this fix?"
+- Question: "All reviews complete. Ship this fix?"
 - Options: "Continue to ship", "Fix issues first", "Stop workflow"
 
 If "Fix issues first": address remaining issues, then re-run the failing verification steps.
 If "Stop workflow": end here.
 
 ### CHECKPOINT — Do NOT announce phase complete until ALL items are confirmed:
-- [ ] Step 1: Verification Loop — ran and produced report
-- [ ] Step 2: Security Review — ran or confirmed N/A for this change
-- [ ] Step 3: Code Review — ran or confirmed N/A for this change
-- [ ] Step 4: Update Project Docs — checked CLAUDE.md, README, Makefile, .env.example, etc.
+- [ ] Step 1: Scope analysis done, review matrix determined
+- [ ] Step 2: All agents dispatched and returned
+- [ ] Step 3: All Critical/Important findings resolved
+- [ ] Step 4: Project docs checked and updated if needed
 - [ ] Gate: User confirmed to ship
 
 If any item is unchecked, go back and complete it now.

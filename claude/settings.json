@@ -175,5 +175,5 @@
     }
   },
   "teammateMode": "splite-panes",
-  "compactInstructions": "Focus on code changes and test results"
+  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning."
 }

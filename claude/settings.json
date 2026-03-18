@@ -129,7 +129,8 @@
     "superpowers-developing-for-claude-code@superpowers-marketplace": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
-    "skill-creator@claude-plugins-official": true
+    "skill-creator@claude-plugins-official": true,
+    "claude-session-driver@superpowers-marketplace": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -175,5 +176,6 @@
     }
   },
   "teammateMode": "in-process",
-  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning."
+  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning.",
+  "skipDangerousModePermissionPrompt": true
 }

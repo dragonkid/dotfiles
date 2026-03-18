@@ -105,6 +105,28 @@ Announce: **"Phase 2 complete. Moving to Phase 3."**
 
 **If user chose "Complex fix" in Phase 1:**
 
+### Step 0: Reuse Discovery
+
+Before writing the plan, scan the codebase for existing utilities, helpers, and patterns that the fix could leverage — this prevents the plan from proposing new code that duplicates what already exists.
+
+Dispatch a Task agent:
+
+```
+Agent(description="Scan for reusable code",
+      subagent_type="general-purpose",
+      prompt="Search the codebase for existing utilities, helpers, shared modules,
+        and established patterns relevant to this bug fix: [root cause description].
+        Look in: utility directories, shared modules, files adjacent to the
+        affected code paths, and common helper locations.
+        For each finding, report: file path, function/module name, what it does,
+        and how it could apply to the fix.
+        Return a structured list of reusable code.")
+```
+
+Feed these findings into the plan — reference existing code rather than proposing new implementations of already-available functionality.
+
+### Step 1: Write the Plan
+
 Invoke Skill `superpowers:writing-plans`.
 
 Follow the skill exactly. It will:
@@ -199,6 +221,7 @@ Build the agent list:
 | Verification loop | Always | Always |
 | Security review | Always | Always |
 | Code review | Always | Always |
+| Simplify review | Always | Always |
 | Architecture review | CHANGED_DIRS >= 3 | Conditional |
 | Go review | HAS_GO = yes | Conditional |
 | Python review | HAS_PYTHON = yes | Conditional |
@@ -233,6 +256,22 @@ Agent(description="Run code review",
         Read the plan from .plan/ directory and root cause from TodoWrite for context.
         Evaluate: correctness, root cause addressed, no regressions, code quality.
         Return findings as Critical / Important / Minor.")
+
+Agent(description="Run simplify review",
+      subagent_type="general-purpose",
+      prompt="Review-only simplify analysis on this branch's changes.
+        Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` to scope changes.
+        Analyze three dimensions:
+        1. CODE REUSE: Search for existing utilities/helpers in the codebase that could
+           replace newly written code. Flag duplicated functionality and inline logic
+           that has existing helpers.
+        2. CODE QUALITY: Check for redundant state, parameter sprawl, copy-paste with
+           slight variation, leaky abstractions, stringly-typed code, unnecessary nesting.
+        3. EFFICIENCY: Check for unnecessary work (redundant computations, duplicate API
+           calls, N+1 patterns), missed concurrency, hot-path bloat, recurring no-op
+           updates, unbounded data structures, overly broad operations.
+        IMPORTANT: Report findings ONLY — do NOT modify any code.
+        Return findings as Critical / Important / Minor for each dimension.")
 ```
 
 **Conditional (include only if condition met):**

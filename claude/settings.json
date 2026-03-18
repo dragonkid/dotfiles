@@ -22,7 +22,7 @@
       "Bash(npx tsc:*)",
       "Bash(git:*)"
     ],
-    "defaultMode": "default"
+    "defaultMode": "bypassPermissions"
   },
   "hooks": {
     "PreToolUse": [
@@ -163,7 +163,6 @@
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
-  "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
     "playwright-extension": {
       "command": "npx",
@@ -174,5 +173,6 @@
     }
   },
   "teammateMode": "in-process",
-  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning."
+  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning.",
+  "skipDangerousModePermissionPrompt": true
 }

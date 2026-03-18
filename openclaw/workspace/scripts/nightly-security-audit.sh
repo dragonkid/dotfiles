@@ -393,7 +393,7 @@ else
 fi
 
 # Check current process environment for leaks
-CURRENT_ENV_SENSITIVE=$(env 2>/dev/null | grep -cE "(TOKEN|KEY|SECRET|PASSWORD|API)" || echo "0")
+CURRENT_ENV_SENSITIVE=$(env 2>/dev/null | grep -cE "(TOKEN|KEY|SECRET|PASSWORD|API)" | tr -d '\n' || echo "0")
 if [ "$CURRENT_ENV_SENSITIVE" -gt 0 ]; then
     log_warn "当前环境中发现 $CURRENT_ENV_SENSITIVE 个敏感变量"
 fi

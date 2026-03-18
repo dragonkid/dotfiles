@@ -14,10 +14,10 @@ You are orchestrating a complete feature development pipeline. Execute the phase
 All design documents and implementation plans are saved in the project repo:
 
 ```
-DOCS_ROOT = .plan/
+DOCS_ROOT = docs/superpowers/
 ```
 
-If `.plan/` does not exist, create it (`mkdir -p .plan`).
+If `docs/superpowers/` does not exist, create it (`mkdir -p docs/superpowers/{specs,plans}`).
 
 ### Vault Sync
 
@@ -29,30 +29,67 @@ If yes: copy the file to `~/Documents/second-brain/Jobs/{project_name}/` where `
 
 ---
 
-## Phase 1: Brainstorm (skippable)
+## Phase 1: Design & Plan (skippable)
 
 Use AskUserQuestion to ask:
 - Question: "How would you like to start?"
-- Options: "Brainstorm from scratch", "I have a design — skip to planning"
+- Options: "Brainstorm from scratch", "I have a design — skip to planning", "I have a plan — skip to branch setup"
 
 ### If brainstorming:
+
+#### Step 0: Reuse Discovery
+
+Before brainstorming, invoke Skill `everything-claude-code:search-first` with the feature request as context. Feed findings into the brainstorming session so the design leverages existing code.
+
+#### Step 1: Brainstorm → Design → Plan
 
 Invoke Skill `superpowers:brainstorming` with the feature request above as context.
 
 **Context hint:** Project architecture and conventions are already loaded from the project's CLAUDE.md. Use that as your starting point — only explore areas where CLAUDE.md lacks sufficient detail for the feature.
 
+**Override:** Tell the skill to save design documents under `docs/superpowers/specs/` (the skill's default) — this aligns with DOCS_ROOT.
+
 Follow the skill exactly. It will:
 - Explore the codebase and ask questions one at a time
 - Propose 2-3 approaches with trade-offs
 - Present the design in sections for incremental validation
-- Write the validated design to `.plan/YYYY-MM-DD-<topic>-design.md`
+- Write the validated design to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- Run spec review loop (auto-dispatch spec-document-reviewer, max 3 rounds)
+- Ask user to review the written spec
+- **Automatically invoke `superpowers:writing-plans`** to create the implementation plan
 
-When brainstorming completes and the design document is saved, announce:
-**"Phase 1 complete — design document saved. Moving to Phase 2."**
+Let the skill complete its full flow — brainstorming will hand off to writing-plans seamlessly. The plan will be saved to `docs/superpowers/plans/`.
 
-### If skipping:
+When the plan is ready, `writing-plans` will present the execution mode choice:
+1. **Subagent-Driven** (recommended) — fresh subagent per task with two-stage review
+2. **Inline Execution** — execute tasks in this session with checkpoints
 
-Ask the user for the design document path or description, then proceed directly to Phase 2.
+Use AskUserQuestion to confirm:
+- Question: "Plan is ready. Proceed to implementation?"
+- Options: "Start implementation", "Revise plan", "Stop workflow"
+
+If "Revise plan": go back to writing-plans skill to iterate.
+If "Stop workflow": end here.
+
+Remember the user's execution mode choice for Phase 3.
+
+### If skipping to planning:
+
+Ask the user for the design document path or description, then invoke Skill `everything-claude-code:search-first` for reuse discovery, followed by Skill `superpowers:writing-plans`. Follow the same gate as above.
+
+### If skipping to branch setup:
+
+Ask the user for the plan document path, then proceed directly to Phase 2.
+
+### Context Protection & Compact
+
+Before suggesting compact, ensure:
+1. Design document and plan file are saved to `docs/superpowers/`
+2. TodoWrite records: execution mode choice, current phase
+
+Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in docs/superpowers/ and TodoWrite. After compact, I'll recover context by reading those files."**
+
+Announce: **"Phase 1 complete — design and plan saved. Moving to Phase 2."**
 
 ---
 
@@ -60,7 +97,13 @@ Ask the user for the design document path or description, then proceed directly 
 
 Use AskUserQuestion to ask:
 - Question: "How to isolate this feature work?"
-- Options: "Create feature branch (Recommended)", "Create worktree"
+- Options: "Create worktree (Recommended)", "Create feature branch"
+
+### If worktree:
+
+Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+
+Record `BRANCH_MODE=worktree` and the base branch name for Phase 5.
 
 ### If feature branch:
 
@@ -72,81 +115,20 @@ Create and switch to a new branch from the current HEAD:
 git checkout -b feat/<feature-slug>
 ```
 
-Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 6.
-
-### If worktree:
-
-Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
-
-Record `BRANCH_MODE=worktree` for Phase 6.
+Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 5.
 
 Announce: **"Phase 2 complete. Moving to Phase 3."**
 
 ---
 
-## Phase 3: Plan
+## Phase 3: Implement
 
-### Step 0: Reuse Discovery
-
-Before writing the plan, scan the codebase for existing utilities, helpers, and patterns that the implementation could leverage — this prevents the plan from proposing new code that duplicates what already exists.
-
-Dispatch a Task agent:
-
-```
-Agent(description="Scan for reusable code",
-      subagent_type="general-purpose",
-      prompt="Search the codebase for existing utilities, helpers, shared modules,
-        and established patterns relevant to this feature: [feature request].
-        Look in: utility directories, shared modules, files adjacent to likely
-        change targets, and common helper locations.
-        For each finding, report: file path, function/module name, what it does,
-        and how it could apply to the current feature.
-        Return a structured list of reusable code.")
-```
-
-Feed these findings into the plan — reference existing code rather than proposing new implementations of already-available functionality.
-
-### Step 1: Write the Plan
-
-Invoke Skill `superpowers:writing-plans`.
-
-Follow the skill exactly. It will:
-- Create a detailed implementation plan based on the Phase 1 design
-- Structure tasks with TDD steps (write test → verify fail → implement → verify pass → commit)
-- Save the plan to `.plan/YYYY-MM-DD-<feature-name>.md`
-- Present the execution mode choice at the end:
-  1. **Subagent-Driven** (this session) — fresh subagent per task with two-stage review
-  2. **Parallel Session** (separate session) — batch execution with checkpoints
-
-Use AskUserQuestion to confirm:
-- Question: "Plan is ready. Proceed to implementation?"
-- Options: "Start implementation", "Revise plan", "Stop workflow"
-
-If "Revise plan": go back to writing-plans skill to iterate.
-If "Stop workflow": end here.
-
-Remember the user's execution mode choice for Phase 4.
-
-### Context Protection & Compact
-
-Before suggesting compact, ensure:
-1. Design document and plan file are saved to `.plan/`
-2. TodoWrite records: BRANCH_MODE (branch/worktree), base branch name, execution mode choice, current phase
-
-Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in .plan/ and TodoWrite. After compact, I'll recover context by reading those files."**
-
-Announce: **"Phase 3 complete — plan saved. Moving to Phase 4."**
-
----
-
-## Phase 4: Implement
-
-Based on the execution mode chosen in Phase 3:
+Based on the execution mode chosen in Phase 1:
 
 - **If Subagent-Driven:** Invoke Skill `superpowers:subagent-driven-development`. Follow the skill exactly.
-- **If Parallel Session:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.
+- **If Inline Execution:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.
 
-**Important:** Both skills will attempt to invoke `superpowers:finishing-a-development-branch` at the end. Do NOT follow that final step — instead proceed to Phase 5.
+**Important:** Both skills will attempt to invoke `superpowers:finishing-a-development-branch` at the end. Do NOT follow that final step — instead proceed to Phase 4.
 
 ### Context Protection & Compact
 
@@ -154,13 +136,13 @@ Before suggesting compact, ensure:
 1. TodoWrite has all task statuses updated
 2. Note the base branch name for later use
 
-Then suggest: **"Implementation complete. Consider running `/compact` before verification — progress is tracked in TodoWrite and git history. After compact, I'll recover context from TodoWrite + git log + .plan/."**
+Then suggest: **"Implementation complete. Consider running `/compact` before verification — progress is tracked in TodoWrite and git history. After compact, I'll recover context from TodoWrite + git log + docs/superpowers/."**
 
-Announce: **"Phase 4 complete — implementation done. Moving to Phase 5."**
+Announce: **"Phase 3 complete — implementation done. Moving to Phase 4."**
 
 ---
 
-## Phase 5: Verify & Review
+## Phase 4: Verify & Review
 
 ### Step 1: Scope Analysis — Determine Review Matrix
 
@@ -172,6 +154,10 @@ BASE=$(git merge-base HEAD <BASE_BRANCH>)
 CHANGED_DIRS=$(git diff --name-only $BASE..HEAD | cut -d/ -f1-2 | sort -u | wc -l)
 HAS_GO=$(test -f go.mod && echo yes || echo no)
 HAS_PYTHON=$(test -f pyproject.toml -o -f setup.py -o -f requirements.txt && echo yes || echo no)
+HAS_TS=$(test -f tsconfig.json && echo yes || echo no)
+HAS_RUST=$(test -f Cargo.toml && echo yes || echo no)
+HAS_CPP=$(test -f CMakeLists.txt -o -f Makefile.am && echo yes || echo no)
+HAS_KOTLIN=$(find . -maxdepth 3 -name "*.kt" -quit 2>/dev/null && echo yes || echo no)
 TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
 ```
 
@@ -188,6 +174,10 @@ Build the agent list:
 | Architecture review | CHANGED_DIRS >= 3 | Conditional |
 | Go review | HAS_GO = yes | Conditional |
 | Python review | HAS_PYTHON = yes | Conditional |
+| TypeScript review | HAS_TS = yes | Conditional |
+| Rust review | HAS_RUST = yes | Conditional |
+| C++ review | HAS_CPP = yes | Conditional |
+| Kotlin review | HAS_KOTLIN = yes | Conditional |
 | Test coverage analysis | TESTS_CHANGED > 0 or no tests exist for changed code | Conditional |
 
 Announce which agents will be dispatched (e.g., "Dispatching 6 parallel reviewers: verification, security, code, simplify, architecture, test coverage").
@@ -216,7 +206,7 @@ Agent(description="Run code review",
       subagent_type="superpowers:code-reviewer",
       prompt="Review the implementation on this branch against the plan.
         Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
-        Read the plan from .plan/ directory for context.
+        Read the plan from docs/superpowers/plans/ directory for context.
         Evaluate: correctness, plan alignment, code quality, test coverage.
         Return findings as Critical / Important / Minor.")
 
@@ -259,6 +249,34 @@ Agent(description="Run Python review",
       prompt="Python-specific review of this branch's changes.
         Run ruff, mypy, bandit. Check for: PEP 8, type hints, Pythonic idioms,
         security, mutable defaults, bare excepts.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run TypeScript review",
+      subagent_type="everything-claude-code:code-reviewer",
+      prompt="TypeScript-specific review of this branch's changes.
+        Run tsc --noEmit, eslint. Check for: strict types, proper error handling,
+        React patterns (if applicable), async/await correctness, import hygiene.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Rust review",
+      subagent_type="everything-claude-code:rust-reviewer",
+      prompt="Rust-specific review of this branch's changes.
+        Run cargo clippy. Check for: ownership/lifetime correctness, unsafe usage,
+        error handling (Result/Option), idiomatic patterns, performance.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run C++ review",
+      subagent_type="everything-claude-code:cpp-reviewer",
+      prompt="C++ review of this branch's changes.
+        Check for: memory safety, modern C++ idioms (RAII, smart pointers),
+        concurrency correctness, const correctness, include hygiene.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Kotlin review",
+      subagent_type="everything-claude-code:kotlin-reviewer",
+      prompt="Kotlin-specific review of this branch's changes.
+        Check for: null safety, coroutine safety, idiomatic patterns,
+        Compose best practices (if applicable), clean architecture.
         Return findings as Critical / Important / Minor.")
 
 Agent(description="Run test coverage analysis",
@@ -317,11 +335,11 @@ If "Stop workflow": end here.
 
 If any item is unchecked, go back and complete it now.
 
-Announce: **"Phase 5 complete — verified and reviewed. Moving to Phase 6."**
+Announce: **"Phase 4 complete — verified and reviewed. Moving to Phase 5."**
 
 ---
 
-## Phase 6: Ship
+## Phase 5: Ship
 
 Invoke Skill `superpowers:finishing-a-development-branch`.
 

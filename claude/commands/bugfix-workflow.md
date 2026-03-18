@@ -14,10 +14,10 @@ You are orchestrating a complete bugfix pipeline. Execute the phases below in or
 Plans (if written) are saved in the project repo:
 
 ```
-DOCS_ROOT = .plan/
+DOCS_ROOT = docs/superpowers/
 ```
 
-If `.plan/` does not exist, create it (`mkdir -p .plan`).
+If `docs/superpowers/` does not exist, create it (`mkdir -p docs/superpowers/{specs,plans}`).
 
 ### Vault Sync
 
@@ -75,7 +75,13 @@ Announce: **"Phase 1 complete — root cause identified. Moving to Phase 2."**
 
 Use AskUserQuestion to ask:
 - Question: "How to isolate this bugfix work?"
-- Options: "Create fix branch (Recommended)", "Create worktree"
+- Options: "Create worktree (Recommended)", "Create fix branch"
+
+### If worktree:
+
+Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
+
+Record `BRANCH_MODE=worktree` and the base branch name for Phase 6.
 
 ### If fix branch:
 
@@ -89,12 +95,6 @@ git checkout -b fix/<bug-slug>
 
 Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 6.
 
-### If worktree:
-
-Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
-
-Record `BRANCH_MODE=worktree` for Phase 6.
-
 Announce: **"Phase 2 complete. Moving to Phase 3."**
 
 ---
@@ -107,23 +107,7 @@ Announce: **"Phase 2 complete. Moving to Phase 3."**
 
 ### Step 0: Reuse Discovery
 
-Before writing the plan, scan the codebase for existing utilities, helpers, and patterns that the fix could leverage — this prevents the plan from proposing new code that duplicates what already exists.
-
-Dispatch a Task agent:
-
-```
-Agent(description="Scan for reusable code",
-      subagent_type="general-purpose",
-      prompt="Search the codebase for existing utilities, helpers, shared modules,
-        and established patterns relevant to this bug fix: [root cause description].
-        Look in: utility directories, shared modules, files adjacent to the
-        affected code paths, and common helper locations.
-        For each finding, report: file path, function/module name, what it does,
-        and how it could apply to the fix.
-        Return a structured list of reusable code.")
-```
-
-Feed these findings into the plan — reference existing code rather than proposing new implementations of already-available functionality.
+Before writing the plan, invoke Skill `everything-claude-code:search-first` with the root cause description as context. Feed findings into the plan — reference existing code rather than proposing new implementations of already-available functionality.
 
 ### Step 1: Write the Plan
 
@@ -132,10 +116,10 @@ Invoke Skill `superpowers:writing-plans`.
 Follow the skill exactly. It will:
 - Create a detailed implementation plan based on the Phase 1 diagnosis
 - Structure tasks with TDD steps (write test → verify fail → implement → verify pass → commit)
-- Save the plan to `.plan/YYYY-MM-DD-<bug-summary>.md`
+- Save the plan to `docs/superpowers/plans/YYYY-MM-DD-<bug-summary>.md`
 - Present the execution mode choice at the end:
-  1. **Subagent-Driven** (this session) — fresh subagent per task with two-stage review
-  2. **Parallel Session** (separate session) — batch execution with checkpoints
+  1. **Subagent-Driven** (recommended) — fresh subagent per task with two-stage review
+  2. **Inline Execution** — execute tasks in this session with checkpoints
 
 Use AskUserQuestion to confirm:
 - Question: "Plan is ready. Proceed to implementation?"
@@ -149,10 +133,10 @@ Remember the user's execution mode choice for Phase 4.
 ### Context Protection & Compact
 
 Before suggesting compact, ensure:
-1. Plan file is saved to `.plan/`
+1. Plan file is saved to `docs/superpowers/`
 2. TodoWrite records: root cause, BRANCH_MODE (branch/worktree), base branch name, execution mode choice, current phase
 
-Then suggest: **"The diagnosis and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in TodoWrite and .plan/. After compact, I'll recover context by reading those files."**
+Then suggest: **"The diagnosis and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in TodoWrite and docs/superpowers/. After compact, I'll recover context by reading those files."**
 
 Announce: **"Phase 3 complete — plan saved. Moving to Phase 4."**
 
@@ -209,6 +193,10 @@ BASE=$(git merge-base HEAD <BASE_BRANCH>)
 CHANGED_DIRS=$(git diff --name-only $BASE..HEAD | cut -d/ -f1-2 | sort -u | wc -l)
 HAS_GO=$(test -f go.mod && echo yes || echo no)
 HAS_PYTHON=$(test -f pyproject.toml -o -f setup.py -o -f requirements.txt && echo yes || echo no)
+HAS_TS=$(test -f tsconfig.json && echo yes || echo no)
+HAS_RUST=$(test -f Cargo.toml && echo yes || echo no)
+HAS_CPP=$(test -f CMakeLists.txt -o -f Makefile.am && echo yes || echo no)
+HAS_KOTLIN=$(find . -maxdepth 3 -name "*.kt" -quit 2>/dev/null && echo yes || echo no)
 TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
 ```
 
@@ -225,6 +213,10 @@ Build the agent list:
 | Architecture review | CHANGED_DIRS >= 3 | Conditional |
 | Go review | HAS_GO = yes | Conditional |
 | Python review | HAS_PYTHON = yes | Conditional |
+| TypeScript review | HAS_TS = yes | Conditional |
+| Rust review | HAS_RUST = yes | Conditional |
+| C++ review | HAS_CPP = yes | Conditional |
+| Kotlin review | HAS_KOTLIN = yes | Conditional |
 | Test coverage analysis | TESTS_CHANGED > 0 or no tests exist for changed code | Conditional |
 
 Announce which agents will be dispatched.
@@ -253,7 +245,7 @@ Agent(description="Run code review",
       subagent_type="superpowers:code-reviewer",
       prompt="Review the fix on this branch against the root cause diagnosis.
         Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
-        Read the plan from .plan/ directory and root cause from TodoWrite for context.
+        Read the plan from docs/superpowers/ directory and root cause from TodoWrite for context.
         Evaluate: correctness, root cause addressed, no regressions, code quality.
         Return findings as Critical / Important / Minor.")
 
@@ -296,6 +288,34 @@ Agent(description="Run Python review",
       prompt="Python-specific review of this branch's changes.
         Run ruff, mypy, bandit. Check for: PEP 8, type hints, Pythonic idioms,
         security, mutable defaults, bare excepts.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run TypeScript review",
+      subagent_type="everything-claude-code:code-reviewer",
+      prompt="TypeScript-specific review of this branch's changes.
+        Run tsc --noEmit, eslint. Check for: strict types, proper error handling,
+        React patterns (if applicable), async/await correctness, import hygiene.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Rust review",
+      subagent_type="everything-claude-code:rust-reviewer",
+      prompt="Rust-specific review of this branch's changes.
+        Run cargo clippy. Check for: ownership/lifetime correctness, unsafe usage,
+        error handling (Result/Option), idiomatic patterns, performance.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run C++ review",
+      subagent_type="everything-claude-code:cpp-reviewer",
+      prompt="C++ review of this branch's changes.
+        Check for: memory safety, modern C++ idioms (RAII, smart pointers),
+        concurrency correctness, const correctness, include hygiene.
+        Return findings as Critical / Important / Minor.")
+
+Agent(description="Run Kotlin review",
+      subagent_type="everything-claude-code:kotlin-reviewer",
+      prompt="Kotlin-specific review of this branch's changes.
+        Check for: null safety, coroutine safety, idiomatic patterns,
+        Compose best practices (if applicable), clean architecture.
         Return findings as Critical / Important / Minor.")
 
 Agent(description="Run test coverage analysis",

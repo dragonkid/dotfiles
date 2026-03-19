@@ -1,8 +1,8 @@
 # Phase 3: Implement
 
-Read TodoWrite to recover: execution mode choice from Phase 1, branch mode and base branch from Phase 2.
+Read TodoWrite to recover: execution mode choice from Phase 2, branch mode and base branch from Phase 1.
 
-Based on the execution mode chosen in Phase 1:
+Based on the execution mode chosen in Phase 2:
 
 - **If Subagent-Driven:** Invoke Skill `superpowers:subagent-driven-development`. Follow the skill exactly.
 - **If Inline Execution:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.

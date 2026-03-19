@@ -1,4 +1,4 @@
-# Phase 2: Branch Setup
+# Phase 1: Branch Setup
 
 Use AskUserQuestion to ask:
 - Question: "How to isolate this feature work?"
@@ -22,6 +22,6 @@ git checkout -b feat/<feature-slug>
 
 Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) in TodoWrite.
 
-Announce: **"Phase 2 complete. Returning to state machine for Phase 3."**
+Announce: **"Phase 1 complete. Returning to state machine for Phase 2."**
 
 Return to the state machine SKILL.md.

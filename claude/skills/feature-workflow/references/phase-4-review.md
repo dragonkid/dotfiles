@@ -1,6 +1,6 @@
 # Phase 4: Verify & Review
 
-Read TodoWrite to recover: base branch name from Phase 2.
+Read TodoWrite to recover: base branch name from Phase 1.
 
 ## Step 1: Scope Analysis — Determine Review Matrix
 
@@ -19,7 +19,7 @@ HAS_KOTLIN=$(find . -maxdepth 3 -name "*.kt" -quit 2>/dev/null && echo yes || ec
 TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
 ```
 
-**Replace `<BASE_BRANCH>`** with the actual base branch name recorded in Phase 2.
+**Replace `<BASE_BRANCH>`** with the actual base branch name recorded in Phase 1.
 
 Build the agent list:
 

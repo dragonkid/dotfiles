@@ -1,150 +1,8 @@
----
-description: "End-to-end feature development: brainstorm → plan → implement → review → ship"
-argument-hint: "Feature description (e.g., 'Add OAuth2 login with JWT refresh tokens')"
----
+# Phase 4: Verify & Review
 
-# Feature Workflow
+Read TodoWrite to recover: base branch name from Phase 2.
 
-You are orchestrating a complete feature development pipeline. Execute the phases below in order. Each phase uses a specific skill — invoke it via the Skill tool and follow it exactly.
-
-**Feature request:** $ARGUMENTS
-
-## Document Output
-
-All design documents and implementation plans are saved in the project repo:
-
-```
-DOCS_ROOT = docs/superpowers/
-```
-
-If `docs/superpowers/` does not exist, create it (`mkdir -p docs/superpowers/{specs,plans}`).
-
-### Vault Sync
-
-After creating or updating any document in `DOCS_ROOT`, ask:
-- Question: "同步此文档到 Obsidian vault？"
-- Options: "Yes — sync to vault", "No — skip"
-
-If yes: copy the file to `~/Documents/second-brain/Jobs/{project_name}/` where `{project_name}` is derived from `basename $(git rev-parse --show-toplevel)`. Create the directory if it doesn't exist.
-
----
-
-## Phase 1: Design & Plan (skippable)
-
-Use AskUserQuestion to ask:
-- Question: "How would you like to start?"
-- Options: "Brainstorm from scratch", "I have a design — skip to planning", "I have a plan — skip to branch setup"
-
-### If brainstorming:
-
-#### Step 0: Reuse Discovery
-
-Before brainstorming, invoke Skill `everything-claude-code:search-first` with the feature request as context. Feed findings into the brainstorming session so the design leverages existing code.
-
-#### Step 1: Brainstorm → Design → Plan
-
-Invoke Skill `superpowers:brainstorming` with the feature request above as context.
-
-**Context hint:** Project architecture and conventions are already loaded from the project's CLAUDE.md. Use that as your starting point — only explore areas where CLAUDE.md lacks sufficient detail for the feature.
-
-**Override:** Tell the skill to save design documents under `docs/superpowers/specs/` (the skill's default) — this aligns with DOCS_ROOT.
-
-Follow the skill exactly. It will:
-- Explore the codebase and ask questions one at a time
-- Propose 2-3 approaches with trade-offs
-- Present the design in sections for incremental validation
-- Write the validated design to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-- Run spec review loop (auto-dispatch spec-document-reviewer, max 3 rounds)
-- Ask user to review the written spec
-- **Automatically invoke `superpowers:writing-plans`** to create the implementation plan
-
-Let the skill complete its full flow — brainstorming will hand off to writing-plans seamlessly. The plan will be saved to `docs/superpowers/plans/`.
-
-When the plan is ready, `writing-plans` will present the execution mode choice:
-1. **Subagent-Driven** (recommended) — fresh subagent per task with two-stage review
-2. **Inline Execution** — execute tasks in this session with checkpoints
-
-Use AskUserQuestion to confirm:
-- Question: "Plan is ready. Proceed to implementation?"
-- Options: "Start implementation", "Revise plan", "Stop workflow"
-
-If "Revise plan": go back to writing-plans skill to iterate.
-If "Stop workflow": end here.
-
-Remember the user's execution mode choice for Phase 3.
-
-### If skipping to planning:
-
-Ask the user for the design document path or description, then invoke Skill `everything-claude-code:search-first` for reuse discovery, followed by Skill `superpowers:writing-plans`. Follow the same gate as above.
-
-### If skipping to branch setup:
-
-Ask the user for the plan document path, then proceed directly to Phase 2.
-
-### Context Protection & Compact
-
-Before suggesting compact, ensure:
-1. Design document and plan file are saved to `docs/superpowers/`
-2. TodoWrite records: execution mode choice, current phase
-
-Then suggest: **"The brainstorm and planning phases used significant context. Consider running `/compact` now — all decisions are persisted in docs/superpowers/ and TodoWrite. After compact, I'll recover context by reading those files."**
-
-Announce: **"Phase 1 complete — design and plan saved. Moving to Phase 2."**
-
----
-
-## Phase 2: Branch Setup
-
-Use AskUserQuestion to ask:
-- Question: "How to isolate this feature work?"
-- Options: "Create worktree (Recommended)", "Create feature branch"
-
-### If worktree:
-
-Invoke Skill `superpowers:using-git-worktrees`. Follow the skill exactly.
-
-Record `BRANCH_MODE=worktree` and the base branch name for Phase 5.
-
-### If feature branch:
-
-Create and switch to a new branch from the current HEAD:
-
-```bash
-# Derive branch name from feature request (kebab-case, max 50 chars)
-# e.g., "Add OAuth2 login" → feat/add-oauth2-login
-git checkout -b feat/<feature-slug>
-```
-
-Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) for Phase 5.
-
-Announce: **"Phase 2 complete. Moving to Phase 3."**
-
----
-
-## Phase 3: Implement
-
-Based on the execution mode chosen in Phase 1:
-
-- **If Subagent-Driven:** Invoke Skill `superpowers:subagent-driven-development`. Follow the skill exactly.
-- **If Inline Execution:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.
-
-**Important:** Both skills will attempt to invoke `superpowers:finishing-a-development-branch` at the end. Do NOT follow that final step — instead proceed to Phase 4.
-
-### Context Protection & Compact
-
-Before suggesting compact, ensure:
-1. TodoWrite has all task statuses updated
-2. Note the base branch name for later use
-
-Then suggest: **"Implementation complete. Consider running `/compact` before verification — progress is tracked in TodoWrite and git history. After compact, I'll recover context from TodoWrite + git log + docs/superpowers/."**
-
-Announce: **"Phase 3 complete — implementation done. Moving to Phase 4."**
-
----
-
-## Phase 4: Verify & Review
-
-### Step 1: Scope Analysis — Determine Review Matrix
+## Step 1: Scope Analysis — Determine Review Matrix
 
 Before dispatching any reviewers, analyze the change scope to build the full review list.
 
@@ -182,7 +40,7 @@ Build the agent list:
 
 Announce which agents will be dispatched (e.g., "Dispatching 6 parallel reviewers: verification, security, code, simplify, architecture, test coverage").
 
-### Step 2: Dispatch All Reviews in Parallel
+## Step 2: Dispatch All Reviews in Parallel
 
 Dispatch every agent from the matrix in a **single parallel batch**:
 
@@ -288,7 +146,7 @@ Agent(description="Run test coverage analysis",
         Return findings with gap descriptions.")
 ```
 
-### Step 3: Collect and Act on Findings
+## Step 3: Collect and Act on Findings
 
 When all agents return, consolidate results into a summary table:
 
@@ -306,7 +164,7 @@ When all agents return, consolidate results into a summary table:
 
 If fixes were needed, re-run only the affected agent(s) to confirm.
 
-### Step 4: Update Project Docs
+## Step 4: Update Project Docs
 
 Check if the following files need updates based on the changes made:
 - **CLAUDE.md**: New modules, patterns, commands, or architectural changes
@@ -317,38 +175,14 @@ Check if the following files need updates based on the changes made:
 
 For each file: read current content, compare against actual changes, update only what is factually outdated or missing. Do not rewrite unchanged sections.
 
-### Gate
-
-Use AskUserQuestion to confirm:
-- Question: "All reviews complete. Ship this feature?"
-- Options: "Continue to ship", "Fix issues first", "Stop workflow"
-
-If "Fix issues first": address remaining issues, then re-run the failing verification steps.
-If "Stop workflow": end here.
-
-### CHECKPOINT — Do NOT announce phase complete until ALL items are confirmed:
+## CHECKPOINT — Do NOT announce phase complete until ALL items are confirmed:
 - [ ] Step 1: Scope analysis done, review matrix determined
 - [ ] Step 2: All agents dispatched and returned
 - [ ] Step 3: All Critical/Important findings resolved
 - [ ] Step 4: Project docs checked and updated if needed
-- [ ] Gate: User confirmed to ship
 
 If any item is unchecked, go back and complete it now.
 
-Announce: **"Phase 4 complete — verified and reviewed. Moving to Phase 5."**
+Announce: **"Phase 4 complete — verified and reviewed. Returning to state machine for Gate 4."**
 
----
-
-## Phase 5: Ship
-
-Invoke Skill `superpowers:finishing-a-development-branch`.
-
-Follow the skill exactly. It will:
-1. Verify tests pass
-2. Present 4 options: merge locally / push + PR / keep as-is / discard
-3. Execute the chosen option
-4. Clean up worktree if applicable
-
-**Default recommendation:** When presenting the 4 options, recommend "Push and create a Pull Request" as the default choice — this is the safest integration path since it allows code review before merging.
-
-Announce: **"Feature workflow complete."**
+Return to the state machine SKILL.md for Gate 4.

@@ -66,6 +66,23 @@ Agent(description="Run code review",
         Use `git diff $(git merge-base HEAD <BASE_BRANCH>)..HEAD` for all changes.
         Read the plan from docs/superpowers/plans/ directory for context.
         Evaluate: correctness, plan alignment, code quality, test coverage.
+
+        FRAMEWORK HOOK EXECUTION PATH CHECK:
+        If the implementation uses any framework hook, callback, validator, middleware,
+        signal, or lifecycle method, verify:
+        1. TRIGGER CONDITIONS — Under what conditions does the framework actually
+           invoke this code? Check the framework docs, not just whether the logic
+           looks correct. Common gotchas: Pydantic validators skipping defaults,
+           Django clean methods skipping blank fields, ORM events not firing on
+           bulk operations, middleware short-circuiting.
+        2. ALL INPUT PATHS — Enumerate every way data can arrive at this hook
+           (explicit value, null, absent/omitted, empty). Confirm the hook fires
+           for each path. 'Sent as null' and 'field omitted' are often distinct
+           framework code paths.
+        3. TEST COVERAGE — Verify tests exist for each distinct input path, not
+           just the happy path.
+        Flag any hook that lacks full path coverage as Critical.
+
         Return findings as Critical / Important / Minor.")
 
 Agent(description="Run simplify review",

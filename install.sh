@@ -252,6 +252,15 @@ link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
 link_config "${BASEDIR}/claude/scripts" ~/.claude/scripts
 link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
+# Merge MCP servers into ~/.claude.json (Claude Code reads MCP config from here, not settings.json)
+if command -v jq &> /dev/null && [ -f ~/.claude.json ]; then
+    log_info "Adding chrome-devtools MCP to ~/.claude.json..."
+    jq '.mcpServers["chrome-devtools"] = {"command":"npx","args":["-y","chrome-devtools-mcp@latest","--autoConnect"]}' \
+        ~/.claude.json > /tmp/claude.json.tmp && mv /tmp/claude.json.tmp ~/.claude.json
+    log_success "MCP servers merged"
+else
+    log_info "Skipping MCP merge (jq or ~/.claude.json not found)"
+fi
 log_success "Claude Code configured"
 
 # config obsidian vault

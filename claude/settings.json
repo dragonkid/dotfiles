@@ -163,15 +163,6 @@
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
-  "mcpServers": {
-    "playwright-extension": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest",
-        "--extension"
-      ]
-    }
-  },
   "teammateMode": "in-process",
   "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning.",
   "skipDangerousModePermissionPrompt": true

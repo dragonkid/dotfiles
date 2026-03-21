@@ -225,14 +225,6 @@ log_success "Git config linked"
 
 # config claude
 log_info "Setting up Claude Code..."
-# Install mgrep (semantic search tool for Claude Code)
-if ! command -v mgrep &> /dev/null; then
-    log_info "Installing mgrep..."
-    npm install -g @mixedbread/mgrep
-    log_success "mgrep installed"
-else
-    log_info "mgrep already installed"
-fi
 # Install typescript-language-server (dependency for Claude Code)
 if ! command -v typescript-language-server &> /dev/null; then
     log_info "Installing typescript-language-server..."

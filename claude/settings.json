@@ -2,7 +2,6 @@
   "respectGitignore": false,
   "permissions": {
     "allow": [
-      "Bash(mgrep:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
       "WebFetch(domain:github.com)",
@@ -32,15 +31,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/observe.sh pre"
-          }
-        ]
-      },
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/check-mgrep-first.sh"
           }
         ]
       },
@@ -123,7 +113,6 @@
     "security-guidance@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": false,
-    "mgrep@Mixedbread-Grep": true,
     "claude-md-management@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
     "claude-mem@thedotmack": true,
@@ -146,12 +135,6 @@
       "source": {
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
-      }
-    },
-    "Mixedbread-Grep": {
-      "source": {
-        "source": "github",
-        "repo": "mixedbread-ai/mgrep"
       }
     },
     "thedotmack": {

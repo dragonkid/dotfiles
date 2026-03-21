@@ -46,7 +46,7 @@ Examples:
 
 ## Tool Selection
 1. File operations: Read, Edit, Grep, Glob (not bash)
-2. Web search: mgrep --web preferred, WebSearch as fallback
+2. Web search: Exa MCP tools (web_search_exa, web_search_advanced_exa, etc.)
 3. Documentation lookup: context7 MCP server
 4. Parallelize independent operations
 5. Read files before editing

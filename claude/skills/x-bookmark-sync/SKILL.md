@@ -2,7 +2,7 @@
 name: x-bookmark-sync
 description: >
   Sync X (Twitter) bookmarks to Obsidian vault as searchable Markdown notes,
-  with optional bookmark removal after sync. Extracts cookies from browser via chrome-devtools MCP,
+  with optional bookmark removal after sync. Extracts cookies from browser via agent-browser CLI,
   then calls X GraphQL API directly with httpx (no API key needed).
   Use when: user says "sync bookmarks", "同步书签", "拉取推特书签", "sync my X bookmarks",
   "pull twitter bookmarks to obsidian", "bookmark sync", "书签同步到 obsidian",
@@ -19,11 +19,13 @@ Fetch X/Twitter bookmarks, convert to Obsidian-compatible Markdown, save to vaul
 
 - **httpx** — async HTTP client (usually pre-installed with Python 3.11+)
 - Install if missing: `pip3 install httpx`
+- **agent-browser** — browser automation CLI (`brew install agent-browser`)
 - No X API key or third-party scraper library needed
 
 ## Configuration
 
 Cookie cache: `~/.x-bookmark-sync/cookies.json`
+State file: `~/.x-bookmark-sync/state.json`
 Config file: `~/.x-bookmark-sync/config.json`
 
 ```json
@@ -37,58 +39,70 @@ Config file: `~/.x-bookmark-sync/config.json`
 
 ## Authentication
 
-Use chrome-devtools MCP to extract cookies directly from the user's browser.
+Use agent-browser CLI to extract cookies from the user's browser.
 The user must be logged in to x.com in Chrome. No manual cookie copying needed.
 
 ### Cookie extraction flow
 
-1. **List browser pages** to find x.com tab:
+**If cached state exists and is valid**, load it directly:
 
-```
-mcp__chrome-devtools__list_pages()
-→ find pageId where URL contains "x.com"
-```
-
-2. **Select the x.com page**:
-
-```
-mcp__chrome-devtools__select_page(pageId=<x_page_id>)
+```bash
+# Check if state file exists
+test -f ~/.x-bookmark-sync/state.json && echo "state exists"
 ```
 
-3. **Extract cookies from a network request** — `document.cookie` cannot access HttpOnly cookies like `auth_token`, but network request headers contain the full cookie string:
+**If no state or cookies expired (401/403)**, extract from Chrome:
 
-```
-mcp__chrome-devtools__list_network_requests(resourceTypes=["xhr", "fetch"], pageSize=3)
-→ pick any request to x.com/i/api/*
-mcp__chrome-devtools__get_network_request(reqid=<reqid>)
-→ read "cookie" from Request Headers
-→ parse out auth_token and ct0
+1. **Connect to the user's Chrome and navigate to x.com**:
+
+```bash
+agent-browser --auto-connect open https://x.com
 ```
 
-4. **Cache cookies** to `~/.x-bookmark-sync/cookies.json` for the current session.
+2. **Extract cookies** — agent-browser reads all cookies including HttpOnly:
 
-### If x.com is not open
+```bash
+agent-browser cookies
+# → JSON array of all cookies for the current page
+# → parse out auth_token and ct0 values
+```
+
+3. **Save state for future sessions**:
+
+```bash
+agent-browser state save ~/.x-bookmark-sync/state.json
+```
+
+4. **Cache the extracted cookies** to `~/.x-bookmark-sync/cookies.json`.
+
+### If Chrome is not running or auto-connect fails
 
 Use AskUserQuestion:
 ```
-question: "需要从浏览器获取 X 登录态，请在 Chrome 中打开 x.com 并登录，然后告诉我"
+question: "需要从浏览器获取 X 登录态，请打开 Chrome 并登录 x.com，然后告诉我"
 options:
   - "已登录，继续"
   - "取消"
 ```
 
-### If no network requests available
-
-Navigate the page to trigger a request:
-```
-mcp__chrome-devtools__navigate_page(type="reload")
-→ wait a few seconds
-→ retry list_network_requests
-```
+Then retry `agent-browser --auto-connect open https://x.com`.
 
 ### If cookies expired (API returns 401/403)
 
-Use AskUserQuestion to ask user to re-login in browser, then re-extract cookies.
+1. Connect to Chrome and reload x.com to refresh cookies:
+
+```bash
+agent-browser --auto-connect open https://x.com
+agent-browser cookies
+```
+
+2. Update cached state and cookies:
+
+```bash
+agent-browser state save ~/.x-bookmark-sync/state.json
+```
+
+3. If still failing, use AskUserQuestion to ask user to re-login in browser.
 
 ## Workflow
 
@@ -214,7 +228,7 @@ After all bookmarks processed (or user chose "停止"):
 ## Script
 
 Deterministic logic is bundled in `scripts/bookmark.py` with three subcommands.
-Claude extracts cookies via MCP, then calls the script for API/file operations:
+Claude extracts cookies via agent-browser, then calls the script for API/file operations:
 
 ```bash
 SKILL_DIR="<path to x-bookmark-sync skill>"
@@ -248,9 +262,8 @@ Check `os.path.exists()` before writing each file.
 
 ## Error Handling
 
-- **No x.com tab**: AskUserQuestion — ask user to open x.com in Chrome
-- **Cookies expired (401/403)**: AskUserQuestion — ask user to re-login in browser
+- **Chrome not running / auto-connect fails**: AskUserQuestion — ask user to open Chrome with x.com
+- **Cookies expired (401/403)**: Re-extract from Chrome via agent-browser, ask user to re-login if needed
 - **Rate limited (429)**: Read `x-rate-limit-reset` header, wait, retry
 - **Write failure**: Do NOT proceed to bookmark removal
 - **Partial sync**: Track which tweets were written; only remove those specific bookmarks
-

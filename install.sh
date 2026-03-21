@@ -252,14 +252,31 @@ link_config "${BASEDIR}/claude/claude.md" ~/.claude/claude.md
 link_config "${BASEDIR}/claude/hooks" ~/.claude/hooks
 link_config "${BASEDIR}/claude/scripts" ~/.claude/scripts
 link_config "${BASEDIR}/claude/statusline.sh" ~/.claude/statusline.sh
-# Merge MCP servers into ~/.claude.json (Claude Code reads MCP config from here, not settings.json)
-if command -v jq &> /dev/null && [ -f ~/.claude.json ]; then
-    log_info "Adding chrome-devtools MCP to ~/.claude.json..."
-    jq '.mcpServers["chrome-devtools"] = {"command":"npx","args":["-y","chrome-devtools-mcp@latest","--autoConnect"]}' \
-        ~/.claude.json > /tmp/claude.json.tmp && mv /tmp/claude.json.tmp ~/.claude.json
-    log_success "MCP servers merged"
+# Install agent-browser (browser automation CLI for AI agents)
+if command -v agent-browser &> /dev/null; then
+    log_info "agent-browser already installed, skipping"
 else
-    log_info "Skipping MCP merge (jq or ~/.claude.json not found)"
+    log_info "Installing agent-browser..."
+    if command -v brew &> /dev/null; then
+        brew install agent-browser
+    elif command -v npm &> /dev/null; then
+        npm install -g agent-browser
+    else
+        log_info "Skipping agent-browser install (no brew or npm)"
+    fi
+    if command -v agent-browser &> /dev/null; then
+        agent-browser install
+        log_success "agent-browser installed"
+    fi
+fi
+# Remove legacy chrome-devtools MCP from ~/.claude.json if present
+if command -v jq &> /dev/null && [ -f ~/.claude.json ]; then
+    if jq -e '.mcpServers["chrome-devtools"]' ~/.claude.json > /dev/null 2>&1; then
+        log_info "Removing chrome-devtools MCP from ~/.claude.json..."
+        jq 'del(.mcpServers["chrome-devtools"])' \
+            ~/.claude.json > /tmp/claude.json.tmp && mv /tmp/claude.json.tmp ~/.claude.json
+        log_success "chrome-devtools MCP removed"
+    fi
 fi
 log_success "Claude Code configured"
 

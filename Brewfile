@@ -1,4 +1,5 @@
 tap "tw93/tap"
+brew "agent-browser"
 brew "autojump"
 brew "bat"
 brew "bitwarden-cli"

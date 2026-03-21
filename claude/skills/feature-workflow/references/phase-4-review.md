@@ -49,7 +49,7 @@ Dispatch every agent from the matrix in a **single parallel batch**:
 Agent(description="Run verification loop",
       subagent_type="general-purpose",
       prompt="Run the verification loop for this project.
-        Invoke Skill `verification-loop`. Follow it exactly — run all 6 phases
+        Invoke Skill `everything-claude-code:verification-loop`. Follow it exactly — run all 6 phases
         (build, types, lint, tests, security, diff). Return the full VERIFICATION REPORT
         with PASS/FAIL for each phase.")
 

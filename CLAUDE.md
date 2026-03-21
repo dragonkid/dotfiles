@@ -58,7 +58,6 @@ This means `model` and `fastMode` exist in the working copy but are never commit
 ## TODO
 
 - [ ] Configure per-agent model tiers to reduce costs: create `~/.claude/agents/` override files setting lightweight agents (build-error-resolver, refactor-cleaner, doc-updater) to `model: haiku`, mid-tier agents (code-reviewer, tdd-guide) to `model: sonnet`, and keep complex reasoning agents (architect, planner, security-reviewer) on `model: opus`
-- [ ] After ECC upgrades, check if `everything-claude-code:verification-loop` has frontmatter — if so, delete local wrapper `claude/skills/verification-loop/SKILL.md` and update `feature-workflow.md` to use `everything-claude-code:verification-loop` (checked 2026-02-25: still no frontmatter upstream)
 - [ ] After ECC upgrades, check if `observe.sh` (JSON triple-quote parse bug) is fixed in upstream **shell** version — if so, switch `settings.json` hook back to plugin path and remove `claude/hooks/observe.sh` (checked 2026-02-25: still present)
 - [ ] After ECC upgrades, check observer trigger mechanism — if fixed upstream (e.g., SessionStart hook), remove `/analyze-observations` command; if observer updated but command still needed, update command to align with new observer logic (checked 2026-02-25: still broken, /analyze-observations still needed)
 - [ ] ECC `instinct-cli.py` (line 91) expects `.yaml` extension but user instincts use `.md` — monitor for upstream fix or extension config option

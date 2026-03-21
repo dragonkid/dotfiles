@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: Multi-source deep research using Exa MCP. Breaks topics into sub-questions, searches with category-aware queries, deep-reads key sources, and synthesizes cited reports. Use when the user wants thorough research, deep dives, competitive analysis, technology evaluation, company research, market landscape analysis, or any question requiring synthesis from multiple sources. Triggers on "research", "deep dive", "investigate", "what's the current state of", "帮我调研", "深入研究", "research this company", "competitor analysis", "company overview", "market landscape", "who are the players in".
+description: Multi-source deep research using Exa MCP. Breaks topics into sub-questions, searches with category-aware queries, deep-reads key sources, and synthesizes cited reports. Use when the user wants thorough research, deep dives, competitive analysis, technology evaluation, tool/library comparison, company research, market landscape analysis, or any question requiring synthesis from multiple sources. Triggers on "research", "deep dive", "investigate", "what's the current state of", "compare", "对比", "比较", "哪个好", "推荐几个", "evaluate", "帮我调研", "深入研究", "研究下", "research this company", "competitor analysis", "company overview", "market landscape", "who are the players in", "alternatives to".
 context: fork
 ---
 
@@ -11,6 +11,31 @@ Produce thorough, cited research reports by breaking topics into sub-questions a
 ## Token Isolation
 
 Always spawn Task agents for search and deep-read steps. Agent returns distilled findings only — main context stays clean.
+
+When dispatching agents, include tool routing and category restrictions in the prompt. Agents don't see this skill — they only know what you tell them. Example:
+
+```
+Research [topic]. For GitHub projects, use `gh api repos/{owner}/{repo}` for
+metadata/README — not web search. For community reception, use Exa
+web_search_advanced_exa with category "tweet" or includeDomains ["reddit.com"].
+Category restrictions: "company" allows NO date/text/domain filters;
+"tweet" allows NO includeText/excludeText/includeDomains/excludeDomains.
+Return distilled findings with source URLs.
+```
+
+## Tool Routing
+
+Not everything should go through Exa. Pick the right tool for each data source:
+
+| Data source | Tool | Why |
+|-------------|------|-----|
+| GitHub repo metadata (stars, language, topics) | `gh api repos/{owner}/{repo}` | Structured data, zero noise, instant |
+| GitHub README | `gh api repos/{owner}/{repo}/readme --jq '.content' \| base64 -d` | Full content, no web scraping |
+| Community discussions (Reddit, HN, Twitter) | Exa `web_search_advanced_exa` | Category-aware, highlights mode |
+| News, papers, blogs | Exa `web_search_advanced_exa` | Category filters, date filters |
+| Full page content | Exa `crawling_exa` | Deep reads, maxCharacters control |
+
+When dispatching research agents, include tool routing in the prompt so agents use the right tool for each source.
 
 ## Workflow
 

@@ -1,19 +1,18 @@
 ---
-name: x-bookmark-sync
+name: x-bookmark-digest
 description: >
-  Sync X (Twitter) bookmarks to Obsidian vault as searchable Markdown notes,
-  with optional bookmark removal after sync. Extracts cookies from browser via agent-browser CLI,
-  then calls X GraphQL API directly with httpx (no API key needed).
-  Use when: user says "sync bookmarks", "同步书签", "拉取推特书签", "sync my X bookmarks",
-  "pull twitter bookmarks to obsidian", "bookmark sync", "书签同步到 obsidian",
-  or wants to batch-save their X bookmarks into their knowledge base.
-  Also triggers when user wants to remove processed bookmarks from X after saving.
+  Review and digest X (Twitter) bookmarks — rank by engagement, deep-research interesting ones,
+  and save findings to Obsidian vault. Extracts cookies via agent-browser CLI, calls X GraphQL API
+  directly with httpx (no API key needed). Use when: user says "digest bookmarks", "消化书签",
+  "review my bookmarks", "处理推特书签", "sync bookmarks", "同步书签", "拉取推特书签",
+  "bookmark digest", "看看书签", "书签消化", or wants to process their X bookmarks into
+  their knowledge base with research and analysis.
 user-invocable: true
 ---
 
-# X Bookmark Sync
+# X Bookmark Digest
 
-Fetch X/Twitter bookmarks, convert to Obsidian-compatible Markdown, save to vault, optionally remove from X.
+Fetch X/Twitter bookmarks, rank by engagement, deep-research interesting ones, and save findings to vault.
 
 ## Dependencies
 

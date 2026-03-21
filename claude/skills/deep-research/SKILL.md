@@ -47,6 +47,21 @@ Ask 1-2 quick clarifying questions:
 
 If the user says "just research it" — skip ahead with reasonable defaults.
 
+### Step 1.5: Vault Cross-Reference
+
+Before web research, check the Obsidian vault for existing notes on the topic. This avoids duplicating prior research and surfaces useful context:
+
+```
+Grep pattern="<topic keywords>" path="~/Documents/second-brain" glob="*.md"
+```
+
+If related notes found:
+- Read the most relevant 2-3 notes for context
+- Note what's already covered vs what's missing — focus web research on gaps
+- Include existing note titles in the report's `## Related` section later
+
+If nothing found, proceed directly to web research.
+
 ### Step 2: Plan Sub-Questions
 
 Break the topic into 3-5 research sub-questions. For each, decide the best Exa category:

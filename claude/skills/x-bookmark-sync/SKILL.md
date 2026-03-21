@@ -123,41 +123,60 @@ headers = {
 
 The Bearer token above is X's public client-side token (not a secret — it's embedded in the web app JS).
 
-### Step 2: Fetch page 1, process, repeat
+### Step 2: Fetch and rank bookmarks
 
-Always fetch page 1 (no cursor). When a bookmark is synced and removed from X,
-it disappears from the list and the next bookmark naturally moves up.
-This eliminates cursor management entirely.
+Fetch page 1 (no cursor):
 
 ```
 GET https://x.com/i/api/graphql/bN6kl72VsPDRIGxDIhVu7A/Bookmarks
 params: variables={"count":20, "includePromotedContent":false}, features={...}
 ```
 
-After processing a page, fetch page 1 again (processed bookmarks have been removed, remaining shift up).
-Stop when: user chooses "停止", or page returns empty (no more bookmarks).
-
-### Step 3: Interactive per-bookmark review
-
-Within each page, process bookmarks one by one. For each bookmark, present a summary as bullet points:
+After fetching, compute a weighted engagement score for each bookmark and sort descending:
 
 ```
-**@username** · YYYY-MM-DD
-- <one-line summary of tweet content>
-- Likes: N · Retweets: N · Replies: N
+score = likes + retweets * 3 + replies * 2
+```
+
+### Step 3: Present ranked list and process one by one
+
+First show the Top 10 ranked overview so the user sees the full picture:
+
+```
+书签热度排行 (Top 10):
+
+ #  Score  Author         Date        Content
+ 1  14268  @hasantoxr     02-01       Claude-Mem 持久化记忆...
+ 2  12872  @virattt       02-06       Dexter 金融分析工具...
+ ...
+```
+
+Then process bookmarks one by one in rank order (highest score first). For each:
+
+```
+**#1** · **@username** · YYYY-MM-DD · Score: N
+<2-3 sentence summary capturing: what the tweet is about, key claims/numbers, and why it's notable>
+- Likes: N · RT: N · Replies: N
 - Media: N photos, N videos (or "none")
-- Links: <expanded URLs if any>
+- Link: https://x.com/username/status/tweet_id
 ```
 
-Then use AskUserQuestion to let the user decide:
+The summary should be informative enough for the user to decide without opening the link.
+Include specific details: project names, star counts, key metrics, tools mentioned.
+Bad: "Claude Code 持久化记忆插件" (too terse, no context)
+Good: "Claude-Mem 给 Claude Code 加持久化跨 session 记忆，声称减少 95% token 用量、20 倍 tool call 上限。10k+ likes，100% 开源。"
+
+Use AskUserQuestion:
 
 ```
 AskUserQuestion:
-  question: "同步这条书签？"
+  question: "处理这条书签？(#1/10)"
   header: "@username"
   options:
-    - label: "同步 (Recommended)"
-      description: "保存到 Clippings/ 并从 X 移除书签"
+    - label: "深入了解 (Recommended)"
+      description: "调研 tweet 内容，分析后保存到 vault 并从 X 移除"
+    - label: "跳过"
+      description: "保留在 X，不处理"
     - label: "不感兴趣"
       description: "不保存，直接从 X 移除"
     - label: "停止"
@@ -165,9 +184,28 @@ AskUserQuestion:
 ```
 
 Based on user choice:
-- **同步**: Write Markdown to vault + remove from X
+- **深入了解**: Trigger the deep-research workflow (see Step 3a below), then save via obsidian-capture + remove from X
+- **跳过**: Do nothing, move to next bookmark
 - **不感兴趣**: Remove from X without saving
 - **停止**: End the loop, remaining bookmarks stay in X
+
+### Step 3a: Deep research workflow (for "深入了解")
+
+When user selects "深入了解", use the `deep-research` skill to investigate the tweet content:
+
+1. **Extract research topic** from the tweet: project names, tools, claims, URLs mentioned
+2. **Invoke deep-research** with a focused query based on the tweet content
+   - e.g., for a tweet about "Dexter" → research "Dexter finance AI tool GitHub features architecture"
+   - Include any URLs from the tweet as starting points
+3. **Present findings** to the user as a concise research summary
+4. **Save via obsidian-capture**:
+   - If the topic needs further exploration → save to `Clippings/` (stays in inbox for future processing)
+   - If the research is comprehensive enough → save to an appropriate topic directory (e.g., `Projects/`, `Tools/`, `Reference/`)
+   - Let obsidian-capture decide the best location based on content type
+5. **Remove the bookmark** from X after successful save
+
+After processing Top 10 (or all selected removals done), fetch page 1 again.
+Repeat the rank-and-process cycle until: user chooses "停止", or page returns empty.
 
 ### Step 4: Write Markdown (for synced bookmarks)
 
@@ -220,8 +258,9 @@ After all bookmarks processed (or user chose "停止"):
 
 ```
 处理完成
-- N 条已同步到 Clippings/
+- N 条已深入调研并保存到 vault
 - N 条不感兴趣（已从 X 移除）
+- N 条跳过（保留在 X）
 - N 条未处理（提前停止）
 ```
 

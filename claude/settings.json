@@ -122,7 +122,8 @@
     "plugin-dev@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "jdtls-lsp@claude-plugins-official": true
+    "jdtls-lsp@claude-plugins-official": true,
+    "obsidian-deep-research@alvdef-obsidian-deep-research": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -142,11 +143,17 @@
         "source": "github",
         "repo": "thedotmack/claude-mem"
       }
+    },
+    "alvdef-obsidian-deep-research": {
+      "source": {
+        "source": "github",
+        "repo": "alvdef/obsidian-deep-research"
+      }
     }
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
+  "skipDangerousModePermissionPrompt": true,
   "teammateMode": "in-process",
-  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning.",
-  "skipDangerousModePermissionPrompt": true
+  "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning."
 }

@@ -15,6 +15,8 @@ user-invocable: true
 
 Search `~/Documents/second-brain` and answer questions based on vault content.
 
+Uses the `obsidian` CLI for structured search (tag/metadata filtering) with Grep/Glob as fallback.
+
 ## Workflow
 
 ### 1. Query Rewriting
@@ -31,16 +33,29 @@ The user's natural language question needs to become effective search terms.
 
 ### 2. Search
 
-Run multiple Grep searches in parallel with different term combinations:
+**Primary: obsidian CLI** (supports tag and metadata filtering):
+
+```bash
+# Full-text search
+obsidian search query="<term>" limit=20
+
+# Tag-based search (Zettelkasten zone)
+obsidian search tag:type/permanent query="<term>" limit=20
+obsidian search tag:confidence/verified query="<term>" limit=10
+
+# Search MOCs for topic overview
+obsidian search tag:type/moc query="<term>" limit=10
+```
+
+**Fallback: Grep/Glob** (if obsidian CLI unavailable or returns errors):
 
 ```
-Grep pattern="<term1>" path="~/Documents/second-brain" glob="*.md"
-Grep pattern="<term2>" path="~/Documents/second-brain" glob="*.md"
+Grep pattern="<term>" path="~/Documents/second-brain" glob="*.md"
 ```
+
+Run multiple searches in parallel with different term combinations.
 
 Exclude non-content directories: skip results from `.obsidian/`, `Templates/`, `Excalidraw/`.
-
-If Grep finds too many results, narrow with Glob for specific filenames first, then read the most relevant files.
 
 If zero results, try:
 - Broader terms (remove qualifiers)
@@ -55,10 +70,16 @@ Read the top 3-5 most relevant files. Synthesize an answer that:
 - Cites source notes using `[[wikilinks]]`
 - Quotes key passages when helpful
 - Notes if the information might be outdated (check `date` in frontmatter)
+- **Flags confidence level** if the note has `#confidence/*` tags:
+  - `#confidence/verified` — well-established finding
+  - `#confidence/likely` — corroborated by multiple sources
+  - `#confidence/uncertain` — AI-generated or unverified, treat with caution
+  - `#confidence/contradicted` — conflicting evidence exists
 
 ### 4. Report
 
-If vault contains relevant information: answer the question with citations.
+If vault contains relevant information: answer the question with citations. Indicate which zone results come from (numbered Zettelkasten directories vs legacy topic folders) when both zones have matches.
+
 If nothing found: say so clearly, and suggest the user might want to research the topic (they can use `/deep-research`).
 
 ## Command
@@ -74,4 +95,6 @@ If no query provided, ask what to search for.
 - Path: `~/Documents/second-brain`
 - Format: Markdown with YAML frontmatter
 - Links: `[[wikilink]]` format
+- Zettelkasten zone: `00-Dashboard/` through `70-Archive/` (numbered directories)
+- Legacy zone: `LLM/`, `Web3/`, `Tools/`, `Clippings/`, etc. (topic directories)
 - Read `~/Documents/second-brain/CLAUDE.md` for full vault conventions if needed

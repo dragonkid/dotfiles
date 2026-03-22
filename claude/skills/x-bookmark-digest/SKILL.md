@@ -139,31 +139,38 @@ score = likes + retweets * 3 + replies * 2
 
 ### Step 3: Present ranked list and process one by one
 
-First show the Top 10 ranked overview so the user sees the full picture:
+Show the Top 3 with rich summaries. Each entry format:
 
 ```
-书签热度排行 (Top 10):
-
- #  Score  Author         Date        Content
- 1  14268  @hasantoxr     02-01       Claude-Mem 持久化记忆...
- 2  12872  @virattt       02-06       Dexter 金融分析工具...
- ...
+**#1 @username** · YYYY-MM-DD · Score: N
+<2-3 sentence summary with specific details: project names, star counts, key claims, tools>
+Likes: N · RT: N · Replies: N
+<original post URL>
 ```
 
-Then process bookmarks one by one in rank order (highest score first). For each:
+The summary should be informative enough to decide without opening the link.
+Bad: "Dexter 金融 AI 开源项目" (too terse)
+Good: "Dexter 在 GitHub 达到 10k stars，定位是 OpenClaw + Claude Code for finance。可以自动寻找低估股票、拆解财务数据、生成投资论文。全部开源。"
+
+After showing the 3 entries, use AskUserQuestion to let the user pick:
 
 ```
-**#1** · **@username** · YYYY-MM-DD · Score: N
-<2-3 sentence summary capturing: what the tweet is about, key claims/numbers, and why it's notable>
-- Likes: N · RT: N · Replies: N
-- Media: N photos, N videos (or "none")
-- Link: https://x.com/username/status/tweet_id
+AskUserQuestion:
+  question: "选择要深入了解的书签"
+  header: "Top 3"
+  options:
+    - label: "#1 @username - <short label>"
+      description: "Score: N · <one-line highlight>"
+    - label: "#2 @username - <short label>"
+      description: "Score: N · <one-line highlight>"
+    - label: "#3 @username - <short label>"
+      description: "Score: N · <one-line highlight>"
+    - label: "停止"
+      description: "结束处理，剩余书签留在 X"
 ```
 
-The summary should be informative enough for the user to decide without opening the link.
-Include specific details: project names, star counts, key metrics, tools mentioned.
-Bad: "Claude Code 持久化记忆插件" (too terse, no context)
-Good: "Claude-Mem 给 Claude Code 加持久化跨 session 记忆，声称减少 95% token 用量、20 倍 tool call 上限。10k+ likes，100% 开源。"
+After processing the selected bookmark, fetch page 1 again (processed bookmarks removed),
+re-rank, and show the next Top 3. Repeat until user chooses "停止" or no bookmarks remain.
 
 Use AskUserQuestion:
 

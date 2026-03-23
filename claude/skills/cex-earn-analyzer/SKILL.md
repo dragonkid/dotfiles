@@ -67,14 +67,16 @@ Do NOT use keyword-based filtering — it misses new stablecoins and produces fa
 
 Send all titles to the LLM in a single prompt and classify each as:
 
-- **stablecoin_earn**: The PRIMARY asset the user deposits/holds is a stablecoin, and the activity is earn/savings/holding reward
+- **stablecoin_earn**: The PRIMARY asset the user deposits/holds is a USD-pegged stablecoin, and the activity is earn/savings/holding reward
+- **non_usd_stablecoin**: The asset is a stablecoin pegged to a non-USD fiat currency (e.g., KGST pegged to Kyrgyzstani Som). Include in output separately with a warning — holding these exposes users to FX risk on top of crypto risk, which defeats the purpose of "stable" yield.
 - **not_relevant**: Trading competitions, referral programs, or activities that merely use stablecoins as reward denomination
 - **uncertain**: Cannot determine — coin might be a stablecoin but not sure
 
 What counts as "stablecoin_earn":
-- Flexible/locked earn products for a stablecoin (e.g., "USDC Flexible Products", "U活期产品")
-- Hold-to-earn airdrops where you hold a stablecoin (e.g., "Hold USD1 to share WLFI")
+- Flexible/locked earn products for a USD-pegged stablecoin (e.g., "USDC Flexible Products", "U活期产品")
+- Hold-to-earn airdrops where you hold a USD-pegged stablecoin (e.g., "Hold USD1 to share WLFI")
 - Does NOT include: trading competitions with stablecoin prizes, referral bonuses paid in USDT
+- Does NOT include by default: non-USD-pegged stablecoins (e.g., KGST/KGS, EURS/EUR). Mention them separately if found.
 
 Note: region restrictions and activity end dates cannot be determined from titles alone — these are filtered in Step 5 after extracting details.
 
@@ -131,7 +133,11 @@ This filtering happens here (not in Step 2) because region/time info is only ava
 
 ### Step 6: Verify Real APY
 
-Only needed for activities where APY is **variable** — depends on participation volume or reward token price (e.g., hold-to-earn airdrops with a fixed token pool). Skip for fixed-rate earn products where the tiered APY is guaranteed within the tier limit.
+Two categories:
+
+**Fixed-rate earn products** (e.g., USDC 5.5%, RLUSD 8%): Tiered APY is guaranteed within the tier limit. No verification needed — just note the tier cap.
+
+**Variable APY activities** (e.g., hold-to-earn airdrops with fixed token pool): The advertised APY is illustrative only. Announcements use hypothetical numbers in examples (e.g., "假设年化收益率20%") — these are NOT promises. Always calculate an estimated range for these:
 
 **6a. Get reward token price** from Binance public API:
 ```bash
@@ -162,16 +168,26 @@ Optimistic:     5% participate
 
 ### Step 7: Risk Assessment
 
-Assess each coin's risk level:
+**7a. Get market data** from Binance public API for each coin involved (deposit coin + reward coin if different):
+```bash
+# 24h trading volume and price
+curl -s "https://api.binance.com/api/v3/ticker/24hr?symbol={COIN}USDT"
+```
+Extract `quoteVolume` (24h USD volume) and `lastPrice`. For market cap, use `quoteVolume` as a proxy or check CoinGecko/CoinMarketCap via Exa if needed.
+
+**7b. Assess each coin's risk level:**
 
 | Factor | Low | Medium | High |
 |--------|-----|--------|------|
 | Issuer track record | Years of operation, major issuer | Backed by known company, < 2 years | New project, unproven |
 | Regulatory status | Licensed (e.g., NYDFS) | Partial compliance | No clear regulation |
 | Reserve transparency | Regular third-party audits | Self-reported reserves | Opaque |
-| Liquidity | Top-tier trading volume | Moderate | Thin, wide spreads |
+| **24h trading volume** | **> $100M** | **$10M - $100M** | **< $10M** |
+| **Market cap** | **> $1B** | **$100M - $1B** | **< $100M** |
 | Peg stability | Consistent $1.00 | Minor deviations (±0.5%) | Significant deviations |
 | Reward currency risk | Same coin (USDC→USDC) | N/A | Different volatile token |
+
+Low volume and small market cap coins carry higher slippage risk on entry/exit and are more susceptible to de-peg events.
 
 ### Step 8: Output
 

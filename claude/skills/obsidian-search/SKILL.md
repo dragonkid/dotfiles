@@ -39,12 +39,13 @@ The user's natural language question needs to become effective search terms.
 # Full-text search
 obsidian search query="<term>" limit=20
 
-# Tag-based search (Zettelkasten zone)
-obsidian search tag:type/permanent query="<term>" limit=20
-obsidian search tag:confidence/verified query="<term>" limit=10
+# Tag-based search — use `tag` command, NOT `search tag:`
+obsidian tag name="type/permanent" verbose     # list all Permanent notes
+obsidian tag name="confidence/verified" verbose # list all verified notes
+obsidian tag name="type/moc" verbose            # list all MOCs
 
-# Search MOCs for topic overview
-obsidian search tag:type/moc query="<term>" limit=10
+# List all tags with counts
+obsidian tags counts sort=count
 ```
 
 **Fallback: Grep/Glob** (if obsidian CLI unavailable or returns errors):

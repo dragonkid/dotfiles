@@ -116,6 +116,7 @@ Extract into this structure:
 | end_time | Activity end (UTC+8) |
 | participation | How to participate |
 | reward_currency | What currency rewards are paid in (same coin, or different token) |
+| reward_distribution | How and when rewards are paid: frequency (per-minute/daily/weekly), destination (spot/earn account), start timing (e.g., "next day after subscription"), and redemption rules (instant/locked, early exit penalty) |
 | special_conditions | KYC, region restrictions, new-user-only, etc. |
 | url | Full announcement URL |
 

@@ -86,3 +86,8 @@ RIGHT: call `AskUserQuestion` with the options as structured choices
 - Factual: prioritize accuracy over agreement
 - Plain text: omit emojis unless requested
 - ASCII diagrams: always use English text to ensure proper alignment
+- Sources: when citing web search results, use title + newline + indented URL (markdown links don't render in terminal):
+  ```
+  - Title here
+    https://example.com/url
+  ```

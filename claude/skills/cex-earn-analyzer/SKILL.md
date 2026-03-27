@@ -192,10 +192,16 @@ Low volume and small market cap coins carry higher slippage risk on entry/exit a
 
 ### Step 8: Output
 
+Tag activities with status icons to highlight what needs attention:
+- `[NEW]` — announced within the last 3 days
+- `[EXPIRING]` — ends within the next 3 days
+- No tag for activities in the middle of their lifecycle
+
 Output each activity:
 
 ```markdown
-## [Coin] [Type] — [Advertised APY]
+## [NEW] [Coin] [Type] — [Advertised APY]
+## [EXPIRING] [Coin] [Type] — [Advertised APY]
 
 | Field | Detail |
 |-------|--------|
@@ -203,10 +209,19 @@ Output each activity:
 | Risk | Low / Medium / High — [one-line reason] |
 | Participation | ... |
 | APY | ... (with tier breakdown) |
-| Time | start → end |
+| Time | start → end [EXPIRING: highlight days remaining] |
 | Link | announcement URL |
 
 [If variable APY: include estimated range from Step 6]
+```
+
+In the horizontal comparison table, include the tag in the status column:
+
+```markdown
+| 币种 | APY | ... | 状态 |
+|------|-----|-----|------|
+| U    | 10% | ... | [NEW] 进行中 |
+| RLUSD| 8%  | ... | [EXPIRING] 剩余 2 天 |
 ```
 
 End with a horizontal comparison table sorted by risk-adjusted return.

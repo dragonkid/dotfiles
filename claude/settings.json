@@ -123,7 +123,8 @@
     "superpowers@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "jdtls-lsp@claude-plugins-official": true,
-    "obsidian-deep-research@alvdef-obsidian-deep-research": true
+    "obsidian-deep-research@alvdef-obsidian-deep-research": true,
+    "last30days@last30days-skill": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -149,10 +150,18 @@
         "source": "github",
         "repo": "alvdef/obsidian-deep-research"
       }
+    },
+    "last30days-skill": {
+      "source": {
+        "source": "github",
+        "repo": "mvanhorn/last30days-skill"
+      }
     }
   },
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
+  "autoMemoryEnabled": true,
+  "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "teammateMode": "in-process",
   "compactInstructions": "Preserve: current goal, files changed with reasons, decisions made (and rejected alternatives), remaining steps, error resolutions. Discard: full file contents, search/grep output, tool results, exploratory reasoning."

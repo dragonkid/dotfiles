@@ -196,3 +196,5 @@ export MAX_THINKING_TOKENS=10000
 
 # OpenClaw hash baseline update
 alias update-oc-baseline="shasum -a 256 ~/.openclaw/openclaw.json > ~/.openclaw/.config-baseline.sha256 && echo \"✅ Hash baseline updated\""
+
+alias claude-mem='bun "/Users/user/.claude/plugins/cache/thedotmack/claude-mem/10.6.2/scripts/worker-service.cjs"'

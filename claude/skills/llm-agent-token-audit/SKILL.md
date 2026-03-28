@@ -18,6 +18,8 @@ frameworks that inject workspace files into system prompts.
 - Setting up new agent and want lean defaults
 - After adding skills/tools, want to check overhead
 
+> **Claude Code users:** For auditing Claude Code's own context (skills, agents, rules, MCP servers), use `/context-budget` instead — it scans Claude Code components with specific token thresholds. This skill is for auditing custom agent frameworks and general LLM setups.
+
 ## Audit Steps
 
 ### 1. Quantify

@@ -62,6 +62,16 @@ If related notes found:
 
 If nothing found, proceed directly to web research.
 
+### Step 1.7: Recency Check
+
+If the topic has strong time-sensitivity signals (product launches, breaking news, market events, "最近", "现在", "刚出的", recent dates, or anything where community reaction in the last 30 days matters more than authoritative analysis), add a note at the end of the report:
+
+```
+> Tip: 这个主题时效性强，可以用 `/last30days <topic>` 获取 Reddit/X/YouTube/Polymarket 的社区实时讨论和 engagement 数据，与本报告互补。
+```
+
+This complements deep-research's authoritative sources (papers, blogs, company data) with community sentiment and engagement signals that Exa cannot capture (Reddit upvotes, X likes, YouTube transcript content, Polymarket odds).
+
 ### Step 2: Plan Sub-Questions
 
 Break the topic into 3-5 research sub-questions. For each, decide the best Exa category:
@@ -189,6 +199,8 @@ When the research target is a company or market landscape, use this pre-planned 
 - User specifies a number → match it
 
 **Output format for company lists:** use structured table (name, description, funding, headcount) instead of prose. For single-company deep dives, use the standard report template.
+
+**Business-oriented research:** When the goal is a business decision (investor diligence, market sizing, competitive positioning, vendor evaluation), read `references/business-research-modes.md` first to get the analysis checklist for that mode. Use the checklist to plan sub-questions, then execute searches with the tool routing and category rules from this skill. The checklist defines *what to collect*; this skill defines *how to search*.
 
 ## Deep Search (Optional)
 

@@ -15,6 +15,7 @@ HAS_PYTHON=$(test -f pyproject.toml -o -f setup.py -o -f requirements.txt && ech
 HAS_TS=$(test -f tsconfig.json && echo yes || echo no)
 HAS_RUST=$(test -f Cargo.toml && echo yes || echo no)
 HAS_CPP=$(test -f CMakeLists.txt -o -f Makefile.am && echo yes || echo no)
+HAS_JAVA=$(test -f pom.xml -o -f build.gradle -o -f build.gradle.kts && echo yes || echo no)
 HAS_KOTLIN=$(find . -maxdepth 3 -name "*.kt" -quit 2>/dev/null && echo yes || echo no)
 TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
 ```
@@ -30,6 +31,7 @@ Build the agent list:
 | Code review | Always | Always |
 | Simplify review | Always | Always |
 | Architecture review | CHANGED_DIRS >= 3 | Conditional |
+| Java review | HAS_JAVA = yes | Conditional |
 | Go review | HAS_GO = yes | Conditional |
 | Python review | HAS_PYTHON = yes | Conditional |
 | TypeScript review | HAS_TS = yes | Conditional |
@@ -118,6 +120,14 @@ Agent(description="Run architecture review",
         Confirm the refactoring improved structural quality.
         Return findings as Critical / Important / Minor.")
 
+Agent(description="Run Java review",
+      subagent_type="everything-claude-code:java-reviewer",
+      prompt="Java/Spring Boot review of this branch's changes.
+        Check for: layered architecture violations, JPA/Hibernate anti-patterns,
+        Spring Security misconfigurations, concurrency issues, Optional misuse,
+        resource leaks, and Java coding standards.
+        Return findings as Critical / Important / Minor.")
+
 Agent(description="Run Go review",
       subagent_type="everything-claude-code:go-reviewer",
       prompt="Go-specific review of this branch's changes.
@@ -133,7 +143,7 @@ Agent(description="Run Python review",
         Return findings as Critical / Important / Minor.")
 
 Agent(description="Run TypeScript review",
-      subagent_type="everything-claude-code:code-reviewer",
+      subagent_type="everything-claude-code:typescript-reviewer",
       prompt="TypeScript-specific review of this branch's changes.
         Run tsc --noEmit, eslint. Check for: strict types, proper error handling,
         React patterns (if applicable), async/await correctness, import hygiene.

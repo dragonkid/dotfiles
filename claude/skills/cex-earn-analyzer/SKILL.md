@@ -15,50 +15,42 @@ user-invocable: true
 
 Scan Binance announcements for stablecoin earning activities, verify advertised APY against on-chain reality, and produce a risk-adjusted comparison.
 
+All data fetching uses public APIs — no browser or login required. The bundled `scripts/fetch_data.py` handles all network calls and returns structured JSON.
+
+## Bundled Script
+
+`scripts/fetch_data.py` provides these subcommands:
+
+```bash
+SCRIPT="$(dirname "$0")/../scripts/fetch_data.py"   # when called from skill dir
+# Or use the absolute path shown by the skill loader
+
+python3 scripts/fetch_data.py announcements [--days N]   # Binance CMS API → JSON list
+python3 scripts/fetch_data.py stablecoins                # DefiLlama → JSON list
+python3 scripts/fetch_data.py ticker USDCUSDT RLUSDUSDT  # Binance 24h ticker → JSON
+python3 scripts/fetch_data.py price WLFIUSDT             # Binance spot price → JSON
+python3 scripts/fetch_data.py detail CODE1 CODE2         # defuddle → clean markdown per page
+```
+
+All output is JSON to stdout, errors to stderr.
+
 ## Workflow
 
 ```
-Fetch announcements ─→ LLM classify ─→ Exa verify unknowns ─→ Extract details ─→ Filter ─→ Verify APY ─→ Output
+fetch_data.py announcements → LLM classify → Exa verify unknowns → fetch_data.py detail → Filter → Verify APY → Output
 ```
 
 ### Step 1: Fetch Announcements
 
-Use agent-browser to execute JS on the Binance page, calling the internal API to batch-fetch titles. This avoids SPA pagination issues.
-
-```
-agent-browser --auto-connect open "https://www.binance.com/zh-CN/support/announcement/list/93"
+```bash
+python3 <skill-dir>/scripts/fetch_data.py announcements --days 30
 ```
 
-Then via `agent-browser eval --stdin` inside the page context (inherits cookies, bypasses CORS):
-
-```javascript
-(async () => {
-  const results = [];
-  for (let page = 1; page <= 8; page++) {
-    const resp = await fetch(
-      'https://www.binance.com/bapi/composite/v1/public/cms/article/list/query'
-      + '?type=1&catalogId=93&pageNo=' + page + '&pageSize=20'
-    );
-    const data = await resp.json();
-    const articles = data?.data?.catalogs?.[0]?.articles || [];
-    articles.forEach(a => {
-      const date = a.releaseDate
-        ? new Date(a.releaseDate).toISOString().split('T')[0]
-        : '';
-      results.push({ title: a.title, code: a.code, date });
-    });
-    if (articles.length === 0) break;
-  }
-  return JSON.stringify(results);
-})()
-```
-
-After fetching, filter to the past 30 days (or the user's requested range) by comparing each item's `date` field against today's date. Discard older items before classification.
+Returns JSON array: `[{title, code, date}, ...]`
 
 Key notes:
 - `catalogId=93` = "币安最新活动" category. Only use this category.
 - The API returns **English** titles regardless of page language. Classification must handle English.
-- 8 pages (~160 items) is a safe over-fetch. Always date-filter after fetching rather than guessing page count.
 - Default range is 30 days. Adjust if the user specifies a different period.
 
 ### Step 2: LLM Classification (No Keyword Filtering)
@@ -92,17 +84,15 @@ Reclassify based on results. If still unclear, include in output with a note.
 
 ### Step 4: Extract Activity Details
 
-For each confirmed stablecoin_earn activity, open the detail page and extract text:
+For each confirmed stablecoin_earn activity, fetch the detail page via defuddle:
 
 ```bash
-agent-browser --auto-connect open "https://www.binance.com/zh-CN/support/announcement/detail/{code}"
-agent-browser wait --load networkidle
-agent-browser eval --stdin <<'EOF'
-document.body.innerText.substring(0, 3000)
-EOF
+python3 <skill-dir>/scripts/fetch_data.py detail CODE1 CODE2 CODE3
 ```
 
-Extract into this structure:
+Returns JSON array: `[{code, url, markdown}, ...]`
+
+The markdown contains the full announcement text with tables preserved. Parse it to extract:
 
 | Field | Description |
 |-------|-------------|
@@ -138,43 +128,38 @@ Two categories:
 
 **Fixed-rate earn products** (e.g., USDC 5.5%, RLUSD 8%): Tiered APY is guaranteed within the tier limit. No verification needed — just note the tier cap.
 
-**Variable APY activities** (e.g., hold-to-earn airdrops with fixed token pool): The advertised APY is illustrative only. Announcements use hypothetical numbers in examples (e.g., "假设年化收益率20%") — these are NOT promises. Always calculate an estimated range for these:
+**Variable APY activities** (e.g., hold-to-earn airdrops with fixed token pool): The advertised APY is illustrative only. Announcements use hypothetical numbers in examples (e.g., "假设年化收益率20%") — these are NOT promises. Always calculate an estimated range:
 
-**6a. Get reward token price** from Binance public API:
+**6a. Get reward token price:**
 ```bash
-curl -s "https://api.binance.com/api/v3/ticker/price?symbol={TOKEN}USDT"
+python3 <skill-dir>/scripts/fetch_data.py price WLFIUSDT
 ```
-If no USDT pair, try USDC: `?symbol={TOKEN}USDC`
 
-**6b. Get on-chain holdings** from Arkham Intelligence:
+**6b. Get stablecoin circulating supply:**
 ```bash
-agent-browser --auto-connect open "https://intel.arkm.com/explorer/entity/binance"
-agent-browser wait --load networkidle
+python3 <skill-dir>/scripts/fetch_data.py stablecoins
 ```
-Extract the coin's total holdings via JS eval. Note: Arkham shows total Binance holdings (including cold wallet reserves), not just activity participants.
+Find the coin by symbol, use `market_cap_usd`. Assume Binance holds 20-40% of total supply.
 
 **6c. Calculate estimated APY range:**
 ```
-# Generalize from the announcement's reward schedule:
-annual_reward_value = (pool_per_period × token_price) × (periods_per_year)
-#   e.g., weekly pool: × 52; daily pool: × 365; one-time pool: annualize over activity duration
-
+annual_reward_value = (pool_per_period * token_price) * periods_per_year
 APY = annual_reward_value / total_participating_amount
 
-# Show a range since actual participation is unknown:
-Conservative: 100% of Arkham holdings participate (floor estimate)
-Moderate:      25% participate
-Optimistic:     5% participate
+Conservative: 40% of circulating supply on Binance, 100% participate
+Moderate:     40% on Binance, 25% participate
+Optimistic:   40% on Binance, 5% participate
 ```
 
 ### Step 7: Risk Assessment
 
-**7a. Get market data** from Binance public API for each coin involved (deposit coin + reward coin if different):
+**7a. Get market data:**
 ```bash
-# 24h trading volume and price
-curl -s "https://api.binance.com/api/v3/ticker/24hr?symbol={COIN}USDT"
+python3 <skill-dir>/scripts/fetch_data.py ticker USDCUSDT RLUSDUSDT UUSDT USD1USDT WLFIUSDT
 ```
-Extract `quoteVolume` (24h USD volume) and `lastPrice`. For market cap, use `quoteVolume` as a proxy or check CoinGecko/CoinMarketCap via Exa if needed.
+Returns `[{symbol, price, volume_24h_usd}, ...]`
+
+For market cap, use the DefiLlama data already fetched in Step 6b.
 
 **7b. Assess each coin's risk level:**
 
@@ -188,20 +173,16 @@ Extract `quoteVolume` (24h USD volume) and `lastPrice`. For market cap, use `quo
 | Peg stability | Consistent $1.00 | Minor deviations (±0.5%) | Significant deviations |
 | Reward currency risk | Same coin (USDC→USDC) | N/A | Different volatile token |
 
-Low volume and small market cap coins carry higher slippage risk on entry/exit and are more susceptible to de-peg events.
-
 ### Step 8: Output
 
-Tag activities with status icons to highlight what needs attention:
+Tag activities with status icons:
 - `[NEW]` — announced within the last 3 days
 - `[EXPIRING]` — ends within the next 3 days
-- No tag for activities in the middle of their lifecycle
 
 Output each activity:
 
 ```markdown
 ## [NEW] [Coin] [Type] — [Advertised APY]
-## [EXPIRING] [Coin] [Type] — [Advertised APY]
 
 | Field | Detail |
 |-------|--------|
@@ -215,30 +196,18 @@ Output each activity:
 [If variable APY: include estimated range from Step 6]
 ```
 
-In the horizontal comparison table, include the tag in the status column:
+End with a horizontal comparison table sorted by risk-adjusted return:
 
 ```markdown
-| 币种 | APY | ... | 状态 |
-|------|-----|-----|------|
-| U    | 10% | ... | [NEW] 进行中 |
-| RLUSD| 8%  | ... | [EXPIRING] 剩余 2 天 |
-```
-
-End with a horizontal comparison table sorted by risk-adjusted return.
-
-### Cleanup
-
-Close agent-browser when done:
-```bash
-agent-browser close
+| 币种 | APY | 类型 | Tier 限额 | 风险 | 奖励币种 | 24h Vol | Market Cap | 状态 |
 ```
 
 ## Gotchas from Experience
 
-- **Binance SPA pagination doesn't work** — URL params and click events on page numbers are unreliable. Always use the internal API via JS eval.
-- **Search box on announcement page is non-functional** — it doesn't filter results. Don't waste time with it.
+- **All APIs are public** — no browser or login needed. The bundled script handles all network calls.
+- **defuddle for detail pages** — returns clean markdown with tables preserved, more reliable than WebFetch's summarization.
 - **API returns English titles** even on the Chinese page. Classification should handle English titles.
-- **Cloudflare on Arkham** — use `--auto-connect` and may need to click through a verification challenge. Click the iframe element, then wait and re-screenshot.
 - **"U" ≠ USDT** — always treat as separate assets.
-- **Advertised APY in examples ≠ guaranteed APY** — some announcements use hypothetical numbers in calculation examples (e.g., "假设年化收益率20%"). This is an illustration, not a promise. Always flag when APY is variable vs fixed.
-- **Detail page text extraction** — use `document.body.innerText.substring(0, 3000)` via eval. Snapshot is too noisy for structured data; full innerText is too long.
+- **Advertised APY in examples ≠ guaranteed APY** — some announcements use hypothetical numbers in calculation examples. Always flag when APY is variable vs fixed.
+- **DefiLlama for stablecoin data** — `stablecoins` subcommand returns market cap and circulating supply for all stablecoins.
+- **Binance ticker API** — `ticker` and `price` subcommands are public, no API key needed.

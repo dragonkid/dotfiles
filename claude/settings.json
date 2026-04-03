@@ -124,7 +124,8 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "jdtls-lsp@claude-plugins-official": true,
     "obsidian-deep-research@alvdef-obsidian-deep-research": true,
-    "last30days@last30days-skill": true
+    "last30days@last30days-skill": true,
+    "codex@openai-codex": true
   },
   "extraKnownMarketplaces": {
     "everything-claude-code": {
@@ -155,6 +156,12 @@
       "source": {
         "source": "github",
         "repo": "mvanhorn/last30days-skill"
+      }
+    },
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
       }
     }
   },

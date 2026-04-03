@@ -18,6 +18,7 @@ HAS_CPP=$(test -f CMakeLists.txt -o -f Makefile.am && echo yes || echo no)
 HAS_JAVA=$(test -f pom.xml -o -f build.gradle -o -f build.gradle.kts && echo yes || echo no)
 HAS_KOTLIN=$(find . -maxdepth 3 -name "*.kt" -quit 2>/dev/null && echo yes || echo no)
 TESTS_CHANGED=$(git diff --name-only $BASE..HEAD | grep -c '_test\.\|\.test\.\|test_\|_spec\.' || true)
+HAS_CODEX=$(command -v codex >/dev/null 2>&1 && echo yes || echo no)
 ```
 
 **Replace `<BASE_BRANCH>`** with the actual base branch name recorded in Phase 1.
@@ -39,6 +40,7 @@ Build the agent list:
 | C++ review | HAS_CPP = yes | Conditional |
 | Kotlin review | HAS_KOTLIN = yes | Conditional |
 | Test coverage analysis | TESTS_CHANGED > 0 or no tests exist for changed code | Conditional |
+| Codex cross-model review | HAS_CODEX = yes | Conditional |
 
 Announce which agents will be dispatched (e.g., "Dispatching 6 parallel reviewers: verification, security, code, simplify, architecture, test coverage").
 
@@ -171,6 +173,25 @@ Agent(description="Run test coverage analysis",
         Focus on: behavioral coverage (not line coverage), critical gaps,
         test-vs-implementation coupling. Rate criticality 1-10.
         Return findings with gap descriptions.")
+
+Agent(description="Run Codex cross-model review",
+      subagent_type="general-purpose",
+      prompt="Run a Codex native code review on this branch's changes.
+        1. Run: codex review --base <BASE_BRANCH>
+           Replace <BASE_BRANCH> with the actual base branch.
+        2. Parse the markdown output. Map findings to the workflow convention:
+           - Findings about security, data loss, race conditions → Critical
+           - Findings about design issues, missing edge cases → Important
+           - Findings about style, naming, minor improvements → Minor
+        3. Return formatted as:
+           CODEX CROSS-MODEL REVIEW (GPT-5.4)
+           Verdict: [approve/needs-attention]
+           Critical: [count]
+           - [finding summary] (file:line)
+           Important: [count]
+           - [finding summary] (file:line)
+           Minor: [count]
+           - [finding summary] (file:line)")
 ```
 
 ## Step 3: Collect and Act on Findings
@@ -184,6 +205,7 @@ When all agents return, consolidate results into a summary table:
 | Security           | PASS   | 0        | 1         | 2     |
 | Code Review        | PASS   | 0        | 2         | 3     |
 | Architecture       | PASS   | 0        | 0         | 1     |
+| Codex Cross-Model  | PASS   | 0        | 1         | 2     |
 | ...                |        |          |           |       |
 ```
 

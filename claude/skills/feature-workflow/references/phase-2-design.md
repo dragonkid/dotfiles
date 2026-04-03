@@ -81,6 +81,63 @@ Read the plan, then return to the state machine to proceed to Phase 3 (Implement
 
 ---
 
+## Codex Plan Challenge
+
+After the plan is finalized, use Codex (GPT-5.4) for a cross-model adversarial assessment of the plan itself (not a code review).
+
+### Guard
+
+```bash
+HAS_CODEX=$(command -v codex >/dev/null 2>&1 && echo yes || echo no)
+```
+
+If `HAS_CODEX != yes`, skip this section entirely and proceed to Context Protection.
+
+### Run Challenge
+
+Use the plan file path from the writing-plans output (recorded in TodoWrite or the previous step). Read its content with the Read tool, then pipe it to Codex exec via stdin:
+
+```bash
+cat <PLAN_FILE_PATH> | codex exec "<adversarial prompt>"
+```
+
+The prompt should follow this structure:
+
+```
+You are performing an adversarial review of an implementation plan.
+Your job is to break confidence in this plan, not to validate it.
+Default to skepticism.
+
+Attack surface — prioritize these failure modes:
+- Flawed assumptions that stop being true under real conditions
+- Missing edge cases, error paths, or rollback scenarios
+- Better alternatives not considered
+- Task sequencing issues (dependencies, parallelism opportunities)
+- Risks the plan author may have rationalized away
+- Whether the design covers all stated user requirements
+- Feasibility of the proposed architecture under production load
+
+Rules:
+- Report only material findings backed by evidence from the plan
+- Do not give credit for good intent or likely follow-up work
+- Keep response under 500 words
+- First line: SOLID / HAS_RISKS / RECONSIDER
+- Then numbered findings, each with: what can go wrong + why + recommendation
+
+PLAN DOCUMENT:
+<plan content here>
+```
+
+### Present Findings
+
+Present the Codex assessment results. **Do not auto-modify the plan** — these findings serve as additional input for the Gate decision.
+
+- If verdict is **RECONSIDER**: prominently highlight before the Gate question
+- If verdict is **HAS_RISKS**: list risk items so the user can decide at the Gate whether to adjust
+- If verdict is **SOLID**: briefly note "Codex found no major risks"
+
+---
+
 ## Context Protection & Compact
 
 Before suggesting compact, ensure:

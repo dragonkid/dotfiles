@@ -199,8 +199,10 @@ Output each activity:
 End with a horizontal comparison table sorted by risk-adjusted return:
 
 ```markdown
-| 币种 | APY | 类型 | Tier 限额 | 风险 | 奖励币种 | 24h Vol | Market Cap | 状态 |
+| 币种 | APR | 类型 | Tier 限额 | 截止时间 (UTC / 本地) | 风险 | 奖励币种 | 24h Vol | Market Cap | 状态 |
 ```
+
+Show both UTC and the user's local timezone. Detect the user's timezone from system environment or conversation context. Example: `Apr 30 23:59 UTC / May 1 07:59 UTC+8`.
 
 ## Gotchas from Experience
 

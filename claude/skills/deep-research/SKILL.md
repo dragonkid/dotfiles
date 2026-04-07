@@ -144,8 +144,10 @@ Structure the report with inline citations:
 ...
 
 ## Key Takeaways
-- [Actionable insight 1]
-- [Actionable insight 2]
+- [Actionable insight 1] ([Source Name](url))
+- [Actionable insight 2] ([Source Name](url))
+
+Every takeaway must cite at least one supporting source so the reader can verify and judge independently.
 
 ## Sources
 1. [Title](url) — [one-line summary]
@@ -182,6 +184,7 @@ Each agent searches, reads sources, and returns findings. Main session synthesiz
 4. Acknowledge gaps: if you couldn't find good info, say so.
 5. No hallucination: if you don't know, say "insufficient data found."
 6. Separate fact from inference: label estimates and opinions clearly.
+7. Conclusions need citations: Key Takeaways and any concluding analysis must include inline source references, not just the body sections. The reader should be able to trace every conclusion back to its evidence without scrolling to the Sources list.
 
 ## Company Research Shortcut
 

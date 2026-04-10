@@ -38,6 +38,21 @@ Does the site require login or have anti-bot protection?
 
 **Default to `--auto-connect` for any site you haven't confirmed works without it.** The cost of using auto-connect unnecessarily is zero; the cost of getting blocked is a wasted attempt and confused error messages.
 
+### Chrome 144+ "Allow remote debugging?" dialog fix
+
+`--auto-connect open <url>` bundles connection + navigation. If the user is slow to click
+Allow, agent-browser times out and retries, stacking new dialogs that make buttons appear
+unresponsive. **Use two-step connection instead**:
+
+```bash
+# Step 1: Establish connection only (user clicks Allow on the single dialog)
+WS_PATH=$(sed -n '2p' ~/Library/Application\ Support/Google/Chrome/DevToolsActivePort)
+agent-browser connect "ws://127.0.0.1:9222${WS_PATH}"
+
+# Step 2: Navigate (no more dialogs in this session)
+agent-browser open <url>
+```
+
 ## Core Workflow
 
 ```bash

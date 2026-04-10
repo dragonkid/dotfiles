@@ -45,16 +45,19 @@ agent-browser connect "ws://127.0.0.1:9222${WS_PATH}"
 The user clicks Allow on Chrome's dialog. Once `connect` succeeds, all subsequent commands
 in this session work without further dialogs.
 
-### Step 2: Navigate to Grok
+### Step 2: Open Grok in a new tab
+
+Always open a new tab for each query — this preserves the user's existing tabs and allows
+clean cleanup after extraction.
 
 ```bash
-agent-browser open "https://x.com/i/grok"
+agent-browser tab new "https://x.com/i/grok"
 agent-browser wait --load networkidle
 ```
 
 To resume a previous conversation:
 ```bash
-agent-browser open "https://x.com/i/grok?conversation=<ID>"
+agent-browser tab new "https://x.com/i/grok?conversation=<ID>"
 agent-browser wait --load networkidle
 ```
 
@@ -122,7 +125,7 @@ sleep 2
 # re-run the eval above
 ```
 
-### Step 5: Record conversation ID and close
+### Step 5: Record conversation ID and close the tab
 
 ```bash
 agent-browser eval --stdin <<'JSEOF'
@@ -133,9 +136,14 @@ JSEOF
 Save the conversation ID from `x.com/i/grok?conversation=<ID>` — use it for follow-ups
 instead of starting new conversations.
 
+Close only the Grok tab (not the entire browser session):
+
 ```bash
-agent-browser close
+agent-browser tab close
 ```
+
+This leaves the CDP connection alive and the user's other tabs untouched. Use
+`agent-browser close` only when you're done with all browser automation for the session.
 
 ## Formatting the Response
 
@@ -154,9 +162,10 @@ The raw `main.innerText` includes sidebar navigation mixed in. Clean it up:
 
 To continue in the same conversation:
 1. Establish connection (Step 1)
-2. `agent-browser open "https://x.com/i/grok?conversation=<ID>"`
+2. `agent-browser tab new "https://x.com/i/grok?conversation=<ID>"`
 3. Same fill → re-snapshot → click submit flow
 4. Extract and format response the same way
+5. `agent-browser tab close` when done
 
 ## Troubleshooting
 

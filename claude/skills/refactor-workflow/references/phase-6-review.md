@@ -233,10 +233,12 @@ For each file: read current content, compare against actual changes, update only
 - [ ] Step 1: Scope analysis done, review matrix determined
 - [ ] Step 2: All agents dispatched and returned
 - [ ] Step 3: All Critical/Important findings resolved
-- [ ] Step 4: Project docs checked and updated if needed
+- [ ] Step 4: Project docs checked and updated if needed (README, CLAUDE.md, Makefile, etc.)
 - [ ] Gate: User confirmed to ship (handled in state machine)
 
 If any item is unchecked, go back and complete it now.
+
+**Re-entry after "Fix issues first":** When returning from Gate 6's "Fix issues first" path, start from this CHECKPOINT — do not skip to Gate 6 directly. The fix loop often resolves code issues (Step 3) but forgets doc updates (Step 4). Walk through all 4 items again.
 
 Announce: **"Phase 6 complete — verified and reviewed. Returning to state machine for Gate 6."**
 

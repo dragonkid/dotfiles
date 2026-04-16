@@ -90,12 +90,22 @@ Update TodoWrite: `phase=4-complete`.
 
 ## Phase 5: Verify & Review
 
-**Smart skip analysis:** Assess the change scope before committing to full review.
-- Trivial change (1-2 files, <50 lines, config-only, docs-only)? -> Recommend: "This is a small change. Run verification only and skip multi-agent review?"
-- Non-trivial change? -> Proceed with full review matrix.
+**ENTRY GATE** — Before doing anything, use AskUserQuestion to let the user choose the review level. Provide change scope context (files changed, lines added) to help them decide:
+- Question: "Phase 5: 变更范围是 X 个文件 / Y 行。选择 review 方式？"
+- Options: "Full review (Recommended) — 7+ agent 并行审查", "Lightweight — 仅 verification loop (build/lint/test)", "Skip review"
 
-If full review: Read `references/phase-5-review.md` and follow it completely.
-If lightweight: Run only the verification loop (build, types, lint, tests) and skip the multi-agent dispatch.
+| Choice | Action |
+|--------|--------|
+| Full review | Read `references/phase-5-review.md` and follow it **completely** — do NOT improvise a partial review. The reference file defines the exact agent matrix and all 4 steps (scope analysis → dispatch → fix → docs). |
+| Lightweight | Run only the verification loop (build, types, lint, tests) and skip the multi-agent dispatch. |
+| Skip review | Proceed directly to Gate 5. |
+
+**GATE 5 CHECKPOINT** — Before presenting the Gate 5 question, verify:
+- [ ] If Full review was chosen: all agents from the review matrix returned results
+- [ ] If Full review was chosen: all Critical findings are resolved
+- [ ] Verification loop (build + lint + tests) passed
+
+If any item is unchecked, go back and complete it before proceeding.
 
 **GATE 5** — Use AskUserQuestion:
 - Question: "All reviews complete. Ship this fix?"
@@ -104,7 +114,7 @@ If lightweight: Run only the verification loop (build, types, lint, tests) and s
 | Choice | Action |
 |--------|--------|
 | Continue to ship | Proceed to Phase 6. |
-| Fix issues first | Address issues, re-run affected agents, then return to this gate. |
+| Fix issues first | Address issues, re-run affected agents, then return to **GATE 5 CHECKPOINT** (not Gate 5 directly — the checkpoint re-verifies all steps including docs updates). |
 | Stop workflow | End. |
 
 Update TodoWrite: `phase=5-complete`.

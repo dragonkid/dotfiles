@@ -30,6 +30,7 @@ python3 scripts/fetch_data.py stablecoins                # DefiLlama → JSON li
 python3 scripts/fetch_data.py ticker USDCUSDT RLUSDUSDT  # Binance 24h ticker → JSON
 python3 scripts/fetch_data.py price WLFIUSDT             # Binance spot price → JSON
 python3 scripts/fetch_data.py detail CODE1 CODE2         # defuddle → clean markdown per page
+python3 scripts/fetch_data.py parse  CODE1 CODE2         # detail + structured extraction → JSON
 ```
 
 All output is JSON to stdout, errors to stderr.
@@ -82,33 +83,38 @@ web_search_exa: "[COIN_NAME] stablecoin OR pegged OR 稳定币"
 
 Reclassify based on results. If still unclear, include in output with a note.
 
-### Step 4: Extract Activity Details
+### Step 4: Extract Activity Details (Structured)
 
-For each confirmed stablecoin_earn activity, fetch the detail page via defuddle:
+Use the `parse` subcommand instead of `detail` — it fetches the page via defuddle AND automatically extracts structured fields:
 
 ```bash
-python3 <skill-dir>/scripts/fetch_data.py detail CODE1 CODE2 CODE3
+python3 <skill-dir>/scripts/fetch_data.py parse CODE1 CODE2 CODE3
 ```
 
-Returns JSON array: `[{code, url, markdown}, ...]`
+Returns JSON array with pre-extracted fields:
+```json
+[{
+  "code": "...", "url": "...",
+  "coin": "USDC",           // auto-detected from table
+  "type": "Flexible",       // Flexible / Locked / Hold Airdrop
+  "advertised_apr": "5.8%", // headline APR
+  "tier_limit": 200.0,      // max amount at tier APR (e.g., ≤200 USDC gets 5.8%)
+  "tier_apr": "5.8%",       // APR within tier limit
+  "base_apr": "0.8%",       // APR above tier limit (Real-Time APR only)
+  "personal_limit": 300000000.0,  // per-user max subscription
+  "start_time": "2026-04-01 00:00:00 UTC",
+  "end_time": "2026-04-30 23:59:59 UTC",
+  "is_ended": false,         // auto-compared with current time
+  "reward_currency": "USDC", // same coin or different token
+  "region_restriction": null, // "Bahrain", "CIS", "GCC", etc. or null
+  "new_user_only": false,
+  "raw_table_text": "..."   // fallback if auto-extraction missed something
+}]
+```
 
-The markdown contains the full announcement text with tables preserved. Parse it to extract:
+The script handles HTML table parsing, promotion period extraction, and tier limit detection automatically. This avoids the 100KB+ raw markdown problem from `detail`.
 
-| Field | Description |
-|-------|-------------|
-| coin | Asset name (e.g., USDC, RLUSD, USD1, U) |
-| type | 活期 (Flexible) / 定期 (Locked) / 持仓空投 (Hold Airdrop) |
-| advertised_apy | The APY stated in the announcement |
-| apy_structure | How APY breaks down (tiered rate + base rate) |
-| tier_limit | Maximum amount eligible for the tiered rate |
-| personal_limit | Per-user max subscription |
-| start_time | Activity start (UTC+8) |
-| end_time | Activity end (UTC+8) |
-| participation | How to participate |
-| reward_currency | What currency rewards are paid in (same coin, or different token) |
-| reward_distribution | How and when rewards are paid: frequency (per-minute/daily/weekly), destination (spot/earn account), start timing (e.g., "next day after subscription"), and redemption rules (instant/locked, early exit penalty) |
-| special_conditions | KYC, region restrictions, new-user-only, etc. |
-| url | Full announcement URL |
+**When to fall back to `detail`:** If `parse` returns `null` for critical fields (coin, tier_limit) on a specific activity, use `detail` for that code and parse manually. The `raw_table_text` field provides a compact summary of the first table for quick LLM review.
 
 Important distinctions:
 - **U is NOT USDT** — "U" is a separate asset on Binance Simple Earn. The announcement explicitly states it is not an abbreviation of USD fiat currency.
@@ -116,11 +122,10 @@ Important distinctions:
 
 ### Step 5: Filter
 
-After extracting details, filter out:
-- **Ended activities**: end_time < current time
-- **Region-limited activities**: special_conditions contains geographic restrictions (e.g., "Balkans only", specific country lists)
-
-This filtering happens here (not in Step 2) because region/time info is only available in the detail page.
+The `parse` output already includes `is_ended` and `region_restriction` fields. Simply:
+- **Remove** entries where `is_ended = true`
+- **Separate** entries with `region_restriction` (report them at the bottom as region-limited)
+- **Remove** entries where `new_user_only = true` if the user is not a new user (ask if unclear)
 
 ### Step 6: Verify Real APY
 

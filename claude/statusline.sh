@@ -5,11 +5,15 @@ read -r input
 eval "$(echo "$input" | jq -r '@sh "
 model_name=\(.model.display_name // "")
 model_id=\(.model.id // "")
+session_id=\(.session_id // "")
 used_pct=\(.context_window.used_percentage // -1)
 remaining_pct=\(.context_window.remaining_percentage // -1)
 ctx_size=\(.context_window.context_window_size // 0)
 in_tok=\(.context_window.total_input_tokens // 0)
-out_tok=\(.context_window.current_usage.output_tokens // 0)
+out_tok=\(.context_window.total_output_tokens // 0)
+cur_out_tok=\(.context_window.current_usage.output_tokens // 0)
+cache_write=\(.context_window.current_usage.cache_creation_input_tokens // 0)
+cache_read=\(.context_window.current_usage.cache_read_input_tokens // 0)
 added=\(.cost.total_lines_added // 0)
 removed=\(.cost.total_lines_removed // 0)
 duration_ms=\(.cost.total_duration_ms // 0)
@@ -34,6 +38,15 @@ fmt_tok() {
   else printf '%d' "$n"; fi
 }
 
+fmt_cost() {
+  # Format cost in dollars: <$0.01 -> "<$0.01", else "$X.XX"
+  local cents_x100=$1  # cost in hundredths of a cent (integer, to avoid floating point)
+  if (( cents_x100 <= 0 )); then printf '$0.00'
+  elif (( cents_x100 < 100 )); then printf '<$0.01'
+  else printf '$%s' "$(echo "scale=2;$cents_x100/10000" | bc | sed 's/^\./0./')"
+  fi
+}
+
 # --- Output speed (ms precision via perl, computed early for badge) ---
 speed=""
 speed_cache="$HOME/.claude/.statusline-speed"
@@ -42,13 +55,77 @@ if [ -n "$now_ms" ] && [ -f "$speed_cache" ]; then
   IFS= read -r prev_tok < "$speed_cache"
   IFS= read -r prev_ms < <(tail -1 "$speed_cache")
   if [ -n "$prev_tok" ] && [ -n "$prev_ms" ]; then
-    dt=$(( out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
+    dt=$(( cur_out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
     if (( dt > 0 && dm > 0 && dm <= 3000 )); then
       speed=$(echo "scale=1;$dt*1000/$dm" | bc)
     fi
   fi
 fi
-[ -n "$now_ms" ] && printf '%s\n%s\n' "$out_tok" "$now_ms" > "$speed_cache"
+[ -n "$now_ms" ] && printf '%s\n%s\n' "$cur_out_tok" "$now_ms" > "$speed_cache"
+
+# --- Token Cost Tracking (persistent across sessions) ---
+# Pricing per 1M tokens (in hundredths of a cent to use integer math):
+#   Claude 4 Opus:   input $15, output $75, cache_write $18.75, cache_read $1.50
+#   Claude 4 Sonnet: input $3, output $15, cache_write $3.75, cache_read $0.30
+#   Claude 3.5 Sonnet: input $3, output $15, cache_write $3.75, cache_read $0.30
+#   Claude 3.5 Haiku:  input $0.80, output $4, cache_write $1.00, cache_read $0.08
+#   Claude 3 Haiku:    input $0.25, output $1.25, cache_write $0.30, cache_read $0.03
+# Stored as: price_per_1M_tokens * 10000 (hundredths of cent), so $15/1M = 150000000 per 1M
+# To get cost for N tokens: N * rate / 1M * 10000 = N * rate_x10k / 1M
+# We'll use: cost_hundredths_cent = tokens * rate_dollar_per_M * 10000 / 1000000
+#          = tokens * rate_dollar_per_M / 100
+# To avoid floating point, multiply rate by 100 first: rate_cents_per_M
+# cost_hundredths_cent = tokens * rate_cents_per_M / 1000000
+
+get_pricing() {
+  # Returns: in_rate out_rate cw_rate cr_rate (all in cents per 1M tokens)
+  local mid="$1"
+  case "$mid" in
+    *opus*|*claude-4-6-opus*|*claude-4-opus*)
+      echo "1500 7500 1875 150" ;;
+    *claude-4*sonnet*|*claude-3-7*|*claude-3.7*)
+      echo "300 1500 375 30" ;;
+    *claude-3-5-sonnet*|*claude-3.5-sonnet*)
+      echo "300 1500 375 30" ;;
+    *haiku*3-5*|*haiku*3.5*)
+      echo "80 400 100 8" ;;
+    *haiku*)
+      echo "25 125 30 3" ;;
+    *)
+      # Default to Sonnet pricing
+      echo "300 1500 375 30" ;;
+  esac
+}
+
+cost_root="$HOME/.claude/.cost"
+today_date=$(date +%Y-%m-%d)
+cost_today_dir="$cost_root/$today_date"
+mkdir -p "$cost_today_dir"
+cost_session_file="$cost_today_dir/session-${session_id}"
+
+session_cost_display=""
+today_cost_display=""
+total_cost_display=""
+
+if [ -n "$session_id" ] && (( in_tok > 0 || out_tok > 0 )); then
+  read -r in_rate out_rate cw_rate cr_rate <<< "$(get_pricing "$model_id")"
+
+  # Session cost from cumulative token counts (conservative: base input rate for all input tokens)
+  session_cost_hcent=$(echo "scale=0; ($in_tok * $in_rate + $out_tok * $out_rate) / 1000000" | bc)
+
+  # Write only this session's file (single writer, no lock needed)
+  echo "$session_cost_hcent" > "$cost_session_file"
+
+  # Today = sum files in today's directory
+  today_hcent=$(awk '{s+=$1} END{print s+0}' "$cost_today_dir"/session-* 2>/dev/null)
+
+  # All-time = sum files across all date directories
+  total_hcent=$(awk '{s+=$1} END{print s+0}' "$cost_root"/*/session-* 2>/dev/null)
+
+  session_cost_display=$(fmt_cost "$session_cost_hcent")
+  today_cost_display=$(fmt_cost "${today_hcent:-0}")
+  total_cost_display=$(fmt_cost "${total_hcent:-0}")
+fi
 
 # --- Model badge: [vX.Y Model | Provider | speed] ---
 model="${model_name:-${model_id:-Unknown}}"
@@ -112,7 +189,15 @@ if [ -n "$dir_raw" ]; then
 fi
 
 # --- Tokens ---
-tokens="${DIM}$(fmt_tok "$in_tok") in/$(fmt_tok "$out_tok") out${RST}"
+tokens="${CYN}$(fmt_tok "$in_tok") in/$(fmt_tok "$out_tok") out${RST}"
+
+# --- Cost display: 💰session | 📅today | Σall-time ---
+cost_part=""
+if [ -n "$session_cost_display" ]; then
+  cost_part="💰${YEL}${session_cost_display}${RST}"
+  cost_part+=" 📅${YEL}${today_cost_display}${RST}"
+  cost_part+=" ${DIM}Σ${RST}${YEL}${total_cost_display}${RST}"
+fi
 
 # --- Duration ---
 ds=$(( duration_ms / 1000 )); dm=$(( ds / 60 )); dh=$(( dm / 60 ))
@@ -124,12 +209,17 @@ else dur="${ds}s"; fi
 lines=""
 (( added > 0 || removed > 0 )) && lines="${GRN}+${added}${RST} ${RED}-${removed}${RST}"
 
-# --- Assemble ---
-parts=("$badge $ctx")
-[ -n "$project_git" ] && parts+=("$project_git")
-parts+=("$tokens")
-parts+=("${DIM}⏱ ${dur}${RST}")
-[ -n "$lines" ] && parts+=("$lines")
+# --- Assemble (two lines) ---
+line1=("$badge $ctx")
+[ -n "$project_git" ] && line1+=("$project_git")
+
+line2=()
+[ -n "$cost_part" ] && line2+=("$cost_part")
+line2+=("$tokens")
+line2+=("${MAG}⏱ ${dur}${RST}")
+[ -n "$lines" ] && line2+=("$lines")
 
 IFS=' | '
-printf '%b' "${parts[*]}"
+line2_str="${line2[0]}"
+for ((i=1;i<${#line2[@]};i++)); do line2_str+=" ${line2[$i]}"; done
+printf '%b\n%b' "${line1[*]}" "$line2_str"

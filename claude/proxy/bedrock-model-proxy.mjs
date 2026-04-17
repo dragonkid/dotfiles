@@ -55,8 +55,10 @@ const server = createServer((req, res) => {
           originalModel = json.model;
           newModel = rewriteModel(json.model);
           json.model = newModel;
-          body = Buffer.from(JSON.stringify(json));
         }
+        // Strip fields unsupported by Bedrock/LiteLLM proxy
+        delete json.context_management;
+        body = Buffer.from(JSON.stringify(json));
       } catch {
         // Not JSON or parse error — forward as-is
       }

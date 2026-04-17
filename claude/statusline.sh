@@ -12,8 +12,7 @@ ctx_size=\(.context_window.context_window_size // 0)
 in_tok=\(.context_window.total_input_tokens // 0)
 out_tok=\(.context_window.total_output_tokens // 0)
 cur_out_tok=\(.context_window.current_usage.output_tokens // 0)
-cache_write=\(.context_window.current_usage.cache_creation_input_tokens // 0)
-cache_read=\(.context_window.current_usage.cache_read_input_tokens // 0)
+cost_usd=\(.cost.total_cost_usd // 0)
 added=\(.cost.total_lines_added // 0)
 removed=\(.cost.total_lines_removed // 0)
 duration_ms=\(.cost.total_duration_ms // 0)
@@ -21,7 +20,7 @@ version=\(.version // "")
 "')"
 dir_raw=$(echo "$input" | jq -r '.workspace.project_dir // .cwd // ""')
 
-# --- Colors (matching claude-hud) ---
+# --- Colors ---
 RST='\033[0m'
 DIM='\033[2m'
 CYN='\033[36m'
@@ -39,92 +38,87 @@ fmt_tok() {
 }
 
 fmt_cost() {
-  # Format cost in dollars: <$0.01 -> "<$0.01", else "$X.XX"
-  local cents_x100=$1  # cost in hundredths of a cent (integer, to avoid floating point)
-  if (( cents_x100 <= 0 )); then printf '$0.00'
-  elif (( cents_x100 < 100 )); then printf '<$0.01'
-  else printf '$%s' "$(echo "scale=2;$cents_x100/10000" | bc | sed 's/^\./0./')"
+  # Input: cost in cents (integer, e.g. 150 = $1.50)
+  local cents=$1
+  if (( cents <= 0 )); then printf '$0.00'
+  elif (( cents < 1 )); then printf '<$0.01'
+  else
+    local d=$(( cents / 100 )); local c=$(( cents % 100 ))
+    printf '$%d.%02d' "$d" "$c"
   fi
 }
 
-# --- Output speed (ms precision via perl, computed early for badge) ---
+# --- Output speed (per-session cache to avoid cross-session pollution) ---
 speed=""
-speed_cache="$HOME/.claude/.statusline-speed"
-now_ms=$(perl -MTime::HiRes=time -e 'printf "%d", time*1000' 2>/dev/null)
-if [ -n "$now_ms" ] && [ -f "$speed_cache" ]; then
-  IFS= read -r prev_tok < "$speed_cache"
-  IFS= read -r prev_ms < <(tail -1 "$speed_cache")
-  if [ -n "$prev_tok" ] && [ -n "$prev_ms" ]; then
-    dt=$(( cur_out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
-    if (( dt > 0 && dm > 0 && dm <= 3000 )); then
-      speed=$(echo "scale=1;$dt*1000/$dm" | bc)
+if [ -n "$session_id" ]; then
+  speed_cache="$HOME/.claude/.statusline-speed-${session_id}"
+  now_ms=$(perl -MTime::HiRes=time -e 'printf "%d", time*1000' 2>/dev/null)
+  if [ -n "$now_ms" ] && [ -f "$speed_cache" ]; then
+    IFS= read -r prev_tok < "$speed_cache"
+    IFS= read -r prev_ms < <(tail -1 "$speed_cache")
+    if [ -n "$prev_tok" ] && [ -n "$prev_ms" ]; then
+      dt=$(( cur_out_tok - prev_tok )); dm=$(( now_ms - prev_ms ))
+      if (( dt > 0 && dm > 0 && dm <= 3000 )); then
+        speed=$(echo "scale=1;$dt*1000/$dm" | bc)
+      fi
     fi
   fi
+  [ -n "$now_ms" ] && printf '%s\n%s\n' "$cur_out_tok" "$now_ms" > "$speed_cache"
 fi
-[ -n "$now_ms" ] && printf '%s\n%s\n' "$cur_out_tok" "$now_ms" > "$speed_cache"
 
-# --- Token Cost Tracking (persistent across sessions) ---
-# Pricing per 1M tokens (in hundredths of a cent to use integer math):
-#   Claude 4 Opus:   input $15, output $75, cache_write $18.75, cache_read $1.50
-#   Claude 4 Sonnet: input $3, output $15, cache_write $3.75, cache_read $0.30
-#   Claude 3.5 Sonnet: input $3, output $15, cache_write $3.75, cache_read $0.30
-#   Claude 3.5 Haiku:  input $0.80, output $4, cache_write $1.00, cache_read $0.08
-#   Claude 3 Haiku:    input $0.25, output $1.25, cache_write $0.30, cache_read $0.03
-# Stored as: price_per_1M_tokens * 10000 (hundredths of cent), so $15/1M = 150000000 per 1M
-# To get cost for N tokens: N * rate / 1M * 10000 = N * rate_x10k / 1M
-# We'll use: cost_hundredths_cent = tokens * rate_dollar_per_M * 10000 / 1000000
-#          = tokens * rate_dollar_per_M / 100
-# To avoid floating point, multiply rate by 100 first: rate_cents_per_M
-# cost_hundredths_cent = tokens * rate_cents_per_M / 1000000
-
-get_pricing() {
-  # Returns: in_rate out_rate cw_rate cr_rate (all in cents per 1M tokens)
-  local mid="$1"
-  case "$mid" in
-    *opus*|*claude-4-6-opus*|*claude-4-opus*)
-      echo "1500 7500 1875 150" ;;
-    *claude-4*sonnet*|*claude-3-7*|*claude-3.7*)
-      echo "300 1500 375 30" ;;
-    *claude-3-5-sonnet*|*claude-3.5-sonnet*)
-      echo "300 1500 375 30" ;;
-    *haiku*3-5*|*haiku*3.5*)
-      echo "80 400 100 8" ;;
-    *haiku*)
-      echo "25 125 30 3" ;;
-    *)
-      # Default to Sonnet pricing
-      echo "300 1500 375 30" ;;
-  esac
-}
+# --- Cost Tracking (delta accumulation, uses official cost.total_cost_usd) ---
+# cost_usd is the session's cumulative cost from Claude Code (accurate, server-side).
+# We convert to cents (integer) for file storage and cross-session summing.
+# Each session file stores: line1=accumulated_cents, line2=last_seen_cost_usd
+# Delta = current cost_usd - last_seen → added to accumulated total.
+# If delta < 0 (compaction reset cost_usd), treat current as fresh baseline.
 
 cost_root="$HOME/.claude/.cost"
 today_date=$(date +%Y-%m-%d)
 cost_today_dir="$cost_root/$today_date"
-mkdir -p "$cost_today_dir"
-cost_session_file="$cost_today_dir/session-${session_id}"
 
 session_cost_display=""
 today_cost_display=""
 total_cost_display=""
 
-if [ -n "$session_id" ] && (( in_tok > 0 || out_tok > 0 )); then
-  read -r in_rate out_rate cw_rate cr_rate <<< "$(get_pricing "$model_id")"
+if [ -n "$session_id" ]; then
+  mkdir -p "$cost_today_dir"
+  cost_session_file="$cost_today_dir/session-${session_id}"
 
-  # Session cost from cumulative token counts (conservative: base input rate for all input tokens)
-  session_cost_hcent=$(echo "scale=0; ($in_tok * $in_rate + $out_tok * $out_rate) / 1000000" | bc)
+  # Convert cost_usd (float) to cents (integer): $1.234 → 123
+  cost_cents=$(echo "scale=0; $cost_usd * 100 / 1" | bc 2>/dev/null)
+  cost_cents=${cost_cents:-0}
 
-  # Write only this session's file (single writer, no lock needed)
-  echo "$session_cost_hcent" > "$cost_session_file"
+  # Read previous state
+  prev_accum=0
+  prev_cost_cents=0
+  if [ -f "$cost_session_file" ]; then
+    IFS= read -r prev_accum < "$cost_session_file"
+    IFS= read -r prev_cost_cents < <(sed -n '2p' "$cost_session_file")
+    prev_accum=${prev_accum:-0}
+    prev_cost_cents=${prev_cost_cents:-0}
+  fi
 
-  # Today = sum files in today's directory
-  today_hcent=$(awk '{s+=$1} END{print s+0}' "$cost_today_dir"/session-* 2>/dev/null)
+  # Calculate delta
+  delta=$(( cost_cents - prev_cost_cents ))
+  if (( delta < 0 )); then
+    # Compaction or reset: treat current cost as a fresh chunk
+    delta=$cost_cents
+  fi
+  accum=$(( prev_accum + delta ))
 
-  # All-time = sum files across all date directories
-  total_hcent=$(awk '{s+=$1} END{print s+0}' "$cost_root"/*/session-* 2>/dev/null)
+  # Write: line1=accumulated_cents, line2=last_seen_cost_cents
+  printf '%d\n%d\n' "$accum" "$cost_cents" > "$cost_session_file"
 
-  session_cost_display=$(fmt_cost "$session_cost_hcent")
-  today_cost_display=$(fmt_cost "${today_hcent:-0}")
-  total_cost_display=$(fmt_cost "${total_hcent:-0}")
+  # Today = sum line1 (accumulated cents) from all session files in today's dir
+  today_cents=$(awk 'NR%2==1{s+=$1} END{print s+0}' "$cost_today_dir"/session-* 2>/dev/null)
+
+  # All-time = sum line1 across all date directories
+  total_cents=$(awk 'NR%2==1{s+=$1} END{print s+0}' "$cost_root"/*/session-* 2>/dev/null)
+
+  session_cost_display=$(fmt_cost "$accum")
+  today_cost_display=$(fmt_cost "${today_cents:-0}")
+  total_cost_display=$(fmt_cost "${total_cents:-0}")
 fi
 
 # --- Model badge: [vX.Y Model | Provider | speed] ---
@@ -140,7 +134,7 @@ badge_inner="${ver_tag}${model}"
 [ -n "$speed" ] && badge_inner+=" ${DIM}${speed} tok/s${CYN}"
 badge="${CYN}[${badge_inner}]${RST}"
 
-# --- Context bar (10 segments, claude-hud thresholds: <70 green, 70-84 yellow, >=85 red) ---
+# --- Context bar (10 segments: <70 green, 70-84 yellow, >=85 red) ---
 if [ "$used_pct" -ge 0 ] 2>/dev/null; then pct=$used_pct
 elif [ "$remaining_pct" -ge 0 ] 2>/dev/null; then pct=$(( 100 - remaining_pct ))
 elif [ "$ctx_size" -gt 0 ]; then pct=$(( in_tok * 100 / ctx_size ))
@@ -156,7 +150,7 @@ ctx="${pct_color}${bar}${DIM}"
 for ((i=0;i<empty;i++)); do ctx+="░"; done
 ctx+="${RST} ${pct_color}${pct}%${RST}"
 
-# --- Project + Git ---
+# --- Project + Git (no eval, pure awk) ---
 project_git=""
 if [ -n "$dir_raw" ]; then
   project="${YEL}$(basename "$dir_raw")${RST}"
@@ -164,12 +158,12 @@ if [ -n "$dir_raw" ]; then
   if [ -n "$branch" ]; then
     porcelain=$(git -C "$dir_raw" status --porcelain 2>/dev/null)
     dirty=""; [ -n "$porcelain" ] && dirty="*"
-    eval "$(echo "$porcelain" | awk '
+    read -r gm ga gd gu <<< "$(echo "$porcelain" | awk '
       /^\?\?/  { u++ }
       /^.M|^M/ { m++ }
       /^A/     { a++ }
       /^.D|^D/ { d++ }
-      END { printf "gm=%d ga=%d gd=%d gu=%d", m+0, a+0, d+0, u+0 }
+      END { printf "%d %d %d %d", m+0, a+0, d+0, u+0 }
     ')"
     ahead=$(git -C "$dir_raw" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
     behind=$(git -C "$dir_raw" rev-list --count HEAD..@{u} 2>/dev/null || echo 0)
@@ -191,7 +185,7 @@ fi
 # --- Tokens ---
 tokens="${CYN}$(fmt_tok "$in_tok") in/$(fmt_tok "$out_tok") out${RST}"
 
-# --- Cost display: 💰session | 📅today | Σall-time ---
+# --- Cost display ---
 cost_part=""
 if [ -n "$session_cost_display" ]; then
   cost_part="💰${YEL}${session_cost_display}${RST}"

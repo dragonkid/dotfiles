@@ -188,9 +188,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Claude Code Configurations
-export CLAUDE_CODE_EFFORT_LEVEL=high
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
-export MAX_THINKING_TOKENS=10000
 
 [ -f ~/.zshrc_private ] && source ~/.zshrc_private
 

@@ -122,6 +122,16 @@ Agent(description="Run Java review",
         Check for: layered architecture violations, JPA/Hibernate anti-patterns,
         Spring Security misconfigurations, concurrency issues, Optional misuse,
         resource leaks, and Java coding standards.
+
+        IMPORTANT — CI/CD BLOCKER RULES:
+        Read `references/cicd-blocker-rules.md` in the workflow skill directory
+        (try paths: ~/.claude/skills/feature-workflow/references/cicd-blocker-rules.md,
+         ~/.claude/skills/bugfix-workflow/references/cicd-blocker-rules.md,
+         ~/.claude/skills/refactor-workflow/references/cicd-blocker-rules.md).
+        These rules are enforced by codemax bot on every PR — violations at BLOCKER
+        severity block merges. Check every rule in that file against the diff.
+        Flag any BLOCKER rule violation as Critical.
+
         Return findings as Critical / Important / Minor.")
 
 Agent(description="Run Go review",

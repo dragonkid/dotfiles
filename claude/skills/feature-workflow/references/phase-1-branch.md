@@ -12,13 +12,24 @@ Record `BRANCH_MODE=worktree` and the base branch name in TodoWrite.
 
 ## If feature branch:
 
-Create and switch to a new branch from the current HEAD:
+**Always fetch and rebase the source branch before creating a new branch.** This ensures the new branch starts from the latest code, avoiding merge conflicts and stale-code issues downstream.
 
 ```bash
+# 1. Determine the source branch (main/master/develop, or a feature branch the user specifies)
+SOURCE_BRANCH=<source-branch>
+
+# 2. Fetch latest and rebase
+git fetch origin $SOURCE_BRANCH
+git checkout $SOURCE_BRANCH
+git pull --rebase origin $SOURCE_BRANCH
+
+# 3. Create the feature branch from the updated source
 # Derive branch name from feature request (kebab-case, max 50 chars)
 # e.g., "Add OAuth2 login" -> feat/add-oauth2-login
 git checkout -b feat/<feature-slug>
 ```
+
+If the user specifies a non-default source branch (e.g., `feat/daily-picks-pipeline`), use that instead of main/master. Ask if unsure.
 
 Record `BRANCH_MODE=branch` and the base branch name (the branch you were on before switching) in TodoWrite.
 

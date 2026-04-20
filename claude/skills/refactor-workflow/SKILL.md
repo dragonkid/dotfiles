@@ -124,7 +124,7 @@ Update TodoWrite: `phase=5-complete`.
 
 | Choice | Action |
 |--------|--------|
-| Full review | Read `references/phase-6-review.md` and follow it **completely** — do NOT improvise a partial review. The reference file defines the exact agent matrix and all 4 steps (scope analysis → dispatch → fix → docs). |
+| Full review | **MANDATORY: Read `references/phase-6-review.md` FIRST**, then follow all 4 steps exactly. The reference file contains the agent matrix table — you MUST use it to determine which agents to launch. Do NOT improvise the agent list from memory. The matrix includes always-on agents (verification, security, code review, simplify) plus conditional agents (language-specific, architecture, test coverage, codex). |
 | Lightweight | Run only the verification loop (build, types, lint, tests) and skip the multi-agent dispatch. |
 | Skip review | Proceed directly to Gate 6. |
 

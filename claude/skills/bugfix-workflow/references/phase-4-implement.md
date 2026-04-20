@@ -20,10 +20,18 @@ If "Switch to plan-first approach": Go to Phase 3 (write a plan), then return to
 
 ## Complex Fix Path (fix_path=complex)
 
-Based on the execution mode chosen in Phase 3:
+### Execution Mode Gate (mandatory)
+
+If the execution mode was NOT recorded in Phase 3 (e.g., because planning was skipped or the skill didn't present the choice), you MUST ask the user now via AskUserQuestion:
+- Question: "选择实施模式？"
+- Options: "Subagent-Driven (Recommended) — 每个 Task 由独立 subagent 执行，可并行处理，带 two-stage review", "Inline Execution — 在当前会话中顺序执行所有任务，每个 checkpoint 确认"
+
+Record the choice in TodoWrite before proceeding. Do NOT assume a default — execution mode MUST be an explicit user choice.
+
+Based on the execution mode chosen:
 
 - **If Subagent-Driven:** Invoke Skill `superpowers:subagent-driven-development`. Follow the skill exactly.
-- **If Parallel Session:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.
+- **If Inline Execution:** Invoke Skill `superpowers:executing-plans`. Follow the skill exactly.
 
 **Important:** Both skills will attempt to invoke `superpowers:finishing-a-development-branch` at the end. Do NOT follow that final step — instead proceed to Phase 5.
 

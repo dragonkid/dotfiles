@@ -1,12 +1,11 @@
 {
-  "language": "zh-CN",
+  "respectGitignore": false,
   "env": {
     "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
     "MAX_THINKING_TOKENS": "256000",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_EFFORT_LEVEL": "max"
   },
-  "respectGitignore": false,
   "permissions": {
     "allow": [
       "mcp__context7__resolve-library-id",
@@ -172,6 +171,7 @@
       }
     }
   },
+  "language": "zh-CN",
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "latest",
   "autoMemoryEnabled": true,
